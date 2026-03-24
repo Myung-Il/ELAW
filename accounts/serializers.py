@@ -1,30 +1,28 @@
 from rest_framework import serializers
-from .models import User
+from core.models import User
 
 class UserSerializer(serializers.ModelSerializer):
-    # 1. 장고가 찾는 username을 '입력 안 해도 됨(required=False)'으로 설정!
-    username = serializers.CharField(required=False)
 
     class Meta:
         model = User
         # 2. fields 목록에 'username' 추가
         fields = [
-            'id', 'username', 'email', 'password', 'name', 'role', 'phone',
-            'company_name', 'business_number', 'manager_name',
-            'ai_consent', 'privacy_consent'
+            'id', 'email', 'name', 'password'
         ]
         extra_kwargs = {
             'password': {'write_only': True}
         }
 
     def create(self, validated_data):
-        # 3. DB에 저장하기 직전에, 이메일을 username 칸에 똑같이 채워 넣습니다! (핵심 꼼수✨)
-        if 'email' in validated_data:
-            validated_data['username'] = validated_data['email']
-
+        # 1. 꼼수 없이 깔끔하게 비밀번호만 따로 빼냅니다.
         password = validated_data.pop('password', None)
+
+        # 2. 남은 데이터(이메일, 이름)로 유저를 만듭니다.
         user = self.Meta.model(**validated_data)
+
+        # 3. 비밀번호는 장고의 안전한 암호화 시스템을 거쳐서 저장합니다.
         if password is not None:
             user.set_password(password)
+
         user.save()
         return user
