@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/ELAW.iml" filepath="$PROJECT_DIR$/.idea/ELAW.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../frontend/ELAW-feature-frontend-all/ELAW-feature-frontend-all.iml" filepath="$PROJECT_DIR$/../frontend/ELAW-feature-frontend-all/ELAW-feature-frontend-all.iml" />
+      <module fileurl="file://$USER_HOME$/Desktop/frontend/frontend.iml" filepath="$USER_HOME$/Desktop/frontend/frontend.iml" />
     </modules>
   </component>
 </project>
