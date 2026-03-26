@@ -1,0 +1,47 @@
+📋 진행 순서
+1. 저장소 clone 생성
+# 원하는 위치로 이동 (예: C:\)
+cd C:\
+
+# clone
+git clone https://github.com/Myung-Il/ELAW.git
+
+# 폴더로 이동
+cd ELAW
+
+2. 브랜치 이동
+git switch feature/API-connection
+설명solved.ac API, GitHub REST API 연동
+
+3. 실행환경 설정
+python -m venv venv
+venv\Scripts\activate
+pip install requests python-dotenv
+python manage.py migrate
+python manage.py runserver
+
+4. GitHub PAT 발급
+GitHub Personal Access Token 발급
+
+브라우저에서 github.com 접속 후 로그인
+오른쪽 위 프로필 사진 클릭 → Settings
+왼쪽 맨 아래 Developer settings 클릭
+Personal access tokens → Tokens (classic)
+Generate new token (classic) 클릭
+아래 권한에 체크:
+
+✅ read:user
+✅ repo (public_repo만 해도 됨)
+
+
+Generate token 클릭 → 생성된 토큰 복사 (다시 볼 수 없으니 꼭 복사!)
+
+5. .env 내용 수정하기
+C:\ELAW\.env에서 'GITHUB_TOKEN=여기에_새토큰_입력'에 자신의 토큰 넣기
+
+.gitignore에 .env 등록 확인
+.env가 GitHub에 올라가지 않도록 확인:
+cmdtype C:\ELAW\.gitignore
+출력 결과에 .env가 있는지 확인
+
+6. api_test.http 파일에서 실행 순서에 맞게 진행하기.
