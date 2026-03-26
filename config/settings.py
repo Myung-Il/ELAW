@@ -139,3 +139,29 @@ SIMPLE_JWT = {
 AUTH_USER_MODEL = 'core.User'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+# ─────────────────────────────────────────
+# config/settings.py 하단에 아래 내용을 추가하세요
+# ─────────────────────────────────────────
+
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv(BASE_DIR / ".env")
+
+# GitHub PAT (ETL에서 사용)
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
+
+# (선택) SQLite → MySQL 전환 시 아래 주석 해제
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME':     os.getenv('DB_NAME', 'elaw_db'),
+#         'USER':     os.getenv('DB_USER', 'elaw_user'),
+#         'PASSWORD': os.getenv('DB_PASSWORD', ''),
+#         'HOST':     os.getenv('DB_HOST', 'localhost'),
+#         'PORT':     os.getenv('DB_PORT', '3306'),
+#         'OPTIONS':  {'charset': 'utf8mb4'},
+#     }
+# }

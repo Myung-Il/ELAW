@@ -1,0 +1,91 @@
+### 1. 회원가입
+POST http://127.0.0.1:8000/api/accounts/signup/
+Content-Type: application/json
+
+{
+  "email": "test@elaw.kr",
+  "password": "test1234!",
+  "name": "테스트유저",
+  "role": "student"
+}
+
+###
+
+### 2. 로그인 (JWT 토큰 발급)
+POST http://127.0.0.1:8000/api/accounts/login/
+Content-Type: application/json
+
+{
+  "email": "test@elaw.kr",
+  "password": "test1234!"
+}
+
+###
+
+### 3. 백준 아이디 등록
+# 로그인 응답의 access 토큰을 아래 Bearer 뒤에 붙여넣기
+POST http://127.0.0.1:8000/api/accounts/platform/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0NTMyMjg3LCJpYXQiOjE3NzQ1Mjg2ODcsImp0aSI6IjI2MWI5YjliZmJhZDRiNzJiZThiMDI1Mzc1NTYzYzJlIiwidXNlcl9pZCI6IjEifQ.KRbKiUZbwYI3nY4YXB8Nsxg3-RSZhJKN155VZa4DYHQ
+
+{
+  "platform": "baekjoon",
+  "external_id": "mango538"
+}
+
+###
+
+### 4. GitHub 아이디 등록
+POST http://127.0.0.1:8000/api/accounts/platform/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0NTI5MDIxLCJpYXQiOjE3NzQ1MjU0MjEsImp0aSI6ImM2ZjA1YzZmYmQyNTQ4MDRhMDQxNjYzZGIyYzI2M2U2IiwidXNlcl9pZCI6IjEifQ.WEO1hJ-RRff49mDfeP7xQqGSFQEnVFX8cnsy4KX8rPA
+
+{
+  "platform": "github",
+  "external_id": "Ohseonghwan538"
+}
+
+###
+
+### 5. 백준 데이터 실제 수집 (solved.ac API 호출)
+POST http://127.0.0.1:8000/api/accounts/platform/sync/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0NTI5MDIxLCJpYXQiOjE3NzQ1MjU0MjEsImp0aSI6ImM2ZjA1YzZmYmQyNTQ4MDRhMDQxNjYzZGIyYzI2M2U2IiwidXNlcl9pZCI6IjEifQ.WEO1hJ-RRff49mDfeP7xQqGSFQEnVFX8cnsy4KX8rPA
+
+{
+  "platform": "baekjoon"
+}
+
+###
+
+### 6. GitHub 데이터 실제 수집
+POST http://127.0.0.1:8000/api/accounts/platform/sync/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0NTI5MDIxLCJpYXQiOjE3NzQ1MjU0MjEsImp0aSI6ImM2ZjA1YzZmYmQyNTQ4MDRhMDQxNjYzZGIyYzI2M2U2IiwidXNlcl9pZCI6IjEifQ.WEO1hJ-RRff49mDfeP7xQqGSFQEnVFX8cnsy4KX8rPA
+
+{
+  "platform": "github"
+}
+
+###
+
+### 7. 수집 현황 확인
+GET http://127.0.0.1:8000/api/accounts/platform/status/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0NTMyMjg3LCJpYXQiOjE3NzQ1Mjg2ODcsImp0aSI6IjI2MWI5YjliZmJhZDRiNzJiZThiMDI1Mzc1NTYzYzJlIiwidXNlcl9pZCI6IjEifQ.KRbKiUZbwYI3nY4YXB8Nsxg3-RSZhJKN155VZa4DYHQ
+```
+
+---
+
+### Step 4 — 실행 순서
+
+각 `###` 블록 왼쪽에 **▶ 실행 버튼**이 생겨요. 순서대로 클릭하면 돼요:
+```
+1번 실행 (회원가입)
+    ↓
+2번 실행 (로그인) → 응답에서 "access" 토큰 복사
+    ↓
+3번, 4번에 토큰 붙여넣고 실행 (플랫폼 등록)
+    ↓
+5번, 6번 실행 (실제 데이터 수집) ← 여기서 solved.ac/GitHub API 호출
+    ↓
+7번 실행 (결과 확인)
