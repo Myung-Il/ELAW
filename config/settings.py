@@ -37,9 +37,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'accounts',
+    'rest_framework',
+    'corsheaders',
+    'core',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -115,3 +120,48 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# --- JWT 토큰 인증 설정 ---
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+}
+
+AUTH_USER_MODEL = 'core.User'
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+# ─────────────────────────────────────────
+# config/settings.py 하단에 아래 내용을 추가하세요
+# ─────────────────────────────────────────
+
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv(BASE_DIR / ".env")
+
+# GitHub PAT (ETL에서 사용)
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
+
+# (선택) SQLite → MySQL 전환 시 아래 주석 해제
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME':     os.getenv('DB_NAME', 'elaw_db'),
+#         'USER':     os.getenv('DB_USER', 'elaw_user'),
+#         'PASSWORD': os.getenv('DB_PASSWORD', ''),
+#         'HOST':     os.getenv('DB_HOST', 'localhost'),
+#         'PORT':     os.getenv('DB_PORT', '3306'),
+#         'OPTIONS':  {'charset': 'utf8mb4'},
+#     }
+# }
