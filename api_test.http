@@ -3,9 +3,9 @@ POST http://127.0.0.1:8000/api/accounts/signup/
 Content-Type: application/json
 
 {
-  "email": "test@elaw.kr",
-  "password": "test1234!",
-  "name": "테스트유저",
+  "email": "ktr040415@mokpo.ac.kr",
+  "password": "rlaxofkd1!",
+  "name": "김태랑",
   "role": "student"
 }
 
@@ -16,8 +16,8 @@ POST http://127.0.0.1:8000/api/accounts/login/
 Content-Type: application/json
 
 {
-  "email": "test@elaw.kr",
-  "password": "test1234!"
+  "email": "ghghghgh0802@naver.com",
+  "password": "rlarjsgnl1!"
 }
 
 ###
@@ -26,11 +26,11 @@ Content-Type: application/json
 # 로그인 응답의 access 토큰을 아래 Bearer 뒤에 붙여넣기
 POST http://127.0.0.1:8000/api/accounts/platform/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0NTMyMjg3LCJpYXQiOjE3NzQ1Mjg2ODcsImp0aSI6IjI2MWI5YjliZmJhZDRiNzJiZThiMDI1Mzc1NTYzYzJlIiwidXNlcl9pZCI6IjEifQ.KRbKiUZbwYI3nY4YXB8Nsxg3-RSZhJKN155VZa4DYHQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1MjEzNDUwLCJpYXQiOjE3NzUyMDk4NTAsImp0aSI6ImVlODdhNTFiNzZlNzRlNzQ4NjE2ZmU1OWE5OThmMTkyIiwidXNlcl9pZCI6IjcifQ.qJY8jxkqaOrgcv5We09Kjr7R5J3ytGKkupAfIJwaBVc
 
 {
   "platform": "baekjoon",
-  "external_id": "mango538"
+  "external_id": "ktr040415"
 }
 
 ###
@@ -38,11 +38,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
 ### 4. GitHub 아이디 등록
 POST http://127.0.0.1:8000/api/accounts/platform/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0NTI5MDIxLCJpYXQiOjE3NzQ1MjU0MjEsImp0aSI6ImM2ZjA1YzZmYmQyNTQ4MDRhMDQxNjYzZGIyYzI2M2U2IiwidXNlcl9pZCI6IjEifQ.WEO1hJ-RRff49mDfeP7xQqGSFQEnVFX8cnsy4KX8rPA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1MjEzNDUwLCJpYXQiOjE3NzUyMDk4NTAsImp0aSI6ImVlODdhNTFiNzZlNzRlNzQ4NjE2ZmU1OWE5OThmMTkyIiwidXNlcl9pZCI6IjcifQ.qJY8jxkqaOrgcv5We09Kjr7R5J3ytGKkupAfIJwaBVc
 
 {
   "platform": "github",
-  "external_id": "Ohseonghwan538"
+  "external_id": "Myung-Il"
 }
 
 ###
@@ -50,7 +50,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
 ### 5. 백준 데이터 실제 수집 (solved.ac API 호출)
 POST http://127.0.0.1:8000/api/accounts/platform/sync/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0NTI5MDIxLCJpYXQiOjE3NzQ1MjU0MjEsImp0aSI6ImM2ZjA1YzZmYmQyNTQ4MDRhMDQxNjYzZGIyYzI2M2U2IiwidXNlcl9pZCI6IjEifQ.WEO1hJ-RRff49mDfeP7xQqGSFQEnVFX8cnsy4KX8rPA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1MjEzNDUwLCJpYXQiOjE3NzUyMDk4NTAsImp0aSI6ImVlODdhNTFiNzZlNzRlNzQ4NjE2ZmU1OWE5OThmMTkyIiwidXNlcl9pZCI6IjcifQ.qJY8jxkqaOrgcv5We09Kjr7R5J3ytGKkupAfIJwaBVc
 
 {
   "platform": "baekjoon"
@@ -61,7 +61,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
 ### 6. GitHub 데이터 실제 수집
 POST http://127.0.0.1:8000/api/accounts/platform/sync/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0NTI5MDIxLCJpYXQiOjE3NzQ1MjU0MjEsImp0aSI6ImM2ZjA1YzZmYmQyNTQ4MDRhMDQxNjYzZGIyYzI2M2U2IiwidXNlcl9pZCI6IjEifQ.WEO1hJ-RRff49mDfeP7xQqGSFQEnVFX8cnsy4KX8rPA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1MjEzNDUwLCJpYXQiOjE3NzUyMDk4NTAsImp0aSI6ImVlODdhNTFiNzZlNzRlNzQ4NjE2ZmU1OWE5OThmMTkyIiwidXNlcl9pZCI6IjcifQ.qJY8jxkqaOrgcv5We09Kjr7R5J3ytGKkupAfIJwaBVc
 
 {
   "platform": "github"
@@ -71,7 +71,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
 
 ### 7. 수집 현황 확인
 GET http://127.0.0.1:8000/api/accounts/platform/status/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0NTMyMjg3LCJpYXQiOjE3NzQ1Mjg2ODcsImp0aSI6IjI2MWI5YjliZmJhZDRiNzJiZThiMDI1Mzc1NTYzYzJlIiwidXNlcl9pZCI6IjEifQ.KRbKiUZbwYI3nY4YXB8Nsxg3-RSZhJKN155VZa4DYHQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1MjEzNDUwLCJpYXQiOjE3NzUyMDk4NTAsImp0aSI6ImVlODdhNTFiNzZlNzRlNzQ4NjE2ZmU1OWE5OThmMTkyIiwidXNlcl9pZCI6IjcifQ.qJY8jxkqaOrgcv5We09Kjr7R5J3ytGKkupAfIJwaBVc
 ```
 
 ---

@@ -165,3 +165,11 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
 #         'OPTIONS':  {'charset': 'utf8mb4'},
 #     }
 # }
+
+# .env 로드
+import os
+from dotenv import load_dotenv
+load_dotenv(BASE_DIR / ".env")
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GITHUB_TOKEN   = os.getenv("GITHUB_TOKEN", "")
