@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-j34rse@upusiz&ggit2!8!i(m)l$0014ml=_+x-kwufq0ls%g1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -173,3 +175,4 @@ load_dotenv(BASE_DIR / ".env")
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GITHUB_TOKEN   = os.getenv("GITHUB_TOKEN", "")
+
