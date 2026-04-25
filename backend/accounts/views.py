@@ -17,3 +17,17 @@ class SignupView(APIView):
 
         # 4. 데이터에 문제가 있으면 에러 이유를 프론트엔드에 알려줍니다.
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ProfileView(APIView):
+    def get(self, request):
+        mock_profile_data = {
+            "message": "프로필 정보 조회 성공 (임시 데이터)",
+            "user_info": {
+                "email": "gunhwi@elaw.com",
+                "nickname": "건휘테스트",
+                "profile_image": "https://dummyimage.com/200x200/cccccc/000000.png&text=Profile",
+                "bio": "안녕하세요! 백엔드 개발자 김건휘입니다.",
+                "joined_at": "2026-04-14"
+                }
+            }
+        return Response(mock_profile_data, status=status.HTTP_200_OK)
