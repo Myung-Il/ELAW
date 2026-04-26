@@ -1,0 +1,11 @@
+# ELAW 백엔드 Python 패키지 목록
+# pip install -r requirements.txt 로 설치
+
+Django==4.2.11
+djangorestframework==3.15.1
+djangorestframework-simplejwt==5.3.1
+django-cors-headers==4.3.1
+psycopg2-binary==2.9.9         # PostgreSQL 연결
+python-dotenv==1.0.0           # 환경변수 관리
+Pillow==10.3.0                 # 이미지 처리
+gunicorn==21.2.0               # 배포용 WSGI 서버
