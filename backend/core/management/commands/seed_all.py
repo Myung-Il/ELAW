@@ -1,4 +1,4 @@
-"""
+﻿"""
 python manage.py seed_all
 
 12개 테이블 전체에 릴레이션 인스턴스를 채우는 시드 커맨드.
@@ -26,7 +26,7 @@ class Command(BaseCommand):
     help = "12개 테이블 전체 시드 데이터 생성"
 
     def handle(self, *args, **options):
-        self.stdout.write("🌱 시드 데이터 생성 시작...\n")
+        self.stdout.write("시드 데이터 생성 시작...\n")
         self._seed_users()
         self._seed_companies()
         self._seed_platform_links()
@@ -39,14 +39,14 @@ class Command(BaseCommand):
         self._seed_matches()
         self._seed_posts()
         self._seed_ai_logs()
-        self.stdout.write(self.style.SUCCESS("\n✅ 시드 데이터 생성 완료!"))
+        self.stdout.write(self.style.SUCCESS("\n[완료] 시드 데이터 생성 완료!"))
 
     # ────────────────────────────────────────
     # 1. Users (15명)
     # ────────────────────────────────────────
     def _seed_users(self):
         from core.models import User
-        self.stdout.write("  👤 사용자 생성 중...")
+        self.stdout.write("  사용자 생성 중...")
 
         students = [
             ("김민준", "minjun.kim@elaw.kr",   "student"),
@@ -96,7 +96,7 @@ class Command(BaseCommand):
     # ────────────────────────────────────────
     def _seed_companies(self):
         from core.models import Company
-        self.stdout.write("  🏢 기업 정보 생성 중...")
+        self.stdout.write("  기업 정보 생성 중...")
 
         company_data = [
             ("카카오", "IT/플랫폼", "국내 1위 메신저 카카오 채용",
@@ -127,7 +127,7 @@ class Command(BaseCommand):
     # ────────────────────────────────────────
     def _seed_platform_links(self):
         from core.models import PlatformLink
-        self.stdout.write("  🔗 플랫폼 연동 생성 중...")
+        self.stdout.write("  플랫폼 연동 생성 중...")
 
         # 가상 백준/GitHub 아이디 (학생별)
         handles = [
@@ -164,7 +164,7 @@ class Command(BaseCommand):
     # ────────────────────────────────────────
     def _seed_user_goals(self):
         from core.models import UserGoal
-        self.stdout.write("  🎯 학습 목표 생성 중...")
+        self.stdout.write("  학습 목표 생성 중...")
 
         fields    = ["백엔드", "프론트엔드", "AI/ML", "데이터분석", "풀스택"]
         job_roles = ["백엔드 개발자", "프론트엔드 개발자", "AI 엔지니어",
@@ -192,7 +192,7 @@ class Command(BaseCommand):
     # ────────────────────────────────────────
     def _seed_curricula(self):
         from core.models import Curriculum
-        self.stdout.write("  📚 커리큘럼 생성 중...")
+        self.stdout.write("  커리큘럼 생성 중...")
 
         count = 0
         for i, (student, goal) in enumerate(zip(self.student_users, self.goal_objs)):
@@ -229,7 +229,7 @@ class Command(BaseCommand):
     # ────────────────────────────────────────
     def _seed_solve_history(self):
         from core.models import SolveHistory
-        self.stdout.write("  📝 풀이 이력 생성 중...")
+        self.stdout.write("  풀이 이력 생성 중...")
 
         PROBLEMS = [
             ("1000","A+B","Bronze5",["구현","수학"]),
@@ -292,7 +292,7 @@ class Command(BaseCommand):
     # ────────────────────────────────────────
     def _rebuild_stats(self):
         from core.models import SolveHistory, LearningStats
-        self.stdout.write("  📊 학습 통계 집계 중...")
+        self.stdout.write("  학습 통계 집계 중...")
 
         count = 0
         for student in self.student_users:
@@ -342,7 +342,7 @@ class Command(BaseCommand):
     # ────────────────────────────────────────
     def _seed_portfolios(self):
         from core.models import Portfolio
-        self.stdout.write("  🗂️  포트폴리오 생성 중...")
+        self.stdout.write("  포트폴리오 생성 중...")
 
         count = 0
         for student in self.student_users:
@@ -374,7 +374,7 @@ class Command(BaseCommand):
     # ────────────────────────────────────────
     def _seed_job_postings(self):
         from core.models import JobPosting
-        self.stdout.write("  💼 채용공고 생성 중...")
+        self.stdout.write("  채용공고 생성 중...")
 
         postings = [
             ("백엔드 개발자 (Python/Django)", ["Python","Django","MySQL"], ["Redis","Docker"], "백엔드 개발자", "new"),
@@ -409,7 +409,7 @@ class Command(BaseCommand):
     # ────────────────────────────────────────
     def _seed_matches(self):
         from core.models import Match
-        self.stdout.write("  🤝 매칭 데이터 생성 중...")
+        self.stdout.write("  매칭 데이터 생성 중...")
 
         statuses = ["recommended","viewed","scrapped","applied","rejected"]
         count = 0
@@ -432,7 +432,7 @@ class Command(BaseCommand):
     # ────────────────────────────────────────
     def _seed_posts(self):
         from core.models import Post
-        self.stdout.write("  📢 게시글 생성 중...")
+        self.stdout.write("  게시글 생성 중...")
 
         posts_data = [
             ("notice",  "ELAW 플랫폼 오픈 안내",        "ELAW가 공식 오픈되었습니다. 많은 이용 부탁드립니다.", True),
@@ -463,7 +463,7 @@ class Command(BaseCommand):
     # ────────────────────────────────────────
     def _seed_ai_logs(self):
         from core.models import AiLog
-        self.stdout.write("  🤖 AI 로그 생성 중...")
+        self.stdout.write("  AI 로그 생성 중...")
 
         features = ["curriculum","weakness","recommendation","portfolio","matching"]
         count = 0
