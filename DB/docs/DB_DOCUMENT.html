@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELAW 프로젝트 DB 설계 문서</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-light: #eff6ff;
+    --secondary: #7c3aed;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --orange: #ea580c;
+    --orange-light: #fff7ed;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--gray-800);
+    background: #fff;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+  h1 { font-size: 28px; font-weight: 700; color: var(--gray-900); margin-bottom: 6px; }
+  h2 { font-size: 20px; font-weight: 700; color: var(--gray-900); margin: 48px 0 16px;
+       padding-bottom: 8px; border-bottom: 2px solid var(--gray-200); }
+  h3 { font-size: 16px; font-weight: 600; color: var(--gray-800); margin: 28px 0 10px; }
+  h4 { font-size: 14px; font-weight: 600; color: var(--gray-700); margin: 20px 0 8px; }
+  p  { margin-bottom: 10px; color: var(--gray-700); }
+  code {
+    font-family: 'Cascadia Code', 'Consolas', monospace;
+    font-size: 12.5px;
+    background: var(--gray-100);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--secondary);
+  }
+  pre {
+    background: var(--gray-900);
+    color: #e2e8f0;
+    padding: 16px 20px;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    font-size: 12.5px;
+    line-height: 1.7;
+    margin: 12px 0;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+
+  /* 메타 헤더 */
+  .doc-meta {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    margin: 16px 0 40px;
+    padding: 16px 20px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-size: 13px; color: var(--gray-600);
+  }
+  .doc-meta span strong { color: var(--gray-800); }
+
+  /* 뱃지 */
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+  .badge-purple { background: #ede9fe; color: #6d28d9; }
+  .badge-green  { background: #dcfce7; color: #15803d; }
+  .badge-orange { background: #ffedd5; color: #c2410c; }
+  .badge-gray   { background: var(--gray-100); color: var(--gray-700); }
+
+  /* 레이어 섹션 */
+  .layer-block {
+    border: 1px solid var(--gray-200);
+    border-left: 4px solid;
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .layer-block.blue   { border-left-color: var(--primary); }
+  .layer-block.purple { border-left-color: var(--secondary); }
+  .layer-block.green  { border-left-color: var(--green); }
+  .layer-block.orange { border-left-color: var(--orange); }
+  .layer-header {
+    padding: 12px 16px;
+    font-weight: 600; font-size: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .layer-block.blue   .layer-header { background: #eff6ff; color: #1d4ed8; }
+  .layer-block.purple .layer-header { background: #f5f3ff; color: #6d28d9; }
+  .layer-block.green  .layer-header { background: var(--green-light); color: #166534; }
+  .layer-block.orange .layer-header { background: var(--orange-light); color: #9a3412; }
+  .layer-body { padding: 16px; }
+
+  /* 테이블 */
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  thead th {
+    background: var(--gray-800); color: #fff;
+    padding: 9px 12px; text-align: left; font-weight: 600;
+  }
+  tbody tr:nth-child(even) { background: var(--gray-50); }
+  tbody td { padding: 8px 12px; border-bottom: 1px solid var(--gray-200); vertical-align: top; }
+  tbody tr:hover { background: var(--primary-light); }
+  td.key { font-family: monospace; font-size: 12.5px; color: var(--secondary); font-weight: 600; }
+  td.type { font-family: monospace; font-size: 12px; color: var(--green); }
+  td.pk  { color: var(--orange); font-weight: 700; }
+  td.fk  { color: var(--primary); }
+
+  /* 요약 카드 그리드 */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px; margin: 16px 0;
+  }
+  .summary-card {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    background: var(--gray-50);
+  }
+  .summary-card .count {
+    font-size: 24px; font-weight: 700; color: var(--primary);
+  }
+  .summary-card .label { font-size: 12px; color: var(--gray-600); margin-top: 2px; }
+  .summary-card .table-name { font-size: 11px; font-family: monospace; color: var(--gray-600); }
+
+  /* 흐름도 */
+  .flow-box {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin: 12px 0;
+  }
+  .flow-step {
+    display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;
+  }
+  .flow-num {
+    flex-shrink: 0; width: 24px; height: 24px;
+    background: var(--primary); color: #fff;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+  .flow-arrow {
+    text-align: center; color: var(--gray-600); font-size: 18px;
+    margin: -4px 0 -4px 36px;
+  }
+
+  /* 명령어 박스 */
+  .cmd-box {
+    background: var(--gray-900);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin: 10px 0;
+    font-family: monospace;
+    font-size: 13px;
+    color: #86efac;
+  }
+  .cmd-comment { color: #6b7280; }
+
+  /* 경고/정보 박스 */
+  .info-box {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    margin: 12px 0;
+    font-size: 13px;
+  }
+  .info-box.warn  { background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; }
+  .info-box.info  { background: var(--primary-light); border: 1px solid #bfdbfe; color: #1e40af; }
+  .info-box.ok    { background: var(--green-light); border: 1px solid #86efac; color: #14532d; }
+
+  /* 목차 */
+  .toc { background: var(--gray-50); border: 1px solid var(--gray-200);
+         border-radius: var(--radius); padding: 20px 24px; margin-bottom: 40px; }
+  .toc h3 { margin: 0 0 12px; font-size: 14px; color: var(--gray-700); }
+  .toc ol { margin-left: 20px; }
+  .toc li { margin: 5px 0; }
+  .toc a  { color: var(--primary); text-decoration: none; font-size: 13px; }
+  .toc a:hover { text-decoration: underline; }
+
+  /* 인덱스 태그 */
+  .index-tag {
+    display: inline-block;
+    background: #fef3c7; color: #92400e;
+    font-size: 11px; padding: 1px 6px;
+    border-radius: 3px; font-family: monospace;
+    margin: 1px 2px;
+  }
+
+  @media print {
+    body { max-width: none; padding: 20px; }
+    h2 { page-break-before: always; }
+    .layer-block { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<h1>ELAW 프로젝트 — DB 설계 문서</h1>
+<div class="doc-meta">
+  <span><strong>프로젝트</strong> ELAW (취업 학습 플랫폼)</span>
+  <span><strong>DB 엔진</strong> SQLite3 (개발) / MySQL 8.0 (운영 예정)</span>
+  <span><strong>ORM</strong> Django 6.0.4</span>
+  <span><strong>총 테이블</strong> 26개</span>
+  <span><strong>작성일</strong> 2026-04-27</span>
+</div>
+
+<div class="toc">
+  <h3>목차</h3>
+  <ol>
+    <li><a href="#overview">전체 구조 개요</a></li>
+    <li><a href="#layer1">레이어 1 — 기본 도메인 (12개 테이블)</a></li>
+    <li><a href="#layer2">레이어 2 — 데이터셋 (5개 테이블)</a></li>
+    <li><a href="#layer3">레이어 3 — 문제 (5개 테이블)</a></li>
+    <li><a href="#layer4">레이어 4 — 추천·갭·포트폴리오 (4개 테이블)</a></li>
+    <li><a href="#relations">테이블 관계도 (ERD 요약)</a></li>
+    <li><a href="#dataflow">데이터 흐름</a></li>
+    <li><a href="#migrations">마이그레이션 히스토리</a></li>
+    <li><a href="#commands">관리 커맨드</a></li>
+    <li><a href="#api">DB 조회 API</a></li>
+    <li><a href="#settings">환경 설정</a></li>
+    <li><a href="#current">현재 데이터 현황</a></li>
+  </ol>
+</div>
+
+
+<!-- ===================== 1. 전체 구조 개요 ===================== -->
+<h2 id="overview">1. 전체 구조 개요</h2>
+
+<p>ELAW DB는 <strong>4개 레이어</strong>로 구성됩니다. 각 레이어는 독립적인 모델 파일로 관리되며, <code>models_register.py</code>를 통해 Django ORM에 일괄 등록됩니다.</p>
+
+<div class="layer-block blue">
+  <div class="layer-header"><span class="badge badge-blue">레이어 1</span> 기본 도메인 — <code>models.py</code></div>
+  <div class="layer-body">사용자, 기업, 학습 목표, 커리큘럼, 풀이 이력, 채용, 포트폴리오 등 플랫폼 핵심 12개 테이블</div>
+</div>
+<div class="layer-block purple">
+  <div class="layer-header"><span class="badge badge-purple">레이어 2</span> 데이터셋 — <code>models_dataset.py</code></div>
+  <div class="layer-body">HuggingFace 이력서·채용공고 원본 데이터셋 저장 및 AI 파싱 결과 5개 테이블</div>
+</div>
+<div class="layer-block green">
+  <div class="layer-header"><span class="badge badge-green">레이어 3</span> 문제 — <code>models_problems.py</code></div>
+  <div class="layer-body">직군별 6,000개 문제, 클러스터, 선수과목 그래프, 학습 경로 메타 5개 테이블</div>
+</div>
+<div class="layer-block orange">
+  <div class="layer-header"><span class="badge badge-orange">레이어 4</span> 추천·갭·포트폴리오 — <code>models_new.py</code></div>
+  <div class="layer-body">스킬 갭 분석, 문제 추천, 포트폴리오 버전 관리, RLHF 피드백 4개 테이블</div>
+</div>
+
+<h3>파일 구조</h3>
+<pre><code>backend/core/
+├── models.py              # 레이어 1 (기본 도메인 12개 모델)
+├── models_dataset.py      # 레이어 2 (데이터셋 5개 모델)
+├── models_problems.py     # 레이어 3 (문제 5개 모델)
+├── models_new.py          # 레이어 4 (추천·갭·포트폴리오 4개 모델)
+├── models_register.py     # 전체 모델 Django 앱 등록 허브
+├── migrations/
+│   ├── 0001_initial.py              # 기본 12개 테이블
+│   ├── 0002_user_is_staff_...py     # User 필드 추가
+│   ├── 0003_dataset_tables.py       # 데이터셋 5개 테이블
+│   ├── 0004_merge_20260421.py       # 병합
+│   ├── 0005_alter_datasetentry_...py # 문제 5개 테이블 추가
+│   └── 0006_portfoliosnapshot_...py  # 추천·갭·포트폴리오 4개 테이블 추가
+└── management/commands/
+    ├── load_dataset.py    # HuggingFace 데이터셋 적재
+    ├── load_problems.py   # JobProblems + LearningPaths 적재
+    ├── seed_all.py        # 테스트용 시드 데이터 생성
+    ├── fill_tables.py     # 기초 데이터 채우기
+    └── sync_platforms.py  # 백준·GitHub API 동기화</code></pre>
+
+
+<!-- ===================== 2. 레이어 1 ===================== -->
+<h2 id="layer1">2. 레이어 1 — 기본 도메인 (12개 테이블)</h2>
+
+<h3>2-1. users (사용자)</h3>
+<p><span class="badge badge-blue">AUTH_USER_MODEL</span> 플랫폼 통합 사용자 계정. role로 학생/기업/관리자를 구분합니다.</p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>제약</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key pk">id</td><td class="type">BigAutoField</td><td>PK</td><td>자동 증가 기본키</td></tr>
+    <tr><td class="key">email</td><td class="type">CharField(254)</td><td>UNIQUE</td><td>로그인 ID</td></tr>
+    <tr><td class="key">password_hash</td><td class="type">CharField(128)</td><td>NOT NULL</td><td>bcrypt 해시</td></tr>
+    <tr><td class="key">name</td><td class="type">CharField(100)</td><td>NOT NULL</td><td>이름</td></tr>
+    <tr><td class="key">role</td><td class="type">CharField(10)</td><td>NOT NULL</td><td>student / company / admin</td></tr>
+    <tr><td class="key">phone</td><td class="type">CharField(20)</td><td>nullable</td><td>전화번호</td></tr>
+    <tr><td class="key">is_active</td><td class="type">BooleanField</td><td>default=True</td><td>계정 활성 여부</td></tr>
+    <tr><td class="key">is_staff</td><td class="type">BooleanField</td><td>default=False</td><td>Django admin 접근</td></tr>
+    <tr><td class="key">ai_consent</td><td class="type">BooleanField</td><td>default=False</td><td>AI 분석 동의</td></tr>
+    <tr><td class="key">privacy_consent</td><td class="type">BooleanField</td><td>default=False</td><td>개인정보 동의</td></tr>
+    <tr><td class="key">created_at</td><td class="type">DateTimeField</td><td>auto_now_add</td><td></td></tr>
+    <tr><td class="key">updated_at</td><td class="type">DateTimeField</td><td>auto_now</td><td></td></tr>
+  </tbody>
+</table>
+<p>인덱스: <span class="index-tag">idx_users_role</span> <span class="index-tag">idx_users_created_at</span></p>
+
+<h3>2-2. companies (기업)</h3>
+<p>User(role=company)와 1:1 연결되는 기업 프로필.</p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>제약</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key pk">id</td><td class="type">BigAutoField</td><td>PK</td><td></td></tr>
+    <tr><td class="key fk">user_id</td><td class="type">OneToOneField</td><td>FK→users</td><td></td></tr>
+    <tr><td class="key">name</td><td class="type">CharField(200)</td><td>NOT NULL</td><td>기업명</td></tr>
+    <tr><td class="key">industry</td><td class="type">CharField(100)</td><td>nullable</td><td>업종</td></tr>
+    <tr><td class="key">description</td><td class="type">TextField</td><td>nullable</td><td>기업 소개</td></tr>
+    <tr><td class="key">logo_url</td><td class="type">CharField(500)</td><td>nullable</td><td></td></tr>
+    <tr><td class="key">website_url</td><td class="type">CharField(500)</td><td>nullable</td><td></td></tr>
+    <tr><td class="key">is_approved</td><td class="type">BooleanField</td><td>default=False</td><td>관리자 승인 여부</td></tr>
+    <tr><td class="key">approved_at</td><td class="type">DateTimeField</td><td>nullable</td><td></td></tr>
+    <tr><td class="key">created_at</td><td class="type">DateTimeField</td><td>auto_now_add</td><td></td></tr>
+  </tbody>
+</table>
+<p>인덱스: <span class="index-tag">idx_companies_approved</span></p>
+
+<h3>2-3. platform_links (외부 플랫폼 연동)</h3>
+<p>백준·GitHub·프로그래머스 계정 연동 정보. (user, platform) 쌍이 유니크합니다.</p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>제약</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key pk">id</td><td class="type">BigAutoField</td><td>PK</td><td></td></tr>
+    <tr><td class="key fk">user_id</td><td class="type">ForeignKey</td><td>FK→users</td><td></td></tr>
+    <tr><td class="key">platform</td><td class="type">CharField(20)</td><td>NOT NULL</td><td>baekjoon / github / programmers</td></tr>
+    <tr><td class="key">external_id</td><td class="type">CharField(100)</td><td>NOT NULL</td><td>플랫폼 내 사용자 ID</td></tr>
+    <tr><td class="key">access_token</td><td class="type">CharField(500)</td><td>nullable</td><td>OAuth 토큰</td></tr>
+    <tr><td class="key">token_expires</td><td class="type">DateTimeField</td><td>nullable</td><td>토큰 만료일</td></tr>
+    <tr><td class="key">last_synced</td><td class="type">DateTimeField</td><td>nullable</td><td>마지막 동기화 시각</td></tr>
+    <tr><td class="key">is_active</td><td class="type">BooleanField</td><td>default=True</td><td></td></tr>
+  </tbody>
+</table>
+<p>유니크: <code>(user, platform)</code> &nbsp; 인덱스: <span class="index-tag">idx_platform_links_synced</span></p>
+
+<h3>2-4. user_goals (학습·취업 목표)</h3>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>제약</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key pk">id</td><td class="type">BigAutoField</td><td>PK</td><td></td></tr>
+    <tr><td class="key fk">user_id</td><td class="type">ForeignKey</td><td>FK→users</td><td></td></tr>
+    <tr><td class="key">goal_type</td><td class="type">CharField(10)</td><td>NOT NULL</td><td>study / job</td></tr>
+    <tr><td class="key">field</td><td class="type">CharField(100)</td><td>nullable</td><td>예) 백엔드, AI/ML</td></tr>
+    <tr><td class="key">job_role</td><td class="type">CharField(100)</td><td>nullable</td><td>예) 백엔드 개발자</td></tr>
+    <tr><td class="key">start_date</td><td class="type">DateField</td><td>nullable</td><td></td></tr>
+    <tr><td class="key">end_date</td><td class="type">DateField</td><td>nullable</td><td></td></tr>
+    <tr><td class="key">duration_weeks</td><td class="type">PositiveSmallIntegerField</td><td>nullable</td><td></td></tr>
+    <tr><td class="key">is_active</td><td class="type">BooleanField</td><td>default=True</td><td>현재 활성 목표</td></tr>
+  </tbody>
+</table>
+<p>인덱스: <span class="index-tag">idx_user_goals_active</span></p>
+
+<h3>2-5. curricula (AI 커리큘럼)</h3>
+<p>Gemini API로 생성된 주차별 학습 계획. goal당 N개 버전 관리됩니다.</p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>제약</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key pk">id</td><td class="type">BigAutoField</td><td>PK</td><td></td></tr>
+    <tr><td class="key fk">goal_id</td><td class="type">ForeignKey</td><td>FK→user_goals</td><td></td></tr>
+    <tr><td class="key fk">user_id</td><td class="type">ForeignKey</td><td>FK→users</td><td></td></tr>
+    <tr><td class="key">content_json</td><td class="type">JSONField</td><td>NOT NULL</td><td>{total_weeks, field, job_role, weeks[{week, theme, tasks, recommended_problems, estimated_hours}]}</td></tr>
+    <tr><td class="key">version</td><td class="type">PositiveSmallIntegerField</td><td>default=1</td><td>버전 번호</td></tr>
+    <tr><td class="key">is_active</td><td class="type">BooleanField</td><td>default=True</td><td>현재 사용 중인 버전</td></tr>
+    <tr><td class="key">generated_at</td><td class="type">DateTimeField</td><td>auto_now_add</td><td></td></tr>
+  </tbody>
+</table>
+<p>인덱스: <span class="index-tag">idx_curricula_user_active</span> <span class="index-tag">idx_curricula_goal</span></p>
+
+<h3>2-6. solve_history (외부 플랫폼 풀이 이력)</h3>
+<p>백준·프로그래머스에서 동기화된 풀이 기록. (user, platform, problem_id)가 유니크합니다.</p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>제약</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key pk">id</td><td class="type">BigAutoField</td><td>PK</td><td></td></tr>
+    <tr><td class="key fk">user_id</td><td class="type">ForeignKey</td><td>FK→users</td><td></td></tr>
+    <tr><td class="key">platform</td><td class="type">CharField(20)</td><td>NOT NULL</td><td>baekjoon / programmers / leetcode</td></tr>
+    <tr><td class="key">problem_id</td><td class="type">CharField(50)</td><td>NOT NULL</td><td>플랫폼 내 문제 번호</td></tr>
+    <tr><td class="key">problem_title</td><td class="type">CharField(300)</td><td>nullable</td><td></td></tr>
+    <tr><td class="key">status</td><td class="type">CharField(10)</td><td>NOT NULL</td><td>solved / failed / partial</td></tr>
+    <tr><td class="key">language</td><td class="type">CharField(30)</td><td>nullable</td><td>사용 언어</td></tr>
+    <tr><td class="key">algo_tags</td><td class="type">JSONField</td><td>nullable</td><td>예) ["DP", "그래프"]</td></tr>
+    <tr><td class="key">difficulty</td><td class="type">CharField(30)</td><td>nullable</td><td>Bronze5, Silver3 등</td></tr>
+    <tr><td class="key">time_spent_min</td><td class="type">PositiveSmallIntegerField</td><td>nullable</td><td>풀이 소요 시간(분)</td></tr>
+    <tr><td class="key">solved_at</td><td class="type">DateTimeField</td><td>nullable</td><td></td></tr>
+    <tr><td class="key">source</td><td class="type">CharField(20)</td><td>default='api'</td><td>api / manual</td></tr>
+  </tbody>
+</table>
+<p>유니크: <code>(user, platform, problem_id)</code> &nbsp; 인덱스: <span class="index-tag">idx_solve_user_solved_at</span> <span class="index-tag">idx_solve_platform</span> <span class="index-tag">idx_solve_language</span></p>
+
+<h3>2-7. learning_stats (학습 통계)</h3>
+<p>언어·알고리즘 태그별 정답률 집계. solve_history에서 자동 재집계됩니다.</p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>제약</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key pk">id</td><td class="type">BigAutoField</td><td>PK</td><td></td></tr>
+    <tr><td class="key fk">user_id</td><td class="type">ForeignKey</td><td>FK→users</td><td></td></tr>
+    <tr><td class="key">stat_type</td><td class="type">CharField(20)</td><td>NOT NULL</td><td>language / algo_tag</td></tr>
+    <tr><td class="key">stat_key</td><td class="type">CharField(100)</td><td>NOT NULL</td><td>예) "Python", "DP"</td></tr>
+    <tr><td class="key">total_count</td><td class="type">PositiveIntegerField</td><td>default=0</td><td>총 시도 수</td></tr>
+    <tr><td class="key">solved_count</td><td class="type">PositiveIntegerField</td><td>default=0</td><td>정답 수</td></tr>
+    <tr><td class="key">failed_count</td><td class="type">PositiveIntegerField</td><td>default=0</td><td>오답 수</td></tr>
+    <tr><td class="key">correct_rate</td><td class="type">FloatField</td><td>nullable</td><td>정답률 0~100</td></tr>
+    <tr><td class="key">last_solved_at</td><td class="type">DateTimeField</td><td>nullable</td><td></td></tr>
+  </tbody>
+</table>
+<p>유니크: <code>(user, stat_type, stat_key)</code> &nbsp; 인덱스: <span class="index-tag">idx_stats_correct_rate</span></p>
+
+<h3>2-8. portfolios (포트폴리오)</h3>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>제약</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key pk">id</td><td class="type">BigAutoField</td><td>PK</td><td></td></tr>
+    <tr><td class="key fk">user_id</td><td class="type">ForeignKey</td><td>FK→users</td><td></td></tr>
+    <tr><td class="key">title</td><td class="type">CharField(200)</td><td>NOT NULL</td><td></td></tr>
+    <tr><td class="key">summary_text</td><td class="type">TextField</td><td>nullable</td><td>요약 문장</td></tr>
+    <tr><td class="key">content_json</td><td class="type">JSONField</td><td>nullable</td><td>섹션별 구조화 내용</td></tr>
+    <tr><td class="key">public_slug</td><td class="type">CharField(50)</td><td>UNIQUE</td><td>공개 URL 식별자</td></tr>
+    <tr><td class="key">pdf_path</td><td class="type">CharField(500)</td><td>nullable</td><td>PDF 파일 경로</td></tr>
+    <tr><td class="key">language</td><td class="type">CharField(5)</td><td>default='ko'</td><td>ko / en</td></tr>
+    <tr><td class="key">version</td><td class="type">PositiveSmallIntegerField</td><td>default=1</td><td></td></tr>
+    <tr><td class="key">is_public</td><td class="type">BooleanField</td><td>default=False</td><td>외부 공개 여부</td></tr>
+  </tbody>
+</table>
+<p>인덱스: <span class="index-tag">idx_portfolios_user_id</span> <span class="index-tag">idx_portfolios_public</span></p>
+
+<h3>2-9. job_postings (채용공고)</h3>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>제약</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key pk">id</td><td class="type">BigAutoField</td><td>PK</td><td></td></tr>
+    <tr><td class="key fk">company_id</td><td class="type">ForeignKey</td><td>FK→companies</td><td></td></tr>
+    <tr><td class="key">title</td><td class="type">CharField(300)</td><td>NOT NULL</td><td>공고 제목</td></tr>
+    <tr><td class="key">description</td><td class="type">TextField</td><td>nullable</td><td></td></tr>
+    <tr><td class="key">required_skills</td><td class="type">JSONField</td><td>NOT NULL</td><td>필수 스킬 목록</td></tr>
+    <tr><td class="key">preferred_skills</td><td class="type">JSONField</td><td>nullable</td><td>우대 스킬 목록</td></tr>
+    <tr><td class="key">job_role</td><td class="type">CharField(100)</td><td>nullable</td><td>직무명</td></tr>
+    <tr><td class="key">career_level</td><td class="type">CharField(20)</td><td>nullable</td><td>new / junior / mid / senior / any</td></tr>
+    <tr><td class="key">deadline</td><td class="type">DateField</td><td>nullable</td><td>마감일</td></tr>
+    <tr><td class="key">is_active</td><td class="type">BooleanField</td><td>default=True</td><td></td></tr>
+    <tr><td class="key">view_count</td><td class="type">PositiveIntegerField</td><td>default=0</td><td></td></tr>
+  </tbody>
+</table>
+<p>인덱스: <span class="index-tag">idx_job_postings_company</span> <span class="index-tag">idx_job_postings_role</span> <span class="index-tag">idx_job_postings_deadline</span></p>
+
+<h3>2-10. matches (AI 매칭)</h3>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>제약</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key pk">id</td><td class="type">BigAutoField</td><td>PK</td><td></td></tr>
+    <tr><td class="key fk">user_id</td><td class="type">ForeignKey</td><td>FK→users</td><td></td></tr>
+    <tr><td class="key fk">posting_id</td><td class="type">ForeignKey</td><td>FK→job_postings</td><td></td></tr>
+    <tr><td class="key">match_score</td><td class="type">FloatField</td><td>NOT NULL</td><td>매칭 점수 0~100</td></tr>
+    <tr><td class="key">status</td><td class="type">CharField(15)</td><td>NOT NULL</td><td>recommended / viewed / scrapped / applied / rejected</td></tr>
+    <tr><td class="key">applied_at</td><td class="type">DateTimeField</td><td>nullable</td><td>지원 시각</td></tr>
+  </tbody>
+</table>
+<p>유니크: <code>(user, posting)</code> &nbsp; 인덱스: <span class="index-tag">idx_matches_user_score</span> <span class="index-tag">idx_matches_posting_status</span></p>
+
+<h3>2-11. posts (게시판)</h3>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>제약</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key pk">id</td><td class="type">BigAutoField</td><td>PK</td><td></td></tr>
+    <tr><td class="key fk">author_id</td><td class="type">ForeignKey</td><td>FK→users (admin only)</td><td></td></tr>
+    <tr><td class="key">category</td><td class="type">CharField(20)</td><td>NOT NULL</td><td>notice / contest / event</td></tr>
+    <tr><td class="key">title</td><td class="type">CharField(300)</td><td>NOT NULL</td><td></td></tr>
+    <tr><td class="key">content</td><td class="type">TextField</td><td>NOT NULL</td><td></td></tr>
+    <tr><td class="key">is_pinned</td><td class="type">BooleanField</td><td>default=False</td><td>상단 고정</td></tr>
+    <tr><td class="key">view_count</td><td class="type">PositiveIntegerField</td><td>default=0</td><td></td></tr>
+  </tbody>
+</table>
+<p>인덱스: <span class="index-tag">idx_posts_category_date</span> <span class="index-tag">idx_posts_pinned</span></p>
+
+<h3>2-12. ai_logs (AI API 호출 이력)</h3>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>제약</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key pk">id</td><td class="type">BigAutoField</td><td>PK</td><td></td></tr>
+    <tr><td class="key fk">user_id</td><td class="type">ForeignKey</td><td>FK→users, nullable</td><td>SYSTEM 호출이면 NULL</td></tr>
+    <tr><td class="key">feature</td><td class="type">CharField(30)</td><td>NOT NULL</td><td>curriculum / weakness / recommendation / portfolio / matching / problem_gen</td></tr>
+    <tr><td class="key">prompt_tokens</td><td class="type">PositiveIntegerField</td><td>nullable</td><td></td></tr>
+    <tr><td class="key">output_tokens</td><td class="type">PositiveIntegerField</td><td>nullable</td><td></td></tr>
+    <tr><td class="key">latency_ms</td><td class="type">PositiveIntegerField</td><td>nullable</td><td>응답 시간(ms)</td></tr>
+    <tr><td class="key">status</td><td class="type">CharField(10)</td><td>NOT NULL</td><td>success / error / timeout</td></tr>
+    <tr><td class="key">error_message</td><td class="type">TextField</td><td>nullable</td><td></td></tr>
+  </tbody>
+</table>
+<p>인덱스: <span class="index-tag">idx_ai_logs_user_feature</span> <span class="index-tag">idx_ai_logs_created_at</span> <span class="index-tag">idx_ai_logs_status</span></p>
+
+
+<!-- ===================== 3. 레이어 2 ===================== -->
+<h2 id="layer2">3. 레이어 2 — 데이터셋 (5개 테이블)</h2>
+<p>HuggingFace 데이터셋 <code>recuse/synthetic_resume_jd_raw_dataset</code> (2,640건) 을 저장·파싱합니다.<br>
+<code>load_dataset</code> 커맨드로 적재, Gemini API로 구조화 파싱합니다.</p>
+
+<h3>3-1. dataset_entries (원본 데이터셋)</h3>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>제약</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key pk">id</td><td class="type">BigAutoField</td><td>PK</td><td></td></tr>
+    <tr><td class="key">dataset_id</td><td class="type">UUIDField</td><td>UNIQUE</td><td>HuggingFace curr_type_id</td></tr>
+    <tr><td class="key">curr_type_str</td><td class="type">CharField(200)</td><td>NOT NULL</td><td>예) "Software Engineer_Junior_Google"</td></tr>
+    <tr><td class="key">job_title</td><td class="type">CharField(100)</td><td>nullable</td><td>파싱된 직무명</td></tr>
+    <tr><td class="key">career_level</td><td class="type">CharField(20)</td><td>nullable</td><td>junior / mid / senior / unknown</td></tr>
+    <tr><td class="key">company_name</td><td class="type">CharField(100)</td><td>nullable</td><td>파싱된 기업명</td></tr>
+    <tr><td class="key">resume_raw</td><td class="type">TextField</td><td>NOT NULL</td><td>원본 이력서 텍스트</td></tr>
+    <tr><td class="key">jd_raw</td><td class="type">TextField</td><td>NOT NULL</td><td>원본 채용공고 텍스트</td></tr>
+    <tr><td class="key">is_parsed</td><td class="type">BooleanField</td><td>default=False</td><td>Gemini 파싱 완료 여부</td></tr>
+  </tbody>
+</table>
+
+<h3>3-2. dataset_resumes (구조화 이력서)</h3>
+<p>DatasetEntry와 1:1. Gemini API로 파싱된 이력서 구조화 데이터.</p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key fk">entry_id</td><td class="type">OneToOneField</td><td>FK→dataset_entries</td></tr>
+    <tr><td class="key">candidate_name / email / phone</td><td class="type">CharField</td><td>기본 인적사항</td></tr>
+    <tr><td class="key">linkedin_url / github_url</td><td class="type">CharField</td><td>nullable</td></tr>
+    <tr><td class="key">profile_summary</td><td class="type">TextField</td><td>자기소개 요약</td></tr>
+    <tr><td class="key">skills_json</td><td class="type">JSONField</td><td>{languages, frameworks, databases, tools}</td></tr>
+    <tr><td class="key">experience_json</td><td class="type">JSONField</td><td>[{company, role, period, duties}]</td></tr>
+    <tr><td class="key">education_json</td><td class="type">JSONField</td><td>[{school, major, degree, period}]</td></tr>
+    <tr><td class="key">projects_json</td><td class="type">JSONField</td><td>프로젝트 목록</td></tr>
+    <tr><td class="key">skill_tags</td><td class="type">JSONField</td><td>["python", "django", ...]</td></tr>
+  </tbody>
+</table>
+
+<h3>3-3. dataset_job_descriptions (구조화 채용공고)</h3>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key fk">entry_id</td><td class="type">OneToOneField</td><td>FK→dataset_entries</td></tr>
+    <tr><td class="key fk">job_posting_id</td><td class="type">ForeignKey</td><td>FK→job_postings (nullable)</td></tr>
+    <tr><td class="key">company_name / job_title</td><td class="type">CharField</td><td></td></tr>
+    <tr><td class="key">location / employment_type / department</td><td class="type">CharField</td><td>nullable</td></tr>
+    <tr><td class="key">responsibilities</td><td class="type">JSONField</td><td>주요 업무 목록</td></tr>
+    <tr><td class="key">qualifications</td><td class="type">JSONField</td><td>{required:[], preferred:[]}</td></tr>
+    <tr><td class="key">benefits</td><td class="type">JSONField</td><td>복지 목록</td></tr>
+    <tr><td class="key">required_skill_tags / preferred_skill_tags</td><td class="type">JSONField</td><td>스킬 태그 배열</td></tr>
+  </tbody>
+</table>
+
+<h3>3-4. dataset_match_scores (AI 매칭 학습 데이터)</h3>
+<p>이력서-채용공고 매칭 점수. AI 모델 학습용 레이블 데이터.</p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key fk">resume_id</td><td class="type">ForeignKey</td><td>FK→dataset_resumes</td></tr>
+    <tr><td class="key fk">jd_id</td><td class="type">ForeignKey</td><td>FK→dataset_job_descriptions</td></tr>
+    <tr><td class="key">is_positive</td><td class="type">BooleanField</td><td>매칭 여부 (True=매칭)</td></tr>
+    <tr><td class="key">rule_score</td><td class="type">FloatField</td><td>규칙 기반 점수</td></tr>
+    <tr><td class="key">ai_score</td><td class="type">FloatField</td><td>AI 모델 점수</td></tr>
+    <tr><td class="key">final_score</td><td class="type">FloatField</td><td>최종 가중 점수</td></tr>
+    <tr><td class="key">score_detail</td><td class="type">JSONField</td><td>세부 점수 breakdown</td></tr>
+  </tbody>
+</table>
+<p>유니크: <code>(resume, jd)</code></p>
+
+<h3>3-5. dataset_load_history (적재 이력)</h3>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key">dataset_name</td><td class="type">CharField(200)</td><td>HuggingFace 데이터셋 경로</td></tr>
+    <tr><td class="key">status</td><td class="type">CharField(10)</td><td>running / success / failed</td></tr>
+    <tr><td class="key">total_rows / loaded_rows / failed_rows</td><td class="type">PositiveIntegerField</td><td>적재 통계</td></tr>
+    <tr><td class="key">error_message</td><td class="type">TextField</td><td>실패 시 오류 메시지</td></tr>
+    <tr><td class="key">started_at / finished_at</td><td class="type">DateTimeField</td><td>배치 시간</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ===================== 4. 레이어 3 ===================== -->
+<h2 id="layer3">4. 레이어 3 — 문제 (5개 테이블)</h2>
+<p><code>JobProblems/</code> (30개 직군 × 200문제 = 5,855개)와 <code>LearningPaths/</code> (클러스터·엣지·메타)를 저장합니다.</p>
+
+<h3>4-1. job_problems (직군 문제)</h3>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>제약</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key pk">id</td><td class="type">BigAutoField</td><td>PK</td><td></td></tr>
+    <tr><td class="key">original_question_id</td><td class="type">PositiveIntegerField</td><td>NOT NULL</td><td>파일 내 1~200 번호</td></tr>
+    <tr><td class="key">job_role</td><td class="type">CharField(100)</td><td>NOT NULL</td><td>예) AI Engineer, Backend Engineer</td></tr>
+    <tr><td class="key">difficulty</td><td class="type">CharField(20)</td><td>NOT NULL</td><td>university_level / junior_level / middle_level / senior_level</td></tr>
+    <tr><td class="key">question_type</td><td class="type">CharField(20)</td><td>nullable</td><td>definition / application / debugging / design / analysis / coding</td></tr>
+    <tr><td class="key">category / subcategory</td><td class="type">CharField(100)</td><td></td><td>예) Machine Learning / Evaluation</td></tr>
+    <tr><td class="key">skills_required</td><td class="type">JSONField</td><td>NOT NULL</td><td>예) ["Metrics", "ROC AUC"]</td></tr>
+    <tr><td class="key">scenario</td><td class="type">TextField</td><td>nullable</td><td>문제 상황 설명</td></tr>
+    <tr><td class="key">question</td><td class="type">TextField</td><td>NOT NULL</td><td>문제 본문</td></tr>
+    <tr><td class="key">choices</td><td class="type">JSONField</td><td>NOT NULL</td><td>객관식 선택지 배열</td></tr>
+    <tr><td class="key">correct_answer</td><td class="type">CharField(300)</td><td>NOT NULL</td><td>정답 문자열</td></tr>
+    <tr><td class="key">explanation</td><td class="type">TextField</td><td>nullable</td><td>해설</td></tr>
+    <tr><td class="key">total_attempts / correct_count</td><td class="type">PositiveIntegerField</td><td>default=0</td><td>풀이 통계 (자동 갱신)</td></tr>
+    <tr><td class="key">avg_correct_rate</td><td class="type">FloatField</td><td>nullable</td><td>전체 정답률 (%)</td></tr>
+  </tbody>
+</table>
+<p>유니크: <code>(job_role, original_question_id)</code> &nbsp; 인덱스: <span class="index-tag">idx_jp_job_role</span> <span class="index-tag">idx_jp_difficulty</span> <span class="index-tag">idx_jp_category</span> <span class="index-tag">idx_jp_qtype</span></p>
+
+<h3>4-2. job_problem_clusters (문제 클러스터)</h3>
+<p>같은 category/subcategory로 묶인 문제 그룹. 스킬 갭 분석 및 추천에 활용됩니다.</p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key">job_role</td><td class="type">CharField(100)</td><td></td></tr>
+    <tr><td class="key">cluster_id</td><td class="type">CharField(200)</td><td>예) "Deep Learning__Optimization"</td></tr>
+    <tr><td class="key">category / subcategory</td><td class="type">CharField(100)</td><td></td></tr>
+    <tr><td class="key">size</td><td class="type">PositiveSmallIntegerField</td><td>클러스터 내 문제 수</td></tr>
+    <tr><td class="key">question_ids</td><td class="type">JSONField</td><td>original_question_id 배열</td></tr>
+    <tr><td class="key">common_skills</td><td class="type">JSONField</td><td>공통 스킬 태그 배열</td></tr>
+    <tr><td class="key">skill_weight / scenario_weight</td><td class="type">FloatField</td><td>LearningPath 생성 파라미터</td></tr>
+  </tbody>
+</table>
+<p>유니크: <code>(job_role, cluster_id)</code> &nbsp; 인덱스: <span class="index-tag">idx_jpc_job_role</span> <span class="index-tag">idx_jpc_category</span></p>
+
+<h3>4-3. problem_edges (선수과목 관계 그래프)</h3>
+<p>문제 A → 문제 B: A를 먼저 풀어야 B를 잘 풀 수 있는 방향성 엣지.</p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key">job_role</td><td class="type">CharField(100)</td><td></td></tr>
+    <tr><td class="key fk">source_problem_id</td><td class="type">ForeignKey</td><td>FK→job_problems (선수 문제)</td></tr>
+    <tr><td class="key fk">target_problem_id</td><td class="type">ForeignKey</td><td>FK→job_problems (후속 문제)</td></tr>
+    <tr><td class="key">combined_score</td><td class="type">FloatField</td><td>스킬+시나리오 가중 합산 점수</td></tr>
+    <tr><td class="key">skill_overlap</td><td class="type">FloatField</td><td>스킬 겹침 정도 0~1</td></tr>
+    <tr><td class="key">scenario_similarity</td><td class="type">FloatField</td><td>시나리오 유사도 0~1</td></tr>
+    <tr><td class="key">is_prerequisite</td><td class="type">BooleanField</td><td>True=선수과목 관계</td></tr>
+  </tbody>
+</table>
+<p>유니크: <code>(source_problem, target_problem)</code> &nbsp; 인덱스: <span class="index-tag">idx_pe_job_role</span> <span class="index-tag">idx_pe_prereq</span> <span class="index-tag">idx_pe_score</span> <span class="index-tag">idx_pe_target</span></p>
+
+<h3>4-4. learning_path_meta (학습 경로 메타)</h3>
+<p>직군별 LearningPath 생성 메타 정보. 30개 직군 × 1행.</p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key">job_role</td><td class="type">CharField(100)</td><td>UNIQUE</td></tr>
+    <tr><td class="key">source_file</td><td class="type">CharField(200)</td><td>원본 JSON 파일명</td></tr>
+    <tr><td class="key">total_problems / cluster_count / edge_count</td><td class="type">PositiveSmallIntegerField</td><td>통계</td></tr>
+    <tr><td class="key">isolated_problem_count</td><td class="type">PositiveSmallIntegerField</td><td>독립 문제(클러스터 미소속) 수</td></tr>
+    <tr><td class="key">difficulty_distribution</td><td class="type">JSONField</td><td>{university_level:25, junior_level:25, ...}</td></tr>
+    <tr><td class="key">skill_weight / scenario_weight</td><td class="type">FloatField</td><td>그래프 생성 파라미터</td></tr>
+  </tbody>
+</table>
+
+<h3>4-5. job_problem_solve_history (자체 문제 풀이 이력)</h3>
+<p>외부 플랫폼(solve_history)과 별도로 ELAW 자체 문제 풀이를 기록합니다.<br>
+<strong>save() 호출 시 job_problems의 total_attempts, correct_count, avg_correct_rate를 자동 갱신합니다.</strong></p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key fk">user_id</td><td class="type">ForeignKey</td><td>FK→users</td></tr>
+    <tr><td class="key fk">problem_id</td><td class="type">ForeignKey</td><td>FK→job_problems</td></tr>
+    <tr><td class="key fk">from_recommendation_id</td><td class="type">ForeignKey</td><td>FK→problem_recommendations (nullable)</td></tr>
+    <tr><td class="key">status</td><td class="type">CharField(10)</td><td>correct / incorrect / skipped</td></tr>
+    <tr><td class="key">selected_answer</td><td class="type">CharField(300)</td><td>사용자 선택 답</td></tr>
+    <tr><td class="key">time_spent_sec</td><td class="type">PositiveSmallIntegerField</td><td>풀이 소요 시간(초)</td></tr>
+    <tr><td class="key">solved_at</td><td class="type">DateTimeField</td><td>auto_now_add</td></tr>
+  </tbody>
+</table>
+<p>인덱스: <span class="index-tag">idx_jpsh_user_time</span> <span class="index-tag">idx_jpsh_user_status</span> <span class="index-tag">idx_jpsh_problem</span></p>
+
+
+<!-- ===================== 5. 레이어 4 ===================== -->
+<h2 id="layer4">5. 레이어 4 — 추천·갭·포트폴리오 (4개 테이블)</h2>
+
+<h3>5-1. skill_gaps (스킬 갭 분석)</h3>
+<p>사용자 현재 역량(learning_stats)과 채용공고 요구 수준(job_postings)의 차이를 수치화합니다.</p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key fk">user_id</td><td class="type">ForeignKey</td><td>FK→users</td></tr>
+    <tr><td class="key fk">posting_id</td><td class="type">ForeignKey</td><td>FK→job_postings (nullable)</td></tr>
+    <tr><td class="key">skill_name</td><td class="type">CharField(100)</td><td>예) Python, DP, 그래프</td></tr>
+    <tr><td class="key">skill_category</td><td class="type">CharField(30)</td><td>language / algo_tag / framework</td></tr>
+    <tr><td class="key">current_level</td><td class="type">FloatField</td><td>현재 역량 0~100</td></tr>
+    <tr><td class="key">required_level</td><td class="type">FloatField</td><td>공고 요구 수준 0~100</td></tr>
+    <tr><td class="key">gap_score</td><td class="type">FloatField</td><td>required - current (음수=충분)</td></tr>
+    <tr><td class="key">recommended_problem_ids</td><td class="type">JSONField</td><td>갭을 채울 추천 문제 ID 목록</td></tr>
+    <tr><td class="key">calculation_method</td><td class="type">CharField(50)</td><td>rule_based / model_based</td></tr>
+  </tbody>
+</table>
+<p>유니크: <code>(user, posting, skill_name)</code></p>
+
+<h3>5-2. problem_recommendations (문제 추천)</h3>
+<p>스킬 갭을 채우기 위해 추천된 문제 1건. 추천 이후 풀이 이력과 연결됩니다.</p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key fk">user_id</td><td class="type">ForeignKey</td><td>FK→users</td></tr>
+    <tr><td class="key fk">posting_id</td><td class="type">ForeignKey</td><td>FK→job_postings (nullable)</td></tr>
+    <tr><td class="key fk">skill_gap_id</td><td class="type">ForeignKey</td><td>FK→skill_gaps (nullable)</td></tr>
+    <tr><td class="key">problem_id</td><td class="type">CharField(100)</td><td>플랫폼 내 문제 ID</td></tr>
+    <tr><td class="key">platform</td><td class="type">CharField(20)</td><td>baekjoon / programmers / leetcode</td></tr>
+    <tr><td class="key">title / algo_tags / difficulty</td><td class="type">CharField/JSONField</td><td>문제 메타정보</td></tr>
+    <tr><td class="key">relevance_score</td><td class="type">FloatField</td><td>추천 관련성 점수 0~1</td></tr>
+    <tr><td class="key">reason</td><td class="type">TextField</td><td>추천 이유 텍스트</td></tr>
+    <tr><td class="key">status</td><td class="type">CharField(10)</td><td>pending / solved / skipped</td></tr>
+    <tr><td class="key">recommended_at / solved_at</td><td class="type">DateTimeField</td><td></td></tr>
+  </tbody>
+</table>
+<p>유니크: <code>(user, platform, problem_id, posting)</code></p>
+
+<h3>5-3. portfolio_snapshots (포트폴리오 버전)</h3>
+<p>AI가 생성한 포트폴리오의 각 버전. is_final=True인 버전이 사용자에게 표시됩니다.</p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key fk">portfolio_id</td><td class="type">ForeignKey</td><td>FK→portfolios</td></tr>
+    <tr><td class="key fk">user_id</td><td class="type">ForeignKey</td><td>FK→users</td></tr>
+    <tr><td class="key fk">posting_id</td><td class="type">ForeignKey</td><td>FK→job_postings (nullable)</td></tr>
+    <tr><td class="key">structured_resume / skill_analysis / problem_history</td><td class="type">JSONField</td><td>생성 당시 입력 데이터 스냅샷</td></tr>
+    <tr><td class="key">generated_content</td><td class="type">JSONField</td><td>섹션별 생성 결과</td></tr>
+    <tr><td class="key">generation_method</td><td class="type">CharField(20)</td><td>gemini / model_v1 / model_v2 / manual</td></tr>
+    <tr><td class="key">generation_prompt</td><td class="type">TextField</td><td>재현·개선용 프롬프트 보관</td></tr>
+    <tr><td class="key">version</td><td class="type">PositiveSmallIntegerField</td><td>버전 번호</td></tr>
+    <tr><td class="key">is_final</td><td class="type">BooleanField</td><td>현재 표시 버전 여부</td></tr>
+    <tr><td class="key">quality_score</td><td class="type">FloatField</td><td>자동 품질 평가 점수</td></tr>
+  </tbody>
+</table>
+
+<h3>5-4. portfolio_feedback (RLHF 피드백)</h3>
+<p>사용자가 포트폴리오 스냅샷에 남긴 피드백. used_for_training=True 데이터로 모델을 재학습합니다.</p>
+<table>
+  <thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td class="key fk">snapshot_id</td><td class="type">ForeignKey</td><td>FK→portfolio_snapshots</td></tr>
+    <tr><td class="key fk">user_id</td><td class="type">ForeignKey</td><td>FK→users</td></tr>
+    <tr><td class="key">rating</td><td class="type">IntegerField</td><td>1(매우불만족) ~ 5(매우만족)</td></tr>
+    <tr><td class="key">feedback_text</td><td class="type">TextField</td><td>자유 텍스트</td></tr>
+    <tr><td class="key">edited_content</td><td class="type">JSONField</td><td>사용자 수정 내용 (원본 비교용)</td></tr>
+    <tr><td class="key">rlhf_labels</td><td class="type">JSONField</td><td>{overall, relevance, completeness, preferred_sections, edit_distance}</td></tr>
+    <tr><td class="key">used_for_training</td><td class="type">BooleanField</td><td>모델 재학습 사용 여부</td></tr>
+    <tr><td class="key">training_batch_id</td><td class="type">CharField(100)</td><td>학습 배치 식별자</td></tr>
+  </tbody>
+</table>
+<p>유니크: <code>(snapshot, user)</code></p>
+
+
+<!-- ===================== 6. 관계도 ===================== -->
+<h2 id="relations">6. 테이블 관계도 (ERD 요약)</h2>
+<pre><code>
+users ──────────────┬── companies (1:1)
+  │                 ├── platform_links (1:N)
+  │                 ├── user_goals (1:N)
+  │                 │     └── curricula (1:N)
+  │                 ├── solve_history (1:N)
+  │                 ├── learning_stats (1:N)
+  │                 ├── portfolios (1:N)
+  │                 │     └── portfolio_snapshots (1:N)
+  │                 │           └── portfolio_feedback (1:N)
+  │                 ├── matches (1:N) ─────────── job_postings (N:1)
+  │                 ├── skill_gaps (1:N) ──────── job_postings (N:1)
+  │                 ├── problem_recommendations (1:N)
+  │                 │     ├── job_postings (N:1)
+  │                 │     └── skill_gaps (N:1)
+  │                 ├── job_problem_solve_history (1:N)
+  │                 │     ├── job_problems (N:1)
+  │                 │     └── problem_recommendations (N:1)
+  │                 └── ai_logs (1:N)
+  │
+job_postings ───────── companies (N:1)
+  └── dataset_job_descriptions (1:N)
+
+job_problems ──────── problem_edges (source N:1, target N:1)
+  └── job_problem_clusters (via question_ids JSON)
+
+dataset_entries ──── dataset_resumes (1:1)
+  └── dataset_job_descriptions (1:1)
+        └── dataset_match_scores (resume N:1, jd N:1)
+</code></pre>
+
+
+<!-- ===================== 7. 데이터 흐름 ===================== -->
+<h2 id="dataflow">7. 데이터 흐름</h2>
+
+<h3>7-1. 문제 데이터 적재 흐름</h3>
+<div class="flow-box">
+  <div class="flow-step"><div class="flow-num">1</div><div><strong>JobProblems/ JSON 파일</strong> (30개 직군 × 200문제) → <code>job_problems</code> 테이블 5,855건 적재</div></div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-step"><div class="flow-num">2</div><div><strong>LearningPaths/ JSON 파일</strong> → <code>job_problem_clusters</code> (5,214건), <code>problem_edges</code> (5,205건), <code>learning_path_meta</code> (30건) 적재</div></div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-step"><div class="flow-num">3</div><div><strong>사용자 문제 풀이</strong> → <code>job_problem_solve_history</code> 저장 → <code>job_problems</code> 통계 자동 갱신</div></div>
+</div>
+
+<h3>7-2. 학습 분석 흐름</h3>
+<div class="flow-box">
+  <div class="flow-step"><div class="flow-num">1</div><div><code>sync_platforms</code> → 백준·GitHub API → <code>solve_history</code> 동기화</div></div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-step"><div class="flow-num">2</div><div><code>solve_history</code> 집계 → <code>learning_stats</code> (언어별·태그별 정답률) 갱신</div></div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-step"><div class="flow-num">3</div><div><code>learning_stats</code> + <code>job_postings.required_skills</code> 비교 → <code>skill_gaps</code> 생성</div></div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-step"><div class="flow-num">4</div><div><code>skill_gaps</code> + <code>problem_edges</code> (선수과목) → <code>problem_recommendations</code> 생성</div></div>
+</div>
+
+<h3>7-3. 포트폴리오 생성 및 RLHF 흐름</h3>
+<div class="flow-box">
+  <div class="flow-step"><div class="flow-num">1</div><div><code>dataset_resumes</code>(구조화 이력서) + <code>skill_gaps</code> + <code>solve_history</code> 요약 → Gemini API 입력</div></div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-step"><div class="flow-num">2</div><div>Gemini 응답 → <code>portfolio_snapshots</code> 저장 (v1, is_final=True)</div></div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-step"><div class="flow-num">3</div><div>사용자 피드백 → <code>portfolio_feedback</code> 저장 (rlhf_labels 포함)</div></div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-step"><div class="flow-num">4</div><div><code>used_for_training=True</code> 데이터 축적 → 자체 모델 재학습 (model_v1 → model_v2)</div></div>
+</div>
+
+<h3>7-4. 매칭 흐름</h3>
+<div class="flow-box">
+  <div class="flow-step"><div class="flow-num">1</div><div><code>dataset_entries</code> (HuggingFace) → Gemini 파싱 → <code>dataset_resumes</code> + <code>dataset_job_descriptions</code></div></div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-step"><div class="flow-num">2</div><div>이력서·공고 쌍 매칭 → <code>dataset_match_scores</code> (AI 학습 레이블)</div></div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-step"><div class="flow-num">3</div><div>실사용자 <code>portfolios</code> + 기업 <code>job_postings</code> → AI 매칭 → <code>matches</code></div></div>
+</div>
+
+
+<!-- ===================== 8. 마이그레이션 ===================== -->
+<h2 id="migrations">8. 마이그레이션 히스토리</h2>
+<table>
+  <thead><tr><th>#</th><th>파일명</th><th>적용일</th><th>내용</th></tr></thead>
+  <tbody>
+    <tr><td>0001</td><td><code>0001_initial.py</code></td><td>초기</td><td>기본 도메인 12개 테이블 생성</td></tr>
+    <tr><td>0002</td><td><code>0002_user_is_staff_...</code></td><td></td><td>User 모델에 is_staff, is_superuser 필드 추가</td></tr>
+    <tr><td>0003</td><td><code>0003_dataset_tables.py</code></td><td></td><td>데이터셋 5개 테이블 추가 (수동 작성)</td></tr>
+    <tr><td>0004</td><td><code>0004_merge_20260421.py</code></td><td>2026-04-21</td><td>0002·0003 병합 마이그레이션</td></tr>
+    <tr><td>0005</td><td><code>0005_alter_datasetentry_...</code></td><td>2026-04-27</td><td>문제 5개 테이블 추가, 데이터셋 필드 수정</td></tr>
+    <tr><td>0006</td><td><code>0006_portfoliosnapshot_...</code></td><td>2026-04-27</td><td>추천·갭·포트폴리오 4개 테이블 추가, from_recommendation 필드 복구</td></tr>
+  </tbody>
+</table>
+
+<div class="info-box ok">마이그레이션 전체 적용 완료 (0006까지). <code>python manage.py showmigrations core</code>로 확인 가능.</div>
+
+
+<!-- ===================== 9. 관리 커맨드 ===================== -->
+<h2 id="commands">9. 관리 커맨드</h2>
+
+<h3>load_problems — 문제 데이터 적재</h3>
+<div class="cmd-box">
+<span class="cmd-comment"># 전체 적재</span><br>
+python manage.py load_problems --problems_dir ./DB/JobProblems --paths_dir ./DB/LearningPaths<br><br>
+<span class="cmd-comment"># 초기화 후 재적재</span><br>
+python manage.py load_problems --problems_dir ./DB/JobProblems --paths_dir ./DB/LearningPaths --reset<br><br>
+<span class="cmd-comment"># 특정 직군만</span><br>
+python manage.py load_problems --problems_dir ./DB/JobProblems --job_role "AI Engineer"
+</div>
+
+<h3>load_dataset — HuggingFace 데이터셋 적재</h3>
+<div class="cmd-box">
+<span class="cmd-comment"># 전체 2,640건</span><br>
+python manage.py load_dataset<br><br>
+<span class="cmd-comment"># 처음 100건만</span><br>
+python manage.py load_dataset --limit 100<br><br>
+<span class="cmd-comment"># 적재 후 Gemini로 파싱 (최대 50건)</span><br>
+python manage.py load_dataset --parse<br><br>
+<span class="cmd-comment"># 특정 기업·경력 필터</span><br>
+python manage.py load_dataset --company Google --level junior
+</div>
+
+<h3>seed_all — 테스트 시드 데이터</h3>
+<div class="cmd-box">
+python manage.py seed_all<br>
+<span class="cmd-comment"># 학생 10명, 기업 3개, 채용공고 6개, 풀이이력·통계·매칭 등 전체 생성</span>
+</div>
+
+<h3>sync_platforms — 외부 플랫폼 동기화</h3>
+<div class="cmd-box">
+python manage.py sync_platforms
+</div>
+
+<div class="info-box warn">모든 커맨드는 가상환경 활성화 후 실행해야 합니다: <code>.\venv\Scripts\Activate.ps1</code></div>
+
+
+<!-- ===================== 10. API ===================== -->
+<h2 id="api">10. DB 조회 API</h2>
+<p>모든 엔드포인트는 JWT 인증이 필요합니다 (<code>Authorization: Bearer &lt;token&gt;</code>).</p>
+<table>
+  <thead><tr><th>메서드</th><th>URL</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td>GET</td><td><code>/api/db/users/</code></td><td>전체 사용자 목록</td></tr>
+    <tr><td>GET</td><td><code>/api/db/companies/</code></td><td>기업 목록</td></tr>
+    <tr><td>GET</td><td><code>/api/db/platform-links/</code></td><td>플랫폼 연동 목록</td></tr>
+    <tr><td>GET</td><td><code>/api/db/user-goals/</code></td><td>학습 목표 목록</td></tr>
+    <tr><td>GET</td><td><code>/api/db/curricula/</code></td><td>커리큘럼 목록</td></tr>
+    <tr><td>GET</td><td><code>/api/db/solve-history/</code></td><td>외부 플랫폼 풀이 이력</td></tr>
+    <tr><td>GET</td><td><code>/api/db/learning-stats/</code></td><td>학습 통계</td></tr>
+    <tr><td>GET</td><td><code>/api/db/portfolios/</code></td><td>포트폴리오 목록</td></tr>
+    <tr><td>GET</td><td><code>/api/db/job-postings/</code></td><td>채용공고 목록</td></tr>
+    <tr><td>GET</td><td><code>/api/db/matches/</code></td><td>매칭 결과 목록</td></tr>
+    <tr><td>GET</td><td><code>/api/db/posts/</code></td><td>게시글 목록</td></tr>
+    <tr><td>GET</td><td><code>/api/db/ai-logs/</code></td><td>AI 호출 로그</td></tr>
+    <tr><td>GET</td><td><code>/api/db/summary/</code></td><td>전체 26개 테이블 건수 요약</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ===================== 11. 환경 설정 ===================== -->
+<h2 id="settings">11. 환경 설정</h2>
+
+<h3>현재 (개발)</h3>
+<pre><code>DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}</code></pre>
+
+<h3>운영 전환 시 (MySQL)</h3>
+<pre><code>DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '3306'),
+        'OPTIONS': {'charset': 'utf8mb4'},
+    }
+}</code></pre>
+
+<h3>필수 환경변수 (.env)</h3>
+<table>
+  <thead><tr><th>변수명</th><th>용도</th><th>필수</th></tr></thead>
+  <tbody>
+    <tr><td><code>GEMINI_API_KEY</code></td><td>커리큘럼·포트폴리오·데이터셋 파싱 AI</td><td>운영 필수</td></tr>
+    <tr><td><code>GITHUB_TOKEN</code></td><td>GitHub API ETL (sync_platforms)</td><td>선택</td></tr>
+    <tr><td><code>DB_NAME / DB_USER / DB_PASSWORD / DB_HOST</code></td><td>MySQL 연결 정보</td><td>MySQL 전환 시</td></tr>
+    <tr><td><code>SECRET_KEY</code></td><td>Django 보안 키</td><td>운영 필수</td></tr>
+  </tbody>
+</table>
+
+<div class="info-box warn">
+  <strong>운영 배포 전 필수 조치:</strong> SECRET_KEY를 50자 이상 랜덤 값으로 교체, DEBUG=False 설정, ALLOWED_HOSTS에 도메인 명시, CORS_ALLOW_ALL_ORIGINS=False 설정.
+</div>
+
+
+<!-- ===================== 12. 현재 데이터 현황 ===================== -->
+<h2 id="current">12. 현재 데이터 현황 (2026-04-27 기준)</h2>
+
+<div class="summary-grid">
+  <div class="summary-card"><div class="count">5,855</div><div class="label">직군 문제</div><div class="table-name">job_problems</div></div>
+  <div class="summary-card"><div class="count">5,214</div><div class="label">문제 클러스터</div><div class="table-name">job_problem_clusters</div></div>
+  <div class="summary-card"><div class="count">5,205</div><div class="label">선수과목 엣지</div><div class="table-name">problem_edges</div></div>
+  <div class="summary-card"><div class="count">30</div><div class="label">학습경로 메타</div><div class="table-name">learning_path_meta</div></div>
+  <div class="summary-card"><div class="count">1,320</div><div class="label">데이터셋 항목</div><div class="table-name">dataset_entries</div></div>
+  <div class="summary-card"><div class="count">2</div><div class="label">적재 이력</div><div class="table-name">dataset_load_history</div></div>
+  <div class="summary-card"><div class="count">0</div><div class="label">일반 사용자</div><div class="table-name">users (seed 전)</div></div>
+  <div class="summary-card"><div class="count">0</div><div class="label">파싱된 이력서</div><div class="table-name">dataset_resumes (파싱 전)</div></div>
+</div>
+
+<div class="info-box info">
+  <strong>다음 적재 단계:</strong><br>
+  1. <code>python manage.py load_dataset --parse</code> — HuggingFace 나머지 1,320건 적재 + Gemini 파싱<br>
+  2. <code>python manage.py seed_all</code> — 테스트 사용자 및 기초 데이터 생성
+</div>
+
+<hr style="margin: 60px 0 20px; border: none; border-top: 1px solid var(--gray-200);">
+<p style="font-size: 12px; color: var(--gray-600); text-align: center;">
+  ELAW DB 설계 문서 &nbsp;|&nbsp; Django 6.0.4 / SQLite3 (개발) / MySQL 8.0 (운영 예정) &nbsp;|&nbsp; 최종 수정 2026-04-27
+</p>
+
+</body>
+</html>

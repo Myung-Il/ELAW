@@ -275,17 +275,43 @@ class DBSummaryView(APIView):
         from core.models import (User, Company, PlatformLink, UserGoal,
                                   Curriculum, SolveHistory, LearningStats,
                                   Portfolio, JobPosting, Match, Post, AiLog)
+        from core.models_dataset import (DatasetEntry, DatasetResume,
+                                          DatasetJobDescription, DatasetMatchScore,
+                                          DatasetLoadHistory)
+        from core.models_problems import (JobProblem, JobProblemCluster,
+                                           ProblemEdge, LearningPathMeta,
+                                           JobProblemSolveHistory)
+        from core.models_new import (SkillGap, ProblemRecommendation,
+                                      PortfolioSnapshot, PortfolioFeedback)
         return Response({
-            'users':          User.objects.count(),
-            'companies':      Company.objects.count(),
-            'platform_links': PlatformLink.objects.count(),
-            'user_goals':     UserGoal.objects.count(),
-            'curricula':      Curriculum.objects.count(),
-            'solve_history':  SolveHistory.objects.count(),
-            'learning_stats': LearningStats.objects.count(),
-            'portfolios':     Portfolio.objects.count(),
-            'job_postings':   JobPosting.objects.count(),
-            'matches':        Match.objects.count(),
-            'posts':          Post.objects.count(),
-            'ai_logs':        AiLog.objects.count(),
+            # 기본 12개
+            'users':                   User.objects.count(),
+            'companies':               Company.objects.count(),
+            'platform_links':          PlatformLink.objects.count(),
+            'user_goals':              UserGoal.objects.count(),
+            'curricula':               Curriculum.objects.count(),
+            'solve_history':           SolveHistory.objects.count(),
+            'learning_stats':          LearningStats.objects.count(),
+            'portfolios':              Portfolio.objects.count(),
+            'job_postings':            JobPosting.objects.count(),
+            'matches':                 Match.objects.count(),
+            'posts':                   Post.objects.count(),
+            'ai_logs':                 AiLog.objects.count(),
+            # 데이터셋 5개
+            'dataset_entries':         DatasetEntry.objects.count(),
+            'dataset_resumes':         DatasetResume.objects.count(),
+            'dataset_jds':             DatasetJobDescription.objects.count(),
+            'dataset_match_scores':    DatasetMatchScore.objects.count(),
+            'dataset_load_history':    DatasetLoadHistory.objects.count(),
+            # 문제 5개
+            'job_problems':            JobProblem.objects.count(),
+            'job_problem_clusters':    JobProblemCluster.objects.count(),
+            'problem_edges':           ProblemEdge.objects.count(),
+            'learning_path_meta':      LearningPathMeta.objects.count(),
+            'job_problem_solve_history': JobProblemSolveHistory.objects.count(),
+            # 추천·갭·포트폴리오 4개
+            'skill_gaps':              SkillGap.objects.count(),
+            'problem_recommendations': ProblemRecommendation.objects.count(),
+            'portfolio_snapshots':     PortfolioSnapshot.objects.count(),
+            'portfolio_feedback':      PortfolioFeedback.objects.count(),
         })
