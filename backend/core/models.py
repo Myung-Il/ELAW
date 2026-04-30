@@ -469,3 +469,6 @@ class AiLog(models.Model):
     def __str__(self):
         user_str = self.user.name if self.user else 'SYSTEM'
         return f"[{self.feature}] {user_str} — {self.status} ({self.latency_ms}ms)"
+
+
+from core.models_register import *  # noqa: F401, F403

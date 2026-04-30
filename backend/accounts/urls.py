@@ -1,12 +1,24 @@
+"""
+accounts/urls.py
+"""
+
 from django.urls import path
-from .views import SignupView, ProfileView
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .views import (
+    SignupView,
+    PlatformLinkView,
+    PlatformSyncView,
+    PlatformStatusView,
+)
 
 urlpatterns = [
-    # /signup/ 이라는 주소로 오면 SignupView 창구가 응답하도록 연결합니다.
-    path('signup/', SignupView.as_view(), name='signup'),
+    # 인증
+    path("signup/",       SignupView.as_view(),          name="signup"),
+    path("login/",        TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("token/refresh/",TokenRefreshView.as_view(),    name="token_refresh"),
 
-    path('login/', TokenObtainPairView.as_view(), name='login'),
-
-    path('profile/', ProfileView.as_view(), name='profile'),
+    # 플랫폼 연동
+    path("platform/",        PlatformLinkView.as_view(),   name="platform_link"),
+    path("platform/sync/",   PlatformSyncView.as_view(),   name="platform_sync"),
+    path("platform/status/", PlatformStatusView.as_view(), name="platform_status"),
 ]

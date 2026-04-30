@@ -1,28 +1,30 @@
+"""
+accounts/serializers.py
+"""
+
 from rest_framework import serializers
-from core.models import User
+from core.models import User, PlatformLink
+
 
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=8)
 
     class Meta:
-        model = User
-        # 2. fields 목록에 'username' 추가
-        fields = [
-            'id', 'email', 'name', 'password'
-        ]
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
+        model  = User
+        fields = ["id", "email", "password", "name", "role",
+                  "phone", "ai_consent", "privacy_consent"]
+        read_only_fields = ["id"]
 
     def create(self, validated_data):
-        # 1. 꼼수 없이 깔끔하게 비밀번호만 따로 빼냅니다.
-        password = validated_data.pop('password', None)
-
-        # 2. 남은 데이터(이메일, 이름)로 유저를 만듭니다.
-        user = self.Meta.model(**validated_data)
-
-        # 3. 비밀번호는 장고의 안전한 암호화 시스템을 거쳐서 저장합니다.
-        if password is not None:
-            user.set_password(password)
-
+        password = validated_data.pop("password")
+        user = User(**validated_data)
+        user.set_password(password)
         user.save()
         return user
+
+
+class PlatformLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = PlatformLink
+        fields = ["id", "platform", "external_id", "last_synced", "is_active", "created_at"]
+        read_only_fields = ["id", "last_synced", "created_at"]
