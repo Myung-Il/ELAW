@@ -1,0 +1,230 @@
+### ============================================================
+### 🧪 김건휘 작업 API 테스트
+### 담당: board(게시판) + profile(프로필) + accounts 일부
+###
+### 사용법:
+###   1. python manage.py runserver 로 서버 실행
+###   2. 각 ### 블록 옆 ▶ 버튼 클릭
+###   3. 로그인하면 access 토큰을 변수에 붙여넣기
+###      (PyCharm에서는 자동 저장도 가능)
+### ============================================================
+
+### 환경 변수
+@host = http://127.0.0.1:8000
+@studentToken = 학생_access_토큰_여기에
+@adminToken = 관리자_access_토큰_여기에
+
+
+### ============================================================
+### 1️⃣ 회원가입 / 로그인 (사전 준비)
+### ============================================================
+
+### 1. 학생 계정 회원가입 - 오성환
+POST {{host}}/api/accounts/signup/
+Content-Type: application/json
+
+{
+  "email": "mango2410@mokpo.ac.kr",
+  "password": "elaw1234!",
+  "name": "오성환",
+  "role": "student",
+  "ai_consent": true,
+  "privacy_consent": true
+}
+
+### 2. 학생 로그인 → access 토큰을 @studentToken에 붙여넣기
+POST {{host}}/api/accounts/login/
+Content-Type: application/json
+
+{
+  "email": "mango2410@mokpo.ac.kr",
+  "password": "elaw1234!"
+}
+
+### 3. 관리자 로그인 → access 토큰을 @adminToken에 붙여넣기
+POST {{host}}/api/accounts/login/
+Content-Type: application/json
+
+{
+  "email": "admin@elaw.kr",
+  "password": "본인이_설정한_비밀번호"
+}
+
+
+### ============================================================
+### 2️⃣ 프로필 API 테스트 (내가 만든 것!)
+### ============================================================
+
+### 4. 내 프로필 조회 (학생)
+GET {{host}}/api/accounts/profile/
+Authorization: Bearer {{studentToken}}
+
+### 5. 내 프로필 조회 (관리자)
+GET {{host}}/api/accounts/profile/
+Authorization: Bearer {{adminToken}}
+
+### 6. 내 프로필 수정 - 이름/전화번호 변경
+PATCH {{host}}/api/accounts/profile/
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{
+  "name": "오성환 (수정됨)",
+  "phone": "010-1234-5678"
+}
+
+### 7. 프로필 일부만 수정 - 동의 항목만
+PATCH {{host}}/api/accounts/profile/
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{
+  "ai_consent": true,
+  "privacy_consent": true
+}
+
+### 8. 비로그인으로 프로필 조회 시도 (실패해야 함! 401)
+GET {{host}}/api/accounts/profile/
+
+### 9. email 수정 시도 (read-only 필드라 변경 안 됨)
+PATCH {{host}}/api/accounts/profile/
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{
+  "email": "newemail@test.com"
+}
+
+
+### ============================================================
+### 3️⃣ Board API 테스트 (내가 만든 것!)
+### ============================================================
+
+### 10. 게시글 목록 조회 (비로그인 OK)
+GET {{host}}/api/board/
+
+### 11. 게시글 목록 조회 (로그인 상태)
+GET {{host}}/api/board/
+Authorization: Bearer {{studentToken}}
+
+### 12. 카테고리별 - 공지사항만
+GET {{host}}/api/board/?category=notice
+
+### 13. 카테고리별 - 대회 정보만
+GET {{host}}/api/board/?category=contest
+
+### 14. 카테고리별 - 이벤트만
+GET {{host}}/api/board/?category=event
+
+### 15. 게시글 작성 - 관리자 (성공해야 함)
+POST {{host}}/api/board/
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "category": "notice",
+  "title": "ELAW 플랫폼 첫 공지사항",
+  "content": "안녕하세요!\n\nELAW 플랫폼 board API 테스트 게시글입니다.\n\n공지사항 잘 확인해주세요!",
+  "is_pinned": true
+}
+
+### 16. 게시글 작성 - 카테고리: contest
+POST {{host}}/api/board/
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "category": "contest",
+  "title": "2026 ICPC 한국 지역대회 안내",
+  "content": "ICPC 대회 일정 안내드립니다.\n\n📅 일시: 2026년 가을\n📍 장소: 미정",
+  "is_pinned": false
+}
+
+### 17. 게시글 작성 - 카테고리: event
+POST {{host}}/api/board/
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "category": "event",
+  "title": "여름방학 프로그래밍 캠프 모집",
+  "content": "ELAW 여름 캠프 참가자를 모집합니다!",
+  "is_pinned": false
+}
+
+### 18. 학생 권한으로 글 작성 시도 (실패해야 함! 403)
+POST {{host}}/api/board/
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{
+  "category": "notice",
+  "title": "학생이 작성하려는 글",
+  "content": "이건 권한 에러가 나야 정상"
+}
+
+### 19. 비로그인 글 작성 시도 (실패해야 함! 401)
+POST {{host}}/api/board/
+Content-Type: application/json
+
+{
+  "category": "notice",
+  "title": "비로그인 시도",
+  "content": "이건 인증 에러"
+}
+
+### 20. 잘못된 카테고리 (실패해야 함! 400)
+POST {{host}}/api/board/
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "category": "잘못된카테고리",
+  "title": "테스트",
+  "content": "테스트"
+}
+
+### 21. 게시글 상세 조회 (조회수 +1) - 1번 글
+GET {{host}}/api/board/1/
+
+### 22. 게시글 수정 - 관리자
+PUT {{host}}/api/board/1/
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "수정된 공지사항 제목",
+  "content": "수정된 내용입니다.",
+  "is_pinned": true
+}
+
+### 23. 게시글 수정 - 학생 권한 (실패! 403)
+PUT {{host}}/api/board/1/
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{
+  "title": "학생이 수정하려는 시도"
+}
+
+### 24. 존재하지 않는 게시글 조회 (404)
+GET {{host}}/api/board/9999/
+
+### 25. 게시글 삭제 - 관리자만 가능
+DELETE {{host}}/api/board/1/
+Authorization: Bearer {{adminToken}}
+
+### 26. 게시글 삭제 - 학생 권한 (실패! 403)
+DELETE {{host}}/api/board/2/
+Authorization: Bearer {{studentToken}}
+
+
+### ============================================================
+### 4️⃣ 통합 시나리오 테스트
+### ============================================================
+
+### 시나리오 A: 학생이 가입 → 로그인 → 프로필 확인 → 게시글 보기
+### → 1번 가입 → 2번 로그인 (토큰 복사) → 4번 프로필 → 10번 목록 → 21번 상세
+
+### 시나리오 B: 관리자 로그인 → 글 작성 → 수정 → 삭제
+### → 3번 로그인 (토큰 복사) → 15번 작성 → 22번 수정 → 25번 삭제

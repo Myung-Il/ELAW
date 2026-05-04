@@ -40,6 +40,7 @@ core_urls = [
 urlpatterns = [
     path('admin/',        admin.site.urls),
     path('api/accounts/', include('accounts.urls')),
+    path('api/board/',    include('board.urls')),    # ⭐ 새로 추가!
     path('api/db/',       include((db_urls,   'db'))),
     path('api/core/',     include((core_urls, 'core'))),
 ]
