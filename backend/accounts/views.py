@@ -1,6 +1,7 @@
 """
 accounts/views.py
 - 회원가입 (기존)
+- 프로필 조회/수정 (신규) ⭐
 - 플랫폼 연동 등록: POST /api/accounts/platform/
 - 플랫폼 동기화:   POST /api/accounts/platform/sync/
 - 연동 현황 조회:  GET  /api/accounts/platform/
@@ -10,14 +11,16 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from .serializers import UserSerializer, PlatformLinkSerializer
+from .serializers import UserSerializer, ProfileSerializer, PlatformLinkSerializer
 
 
 # ─────────────────────────────────────────
-# 기존: 회원가입
+# 회원가입
 # ─────────────────────────────────────────
 
 class SignupView(APIView):
+    """POST /api/accounts/signup/"""
+
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -30,7 +33,49 @@ class SignupView(APIView):
 
 
 # ─────────────────────────────────────────
-# 신규: 플랫폼 연동
+# 프로필 조회 / 수정 (신규) ⭐
+# ─────────────────────────────────────────
+
+class ProfileView(APIView):
+    """
+    GET   /api/accounts/profile/  → 내 프로필 조회
+    PATCH /api/accounts/profile/  → 내 프로필 수정 (이름, 전화번호, 동의 항목)
+
+    수정 가능 필드: name, phone, ai_consent, privacy_consent
+    수정 불가 필드: email, role (보안상 보호)
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """내 프로필 조회"""
+        serializer = ProfileSerializer(request.user)
+        return Response({
+            "message": "프로필 조회 성공",
+            "data": serializer.data,
+        }, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        """내 프로필 부분 수정"""
+        serializer = ProfileSerializer(
+            request.user,
+            data=request.data,
+            partial=True,   # 일부 필드만 수정 가능
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "message": "프로필이 수정되었습니다.",
+                "data": serializer.data,
+            }, status=status.HTTP_200_OK)
+
+        return Response({
+            "message": "입력값이 올바르지 않습니다.",
+            "errors": serializer.errors,
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ─────────────────────────────────────────
+# 플랫폼 연동 (기존)
 # ─────────────────────────────────────────
 
 class PlatformLinkView(APIView):
@@ -41,27 +86,16 @@ class PlatformLinkView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        """연동된 플랫폼 목록 반환"""
         from core.models import PlatformLink
         links = PlatformLink.objects.filter(user=request.user)
         serializer = PlatformLinkSerializer(links, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        """
-        플랫폼 아이디 등록 또는 수정.
-
-        요청 예시:
-        {
-            "platform": "baekjoon",    // "baekjoon" | "github" | "programmers"
-            "external_id": "my_handle",
-            "access_token": "ghp_xxxx"  // GitHub PAT (선택)
-        }
-        """
         from core.models import PlatformLink
 
-        platform    = request.data.get("platform")
-        external_id = request.data.get("external_id", "").strip()
+        platform     = request.data.get("platform")
+        external_id  = request.data.get("external_id", "").strip()
         access_token = request.data.get("access_token", None)
 
         # 유효성 검사
@@ -77,7 +111,6 @@ class PlatformLinkView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # 등록 또는 업데이트
         link, created = PlatformLink.objects.update_or_create(
             user     = request.user,
             platform = platform,
@@ -101,15 +134,7 @@ class PlatformLinkView(APIView):
 
 
 class PlatformSyncView(APIView):
-    """
-    POST /api/accounts/platform/sync/
-    → 등록된 플랫폼에서 실제 데이터 수집
-
-    요청 예시:
-    {
-        "platform": "baekjoon"   // 생략 시 연동된 전체 플랫폼 동기화
-    }
-    """
+    """POST /api/accounts/platform/sync/ → 등록된 플랫폼에서 실제 데이터 수집"""
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -117,9 +142,8 @@ class PlatformSyncView(APIView):
         from core.etl.baekjoon_collector import BaekjoonCollector
         from core.etl.github_collector import GitHubCollector
 
-        target_platform = request.data.get("platform", None)  # None = 전체
+        target_platform = request.data.get("platform", None)
 
-        # 동기화할 플랫폼 링크 조회
         qs = PlatformLink.objects.filter(user=request.user, is_active=True)
         if target_platform:
             qs = qs.filter(platform=target_platform)
@@ -137,11 +161,9 @@ class PlatformSyncView(APIView):
             if platform == "baekjoon":
                 collector = BaekjoonCollector(request.user, link)
                 results[platform] = collector.sync()
-
             elif platform == "github":
                 collector = GitHubCollector(request.user, link)
                 results[platform] = collector.sync()
-
             else:
                 results[platform] = {"message": f"{platform} 수집기는 아직 준비 중입니다."}
 
@@ -155,10 +177,7 @@ class PlatformSyncView(APIView):
 
 
 class PlatformStatusView(APIView):
-    """
-    GET /api/accounts/platform/status/
-    → 플랫폼별 수집 현황 요약 (마지막 동기화 시각, 풀이 수 등)
-    """
+    """GET /api/accounts/platform/status/ → 플랫폼별 수집 현황 요약"""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -189,7 +208,7 @@ class PlatformStatusView(APIView):
             ).values("stat_key", "correct_rate").order_by("-correct_rate")[:5]
         )
 
-        # 알고리즘 태그 취약점 Top5 (정답률 낮은 순)
+        # 알고리즘 태그 취약점 Top5
         weak_tags = list(
             LearningStats.objects.filter(
                 user      = request.user,
@@ -199,7 +218,7 @@ class PlatformStatusView(APIView):
         )
 
         return Response({
-            "platforms":  summary,
+            "platforms":     summary,
             "top_languages": lang_stats,
-            "weak_tags":  weak_tags,
+            "weak_tags":     weak_tags,
         })
