@@ -14,7 +14,8 @@
       "PowerShell(Get-Process *)",
       "Bash(npx tsc *)",
       "Bash(node -e \"require\\('clsx'\\); console.log\\('clsx ok'\\)\")",
-      "Bash(node -e \"require\\('tailwind-merge'\\); console.log\\('tw-merge ok'\\)\")"
+      "Bash(node -e \"require\\('tailwind-merge'\\); console.log\\('tw-merge ok'\\)\")",
+      "Bash(dir /s \"C:\\\\Users\\\\융합소프트웨어학과\\\\프로젝트\\\\ELAW\\\\frontend\")"
     ]
   }
 }
