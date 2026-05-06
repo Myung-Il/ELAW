@@ -10,14 +10,20 @@
       "senior_level": 100
     },
     "cluster_count": 196,
-    "edge_count": 87,
-    "isolated_problem_count": 90,
+    "edge_count": 525,
+    "isolated_problem_count": 0,
+    "model_info": {
+      "scenario_similarity": "paraphrase-multilingual-mpnet-base-v2",
+      "skill_similarity": "paraphrase-multilingual-mpnet-base-v2",
+      "device": "cpu",
+      "dl_available": true
+    },
     "parameters": {
-      "skill_weight": 0.6,
-      "scenario_weight": 0.4,
-      "min_combined_score": 0.15,
+      "skill_weight": 0.55,
+      "scenario_weight": 0.45,
+      "min_combined_score": 0.2,
       "max_prereqs_per_target": 3,
-      "same_category_bonus": 0.1
+      "same_category_bonus": 0.08
     }
   },
   "clusters": [
@@ -4609,700 +4615,4204 @@
     ],
     "edges": [
       {
+        "Preceding_ID": 8,
+        "Target_ID": 26,
+        "skill_overlap": 0.5141,
+        "scenario_similarity": 0.6032,
+        "combined_score": 0.5542,
+        "Logic": "스킬 의미 유사도=0.514 (딥러닝) | 시나리오 의미 유사도=0.603 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 26,
+        "skill_overlap": 0.4892,
+        "scenario_similarity": 0.3997,
+        "combined_score": 0.4489,
+        "Logic": "스킬 의미 유사도=0.489 (딥러닝) | 시나리오 의미 유사도=0.400 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 11,
+        "Target_ID": 26,
+        "skill_overlap": 0.4383,
+        "scenario_similarity": 0.4067,
+        "combined_score": 0.4241,
+        "Logic": "스킬 의미 유사도=0.438 (딥러닝) | 시나리오 의미 유사도=0.407 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 11,
+        "Target_ID": 27,
+        "skill_overlap": 0.5143,
+        "scenario_similarity": 0.516,
+        "combined_score": 0.5151,
+        "Logic": "스킬 의미 유사도=0.514 (딥러닝) | 시나리오 의미 유사도=0.516 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 1,
+        "Target_ID": 27,
+        "skill_overlap": 0.4869,
+        "scenario_similarity": 0.4005,
+        "combined_score": 0.448,
+        "Logic": "스킬 의미 유사도=0.487 (딥러닝) | 시나리오 의미 유사도=0.400 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 8,
+        "Target_ID": 27,
+        "skill_overlap": 0.3891,
+        "scenario_similarity": 0.4944,
+        "combined_score": 0.4365,
+        "Logic": "스킬 의미 유사도=0.389 (딥러닝) | 시나리오 의미 유사도=0.494 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 25,
+        "Target_ID": 28,
+        "skill_overlap": 0.7636,
+        "scenario_similarity": 0.3155,
+        "combined_score": 0.562,
+        "Logic": "스킬 의미 유사도=0.764 (딥러닝) | 시나리오 의미 유사도=0.316 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 22,
+        "Target_ID": 28,
+        "skill_overlap": 0.2268,
+        "scenario_similarity": 0.6628,
+        "combined_score": 0.423,
+        "Logic": "스킬 의미 유사도=0.227 (딥러닝) | 시나리오 의미 유사도=0.663 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 4,
+        "Target_ID": 28,
+        "skill_overlap": 0.3388,
+        "scenario_similarity": 0.2368,
+        "combined_score": 0.3729,
+        "Logic": "스킬 의미 유사도=0.339 (딥러닝) | 시나리오 의미 유사도=0.237 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Data Management)"
+      },
+      {
+        "Preceding_ID": 19,
+        "Target_ID": 29,
+        "skill_overlap": 0.3936,
+        "scenario_similarity": 0.3297,
+        "combined_score": 0.3648,
+        "Logic": "스킬 의미 유사도=0.394 (딥러닝) | 시나리오 의미 유사도=0.330 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 20,
+        "Target_ID": 29,
+        "skill_overlap": 0.3793,
+        "scenario_similarity": 0.2207,
+        "combined_score": 0.3079,
+        "Logic": "스킬 의미 유사도=0.379 (딥러닝) | 시나리오 의미 유사도=0.221 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 29,
+        "skill_overlap": 0.3304,
+        "scenario_similarity": 0.2748,
+        "combined_score": 0.3054,
+        "Logic": "스킬 의미 유사도=0.330 (딥러닝) | 시나리오 의미 유사도=0.275 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 8,
+        "Target_ID": 30,
+        "skill_overlap": 0.3204,
+        "scenario_similarity": 0.5063,
+        "combined_score": 0.4841,
+        "Logic": "스킬 의미 유사도=0.320 (딥러닝) | 시나리오 의미 유사도=0.506 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 10,
+        "Target_ID": 30,
+        "skill_overlap": 0.3175,
+        "scenario_similarity": 0.4265,
+        "combined_score": 0.4465,
+        "Logic": "스킬 의미 유사도=0.317 (딥러닝) | 시나리오 의미 유사도=0.426 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 14,
+        "Target_ID": 30,
+        "skill_overlap": 0.3475,
+        "scenario_similarity": 0.3766,
+        "combined_score": 0.4406,
+        "Logic": "스킬 의미 유사도=0.347 (딥러닝) | 시나리오 의미 유사도=0.377 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 11,
+        "Target_ID": 31,
+        "skill_overlap": 0.2889,
+        "scenario_similarity": 0.5622,
+        "combined_score": 0.4119,
+        "Logic": "스킬 의미 유사도=0.289 (딥러닝) | 시나리오 의미 유사도=0.562 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 12,
+        "Target_ID": 31,
+        "skill_overlap": 0.3171,
+        "scenario_similarity": 0.5076,
+        "combined_score": 0.4028,
+        "Logic": "스킬 의미 유사도=0.317 (딥러닝) | 시나리오 의미 유사도=0.508 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 10,
+        "Target_ID": 31,
+        "skill_overlap": 0.314,
+        "scenario_similarity": 0.4701,
+        "combined_score": 0.3842,
+        "Logic": "스킬 의미 유사도=0.314 (딥러닝) | 시나리오 의미 유사도=0.470 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 7,
+        "Target_ID": 32,
+        "skill_overlap": 0.414,
+        "scenario_similarity": 0.4754,
+        "combined_score": 0.4416,
+        "Logic": "스킬 의미 유사도=0.414 (딥러닝) | 시나리오 의미 유사도=0.475 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 2,
+        "Target_ID": 32,
+        "skill_overlap": 0.4812,
+        "scenario_similarity": 0.3012,
+        "combined_score": 0.4002,
+        "Logic": "스킬 의미 유사도=0.481 (딥러닝) | 시나리오 의미 유사도=0.301 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 6,
+        "Target_ID": 32,
+        "skill_overlap": 0.4429,
+        "scenario_similarity": 0.336,
+        "combined_score": 0.3948,
+        "Logic": "스킬 의미 유사도=0.443 (딥러닝) | 시나리오 의미 유사도=0.336 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 33,
+        "skill_overlap": 0.4315,
+        "scenario_similarity": 0.356,
+        "combined_score": 0.4775,
+        "Logic": "스킬 의미 유사도=0.431 (딥러닝) | 시나리오 의미 유사도=0.356 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 24,
+        "Target_ID": 33,
+        "skill_overlap": 0.2656,
+        "scenario_similarity": 0.4336,
+        "combined_score": 0.4212,
+        "Logic": "스킬 의미 유사도=0.266 (딥러닝) | 시나리오 의미 유사도=0.434 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 17,
+        "Target_ID": 33,
+        "skill_overlap": 0.3664,
+        "scenario_similarity": 0.2547,
+        "combined_score": 0.3962,
+        "Logic": "스킬 의미 유사도=0.366 (딥러닝) | 시나리오 의미 유사도=0.255 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 11,
+        "Target_ID": 34,
+        "skill_overlap": 0.497,
+        "scenario_similarity": 0.3218,
+        "combined_score": 0.4182,
+        "Logic": "스킬 의미 유사도=0.497 (딥러닝) | 시나리오 의미 유사도=0.322 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 12,
+        "Target_ID": 34,
+        "skill_overlap": 0.3533,
+        "scenario_similarity": 0.4856,
+        "combined_score": 0.4128,
+        "Logic": "스킬 의미 유사도=0.353 (딥러닝) | 시나리오 의미 유사도=0.486 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 20,
+        "Target_ID": 34,
+        "skill_overlap": 0.5976,
+        "scenario_similarity": 0.1403,
+        "combined_score": 0.3918,
+        "Logic": "스킬 의미 유사도=0.598 (딥러닝) | 시나리오 의미 유사도=0.140 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
         "Preceding_ID": 2,
         "Target_ID": 35,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.3,
-        "Logic": "공통 스킬 ['swift'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 university_level → junior_level | 동일 카테고리(iOS)"
+        "skill_overlap": 0.6754,
+        "scenario_similarity": 0.1942,
+        "combined_score": 0.5389,
+        "Logic": "공통 스킬 ['swift'] (임베딩 유사도=0.675) | 시나리오 의미 유사도=0.194 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(iOS)"
       },
       {
         "Preceding_ID": 7,
         "Target_ID": 35,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.3,
-        "Logic": "공통 스킬 ['swift'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 university_level → junior_level | 동일 카테고리(iOS)"
+        "skill_overlap": 0.6575,
+        "scenario_similarity": 0.189,
+        "combined_score": 0.5267,
+        "Logic": "공통 스킬 ['swift'] (임베딩 유사도=0.658) | 시나리오 의미 유사도=0.189 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(iOS)"
       },
       {
-        "Preceding_ID": 1,
-        "Target_ID": 37,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0238,
-        "combined_score": 0.3095,
-        "Logic": "공통 스킬 ['android'] (Jaccard=0.33) | 시나리오 유사도=0.02 | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+        "Preceding_ID": 15,
+        "Target_ID": 35,
+        "skill_overlap": 0.3927,
+        "scenario_similarity": 0.3774,
+        "combined_score": 0.4658,
+        "Logic": "스킬 의미 유사도=0.393 (딥러닝) | 시나리오 의미 유사도=0.377 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(iOS)"
+      },
+      {
+        "Preceding_ID": 6,
+        "Target_ID": 36,
+        "skill_overlap": 0.4599,
+        "scenario_similarity": 0.3596,
+        "combined_score": 0.4948,
+        "Logic": "스킬 의미 유사도=0.460 (딥러닝) | 시나리오 의미 유사도=0.360 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 14,
+        "Target_ID": 36,
+        "skill_overlap": 0.4443,
+        "scenario_similarity": 0.3022,
+        "combined_score": 0.4603,
+        "Logic": "스킬 의미 유사도=0.444 (딥러닝) | 시나리오 의미 유사도=0.302 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Android)"
       },
       {
         "Preceding_ID": 8,
-        "Target_ID": 37,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.3,
-        "Logic": "공통 스킬 ['android'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+        "Target_ID": 36,
+        "skill_overlap": 0.3671,
+        "scenario_similarity": 0.384,
+        "combined_score": 0.4547,
+        "Logic": "스킬 의미 유사도=0.367 (딥러닝) | 시나리오 의미 유사도=0.384 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Android)"
       },
       {
         "Preceding_ID": 11,
         "Target_ID": 37,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.3,
-        "Logic": "공통 스킬 ['android'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+        "skill_overlap": 0.7104,
+        "scenario_similarity": 0.2416,
+        "combined_score": 0.5794,
+        "Logic": "공통 스킬 ['android'] (임베딩 유사도=0.710) | 시나리오 의미 유사도=0.242 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 1,
+        "Target_ID": 37,
+        "skill_overlap": 0.685,
+        "scenario_similarity": 0.1949,
+        "combined_score": 0.5445,
+        "Logic": "공통 스킬 ['android'] (임베딩 유사도=0.685) | 시나리오 의미 유사도=0.195 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 10,
+        "Target_ID": 37,
+        "skill_overlap": 0.6645,
+        "scenario_similarity": 0.165,
+        "combined_score": 0.5197,
+        "Logic": "스킬 의미 유사도=0.664 (딥러닝) | 시나리오 의미 유사도=0.165 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Android)"
       },
       {
         "Preceding_ID": 18,
         "Target_ID": 38,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0321,
-        "combined_score": 0.2129,
-        "Logic": "공통 스킬 ['api'] (Jaccard=0.33) | 시나리오 유사도=0.03 | 난이도 university_level → junior_level"
+        "skill_overlap": 0.6773,
+        "scenario_similarity": 0.4356,
+        "combined_score": 0.5685,
+        "Logic": "공통 스킬 ['api'] (임베딩 유사도=0.677) | 시나리오 의미 유사도=0.436 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 25,
+        "Target_ID": 38,
+        "skill_overlap": 0.4605,
+        "scenario_similarity": 0.6317,
+        "combined_score": 0.5376,
+        "Logic": "스킬 의미 유사도=0.461 (딥러닝) | 시나리오 의미 유사도=0.632 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 13,
+        "Target_ID": 38,
+        "skill_overlap": 0.5124,
+        "scenario_similarity": 0.5502,
+        "combined_score": 0.5294,
+        "Logic": "스킬 의미 유사도=0.512 (딥러닝) | 시나리오 의미 유사도=0.550 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 19,
+        "Target_ID": 39,
+        "skill_overlap": 0.8596,
+        "scenario_similarity": 0.5587,
+        "combined_score": 0.7242,
+        "Logic": "스킬 의미 유사도=0.860 (딥러닝) | 시나리오 의미 유사도=0.559 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 39,
+        "skill_overlap": 0.3817,
+        "scenario_similarity": 0.5909,
+        "combined_score": 0.4758,
+        "Logic": "스킬 의미 유사도=0.382 (딥러닝) | 시나리오 의미 유사도=0.591 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 5,
+        "Target_ID": 39,
+        "skill_overlap": 0.3508,
+        "scenario_similarity": 0.602,
+        "combined_score": 0.4638,
+        "Logic": "스킬 의미 유사도=0.351 (딥러닝) | 시나리오 의미 유사도=0.602 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 24,
+        "Target_ID": 40,
+        "skill_overlap": 0.4117,
+        "scenario_similarity": 0.7276,
+        "combined_score": 0.5538,
+        "Logic": "스킬 의미 유사도=0.412 (딥러닝) | 시나리오 의미 유사도=0.728 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 18,
+        "Target_ID": 40,
+        "skill_overlap": 0.5449,
+        "scenario_similarity": 0.5532,
+        "combined_score": 0.5487,
+        "Logic": "스킬 의미 유사도=0.545 (딥러닝) | 시나리오 의미 유사도=0.553 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 17,
+        "Target_ID": 40,
+        "skill_overlap": 0.4889,
+        "scenario_similarity": 0.5333,
+        "combined_score": 0.5089,
+        "Logic": "스킬 의미 유사도=0.489 (딥러닝) | 시나리오 의미 유사도=0.533 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 41,
+        "skill_overlap": 0.4298,
+        "scenario_similarity": 0.6826,
+        "combined_score": 0.5436,
+        "Logic": "스킬 의미 유사도=0.430 (딥러닝) | 시나리오 의미 유사도=0.683 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 11,
+        "Target_ID": 41,
+        "skill_overlap": 0.444,
+        "scenario_similarity": 0.4748,
+        "combined_score": 0.5379,
+        "Logic": "스킬 의미 유사도=0.444 (딥러닝) | 시나리오 의미 유사도=0.475 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 41,
+        "skill_overlap": 0.4578,
+        "scenario_similarity": 0.6339,
+        "combined_score": 0.5371,
+        "Logic": "스킬 의미 유사도=0.458 (딥러닝) | 시나리오 의미 유사도=0.634 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 42,
+        "skill_overlap": 0.4888,
+        "scenario_similarity": 0.3958,
+        "combined_score": 0.447,
+        "Logic": "스킬 의미 유사도=0.489 (딥러닝) | 시나리오 의미 유사도=0.396 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 2,
+        "Target_ID": 42,
+        "skill_overlap": 0.4419,
+        "scenario_similarity": 0.2518,
+        "combined_score": 0.4363,
+        "Logic": "스킬 의미 유사도=0.442 (딥러닝) | 시나리오 의미 유사도=0.252 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(iOS)"
+      },
+      {
+        "Preceding_ID": 15,
+        "Target_ID": 42,
+        "skill_overlap": 0.4354,
+        "scenario_similarity": 0.2481,
+        "combined_score": 0.4311,
+        "Logic": "스킬 의미 유사도=0.435 (딥러닝) | 시나리오 의미 유사도=0.248 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(iOS)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 43,
+        "skill_overlap": 0.4227,
+        "scenario_similarity": 0.6595,
+        "combined_score": 0.6093,
+        "Logic": "스킬 의미 유사도=0.423 (딥러닝) | 시나리오 의미 유사도=0.660 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 20,
+        "Target_ID": 43,
+        "skill_overlap": 0.4582,
+        "scenario_similarity": 0.5499,
+        "combined_score": 0.5795,
+        "Logic": "스킬 의미 유사도=0.458 (딥러닝) | 시나리오 의미 유사도=0.550 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 10,
+        "Target_ID": 43,
+        "skill_overlap": 0.5492,
+        "scenario_similarity": 0.5202,
+        "combined_score": 0.5362,
+        "Logic": "스킬 의미 유사도=0.549 (딥러닝) | 시나리오 의미 유사도=0.520 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 44,
+        "skill_overlap": 0.5102,
+        "scenario_similarity": 0.7893,
+        "combined_score": 0.6358,
+        "Logic": "스킬 의미 유사도=0.510 (딥러닝) | 시나리오 의미 유사도=0.789 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 5,
+        "Target_ID": 44,
+        "skill_overlap": 0.3961,
+        "scenario_similarity": 0.7827,
+        "combined_score": 0.57,
+        "Logic": "스킬 의미 유사도=0.396 (딥러닝) | 시나리오 의미 유사도=0.783 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 1,
+        "Target_ID": 44,
+        "skill_overlap": 0.4271,
+        "scenario_similarity": 0.5565,
+        "combined_score": 0.5653,
+        "Logic": "스킬 의미 유사도=0.427 (딥러닝) | 시나리오 의미 유사도=0.557 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 45,
+        "skill_overlap": 0.4743,
+        "scenario_similarity": 0.5243,
+        "combined_score": 0.4968,
+        "Logic": "스킬 의미 유사도=0.474 (딥러닝) | 시나리오 의미 유사도=0.524 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 5,
+        "Target_ID": 45,
+        "skill_overlap": 0.482,
+        "scenario_similarity": 0.5108,
+        "combined_score": 0.495,
+        "Logic": "스킬 의미 유사도=0.482 (딥러닝) | 시나리오 의미 유사도=0.511 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 24,
+        "Target_ID": 45,
+        "skill_overlap": 0.549,
+        "scenario_similarity": 0.3539,
+        "combined_score": 0.4612,
+        "Logic": "스킬 의미 유사도=0.549 (딥러닝) | 시나리오 의미 유사도=0.354 (딥러닝) | 난이도 university_level → junior_level"
       },
       {
         "Preceding_ID": 6,
         "Target_ID": 46,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0891,
-        "combined_score": 0.3356,
-        "Logic": "공통 스킬 ['kotlin'] (Jaccard=0.33) | 시나리오 유사도=0.09 | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+        "skill_overlap": 0.7088,
+        "scenario_similarity": 0.4617,
+        "combined_score": 0.6776,
+        "Logic": "공통 스킬 ['kotlin'] (임베딩 유사도=0.709) | 시나리오 의미 유사도=0.462 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Android)"
       },
       {
-        "Preceding_ID": 8,
+        "Preceding_ID": 3,
         "Target_ID": 46,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.2512,
-        "combined_score": 0.2005,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.25 | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+        "skill_overlap": 0.4262,
+        "scenario_similarity": 0.5449,
+        "combined_score": 0.4796,
+        "Logic": "스킬 의미 유사도=0.426 (딥러닝) | 시나리오 의미 유사도=0.545 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 23,
+        "Target_ID": 46,
+        "skill_overlap": 0.5158,
+        "scenario_similarity": 0.3797,
+        "combined_score": 0.4545,
+        "Logic": "스킬 의미 유사도=0.516 (딥러닝) | 시나리오 의미 유사도=0.380 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 13,
+        "Target_ID": 47,
+        "skill_overlap": 0.4691,
+        "scenario_similarity": 0.333,
+        "combined_score": 0.4878,
+        "Logic": "스킬 의미 유사도=0.469 (딥러닝) | 시나리오 의미 유사도=0.333 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 47,
+        "skill_overlap": 0.3637,
+        "scenario_similarity": 0.4383,
+        "combined_score": 0.4773,
+        "Logic": "스킬 의미 유사도=0.364 (딥러닝) | 시나리오 의미 유사도=0.438 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 7,
+        "Target_ID": 47,
+        "skill_overlap": 0.3447,
+        "scenario_similarity": 0.6231,
+        "combined_score": 0.47,
+        "Logic": "스킬 의미 유사도=0.345 (딥러닝) | 시나리오 의미 유사도=0.623 (딥러닝) | 난이도 university_level → junior_level"
       },
       {
         "Preceding_ID": 14,
         "Target_ID": 48,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.3,
-        "Logic": "공통 스킬 ['intent'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+        "skill_overlap": 0.7201,
+        "scenario_similarity": 0.2653,
+        "combined_score": 0.5955,
+        "Logic": "공통 스킬 ['intent'] (임베딩 유사도=0.720) | 시나리오 의미 유사도=0.265 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 11,
+        "Target_ID": 48,
+        "skill_overlap": 0.583,
+        "scenario_similarity": 0.3735,
+        "combined_score": 0.5687,
+        "Logic": "스킬 의미 유사도=0.583 (딥러닝) | 시나리오 의미 유사도=0.373 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 8,
+        "Target_ID": 48,
+        "skill_overlap": 0.4404,
+        "scenario_similarity": 0.5065,
+        "combined_score": 0.5501,
+        "Logic": "스킬 의미 유사도=0.440 (딥러닝) | 시나리오 의미 유사도=0.506 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 18,
+        "Target_ID": 49,
+        "skill_overlap": 0.6138,
+        "scenario_similarity": 0.209,
+        "combined_score": 0.5116,
+        "Logic": "스킬 의미 유사도=0.614 (딥러닝) | 시나리오 의미 유사도=0.209 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 13,
+        "Target_ID": 49,
+        "skill_overlap": 0.3714,
+        "scenario_similarity": 0.3646,
+        "combined_score": 0.4483,
+        "Logic": "스킬 의미 유사도=0.371 (딥러닝) | 시나리오 의미 유사도=0.365 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 19,
+        "Target_ID": 49,
+        "skill_overlap": 0.4133,
+        "scenario_similarity": 0.1924,
+        "combined_score": 0.3939,
+        "Logic": "스킬 의미 유사도=0.413 (딥러닝) | 시나리오 의미 유사도=0.192 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 13,
+        "Target_ID": 50,
+        "skill_overlap": 0.4851,
+        "scenario_similarity": 0.5344,
+        "combined_score": 0.5873,
+        "Logic": "스킬 의미 유사도=0.485 (딥러닝) | 시나리오 의미 유사도=0.534 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 18,
+        "Target_ID": 50,
+        "skill_overlap": 0.477,
+        "scenario_similarity": 0.3832,
+        "combined_score": 0.5148,
+        "Logic": "스킬 의미 유사도=0.477 (딥러닝) | 시나리오 의미 유사도=0.383 (딥러닝) | 난이도 university_level → junior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 8,
+        "Target_ID": 50,
+        "skill_overlap": 0.4918,
+        "scenario_similarity": 0.446,
+        "combined_score": 0.4712,
+        "Logic": "스킬 의미 유사도=0.492 (딥러닝) | 시나리오 의미 유사도=0.446 (딥러닝) | 난이도 university_level → junior_level"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 51,
+        "skill_overlap": 0.6033,
+        "scenario_similarity": 0.415,
+        "combined_score": 0.5186,
+        "Logic": "스킬 의미 유사도=0.603 (딥러닝) | 시나리오 의미 유사도=0.415 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 17,
+        "Target_ID": 51,
+        "skill_overlap": 0.6548,
+        "scenario_similarity": 0.3177,
+        "combined_score": 0.5031,
+        "Logic": "스킬 의미 유사도=0.655 (딥러닝) | 시나리오 의미 유사도=0.318 (딥러닝) | 난이도 university_level → middle_level"
       },
       {
         "Preceding_ID": 36,
         "Target_ID": 51,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.2,
-        "Logic": "공통 스킬 ['memory leak'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 junior_level → middle_level"
+        "skill_overlap": 0.7614,
+        "scenario_similarity": 0.1678,
+        "combined_score": 0.4943,
+        "Logic": "공통 스킬 ['memory leak'] (임베딩 유사도=0.761) | 시나리오 의미 유사도=0.168 (딥러닝) | 난이도 junior_level → middle_level"
       },
       {
         "Preceding_ID": 26,
         "Target_ID": 52,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.137,
-        "combined_score": 0.3048,
-        "Logic": "공통 스킬 ['retrofit'] (Jaccard=0.25) | 시나리오 유사도=0.14 | 난이도 junior_level → middle_level | 동일 카테고리(Networking)"
+        "skill_overlap": 0.7058,
+        "scenario_similarity": 0.3474,
+        "combined_score": 0.6245,
+        "Logic": "공통 스킬 ['retrofit'] (임베딩 유사도=0.706) | 시나리오 의미 유사도=0.347 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 52,
+        "skill_overlap": 0.5926,
+        "scenario_similarity": 0.4446,
+        "combined_score": 0.606,
+        "Logic": "스킬 의미 유사도=0.593 (딥러닝) | 시나리오 의미 유사도=0.445 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 38,
+        "Target_ID": 52,
+        "skill_overlap": 0.4745,
+        "scenario_similarity": 0.5064,
+        "combined_score": 0.5688,
+        "Logic": "스킬 의미 유사도=0.474 (딥러닝) | 시나리오 의미 유사도=0.506 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 33,
+        "Target_ID": 53,
+        "skill_overlap": 0.6092,
+        "scenario_similarity": 0.4775,
+        "combined_score": 0.55,
+        "Logic": "스킬 의미 유사도=0.609 (딥러닝) | 시나리오 의미 유사도=0.478 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 5,
+        "Target_ID": 53,
+        "skill_overlap": 0.5473,
+        "scenario_similarity": 0.3464,
+        "combined_score": 0.5369,
+        "Logic": "스킬 의미 유사도=0.547 (딥러닝) | 시나리오 의미 유사도=0.346 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(UI Framework)"
+      },
+      {
+        "Preceding_ID": 48,
+        "Target_ID": 53,
+        "skill_overlap": 0.6177,
+        "scenario_similarity": 0.3851,
+        "combined_score": 0.513,
+        "Logic": "스킬 의미 유사도=0.618 (딥러닝) | 시나리오 의미 유사도=0.385 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 54,
+        "skill_overlap": 0.5099,
+        "scenario_similarity": 0.5684,
+        "combined_score": 0.6162,
+        "Logic": "스킬 의미 유사도=0.510 (딥러닝) | 시나리오 의미 유사도=0.568 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 33,
+        "Target_ID": 54,
+        "skill_overlap": 0.4412,
+        "scenario_similarity": 0.5486,
+        "combined_score": 0.5696,
+        "Logic": "스킬 의미 유사도=0.441 (딥러닝) | 시나리오 의미 유사도=0.549 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 23,
+        "Target_ID": 54,
+        "skill_overlap": 0.5335,
+        "scenario_similarity": 0.4871,
+        "combined_score": 0.5126,
+        "Logic": "스킬 의미 유사도=0.533 (딥러닝) | 시나리오 의미 유사도=0.487 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 55,
+        "skill_overlap": 0.5109,
+        "scenario_similarity": 0.3003,
+        "combined_score": 0.4961,
+        "Logic": "스킬 의미 유사도=0.511 (딥러닝) | 시나리오 의미 유사도=0.300 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Networking)"
       },
       {
         "Preceding_ID": 25,
         "Target_ID": 55,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.15,
-        "Logic": "공통 스킬 ['security'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 university_level → middle_level"
+        "skill_overlap": 0.6575,
+        "scenario_similarity": 0.1242,
+        "combined_score": 0.4175,
+        "Logic": "공통 스킬 ['security'] (임베딩 유사도=0.657) | 시나리오 의미 유사도=0.124 (딥러닝) | 난이도 university_level → middle_level"
       },
       {
-        "Preceding_ID": 34,
+        "Preceding_ID": 6,
+        "Target_ID": 55,
+        "skill_overlap": 0.4875,
+        "scenario_similarity": 0.3316,
+        "combined_score": 0.4173,
+        "Logic": "스킬 의미 유사도=0.488 (딥러닝) | 시나리오 의미 유사도=0.332 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 44,
         "Target_ID": 56,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.2,
-        "Logic": "공통 스킬 ['gradle'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 junior_level → middle_level"
+        "skill_overlap": 0.6018,
+        "scenario_similarity": 0.5714,
+        "combined_score": 0.6681,
+        "Logic": "스킬 의미 유사도=0.602 (딥러닝) | 시나리오 의미 유사도=0.571 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 56,
+        "skill_overlap": 0.5881,
+        "scenario_similarity": 0.7154,
+        "combined_score": 0.6454,
+        "Logic": "스킬 의미 유사도=0.588 (딥러닝) | 시나리오 의미 유사도=0.715 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 46,
+        "Target_ID": 56,
+        "skill_overlap": 0.613,
+        "scenario_similarity": 0.368,
+        "combined_score": 0.5828,
+        "Logic": "스킬 의미 유사도=0.613 (딥러닝) | 시나리오 의미 유사도=0.368 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Android)"
       },
       {
         "Preceding_ID": 23,
         "Target_ID": 57,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.25,
-        "Logic": "공통 스킬 ['native'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 university_level → middle_level | 동일 카테고리(Cross-platform)"
+        "skill_overlap": 0.7266,
+        "scenario_similarity": 0.4495,
+        "combined_score": 0.6819,
+        "Logic": "공통 스킬 ['native'] (임베딩 유사도=0.727) | 시나리오 의미 유사도=0.449 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(Cross-platform)"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 57,
+        "skill_overlap": 0.4709,
+        "scenario_similarity": 0.3999,
+        "combined_score": 0.519,
+        "Logic": "스킬 의미 유사도=0.471 (딥러닝) | 시나리오 의미 유사도=0.400 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(Cross-platform)"
+      },
+      {
+        "Preceding_ID": 44,
+        "Target_ID": 57,
+        "skill_overlap": 0.4628,
+        "scenario_similarity": 0.5784,
+        "combined_score": 0.5148,
+        "Logic": "스킬 의미 유사도=0.463 (딥러닝) | 시나리오 의미 유사도=0.578 (딥러닝) | 난이도 junior_level → middle_level"
       },
       {
         "Preceding_ID": 27,
         "Target_ID": 58,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.2649,
-        "combined_score": 0.306,
-        "Logic": "공통 스킬 ['fcm'] (Jaccard=0.33) | 시나리오 유사도=0.26 | 난이도 junior_level → middle_level"
+        "skill_overlap": 0.7127,
+        "scenario_similarity": 0.5275,
+        "combined_score": 0.6293,
+        "Logic": "공통 스킬 ['fcm'] (임베딩 유사도=0.713) | 시나리오 의미 유사도=0.527 (딥러닝) | 난이도 junior_level → middle_level"
       },
       {
-        "Preceding_ID": 6,
-        "Target_ID": 62,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.15,
-        "Logic": "공통 스킬 ['kotlin'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 university_level → middle_level"
+        "Preceding_ID": 50,
+        "Target_ID": 58,
+        "skill_overlap": 0.4803,
+        "scenario_similarity": 0.4441,
+        "combined_score": 0.544,
+        "Logic": "스킬 의미 유사도=0.480 (딥러닝) | 시나리오 의미 유사도=0.444 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 33,
+        "Target_ID": 58,
+        "skill_overlap": 0.6037,
+        "scenario_similarity": 0.2696,
+        "combined_score": 0.5334,
+        "Logic": "스킬 의미 유사도=0.604 (딥러닝) | 시나리오 의미 유사도=0.270 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 27,
+        "Target_ID": 59,
+        "skill_overlap": 0.465,
+        "scenario_similarity": 0.5103,
+        "combined_score": 0.4854,
+        "Logic": "스킬 의미 유사도=0.465 (딥러닝) | 시나리오 의미 유사도=0.510 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 50,
+        "Target_ID": 59,
+        "skill_overlap": 0.4623,
+        "scenario_similarity": 0.333,
+        "combined_score": 0.4841,
+        "Logic": "스킬 의미 유사도=0.462 (딥러닝) | 시나리오 의미 유사도=0.333 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 24,
+        "Target_ID": 59,
+        "skill_overlap": 0.3968,
+        "scenario_similarity": 0.3952,
+        "combined_score": 0.4761,
+        "Logic": "스킬 의미 유사도=0.397 (딥러닝) | 시나리오 의미 유사도=0.395 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 32,
+        "Target_ID": 60,
+        "skill_overlap": 0.5763,
+        "scenario_similarity": 0.677,
+        "combined_score": 0.7016,
+        "Logic": "스킬 의미 유사도=0.576 (딥러닝) | 시나리오 의미 유사도=0.677 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(QA)"
+      },
+      {
+        "Preceding_ID": 27,
+        "Target_ID": 60,
+        "skill_overlap": 0.4009,
+        "scenario_similarity": 0.4653,
+        "combined_score": 0.4299,
+        "Logic": "스킬 의미 유사도=0.401 (딥러닝) | 시나리오 의미 유사도=0.465 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 12,
+        "Target_ID": 60,
+        "skill_overlap": 0.4937,
+        "scenario_similarity": 0.3478,
+        "combined_score": 0.4281,
+        "Logic": "스킬 의미 유사도=0.494 (딥러닝) | 시나리오 의미 유사도=0.348 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 16,
+        "Target_ID": 61,
+        "skill_overlap": 0.5324,
+        "scenario_similarity": 0.3359,
+        "combined_score": 0.444,
+        "Logic": "스킬 의미 유사도=0.532 (딥러닝) | 시나리오 의미 유사도=0.336 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 17,
+        "Target_ID": 61,
+        "skill_overlap": 0.4232,
+        "scenario_similarity": 0.4496,
+        "combined_score": 0.4351,
+        "Logic": "스킬 의미 유사도=0.423 (딥러닝) | 시나리오 의미 유사도=0.450 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 5,
+        "Target_ID": 61,
+        "skill_overlap": 0.4798,
+        "scenario_similarity": 0.358,
+        "combined_score": 0.425,
+        "Logic": "스킬 의미 유사도=0.480 (딥러닝) | 시나리오 의미 유사도=0.358 (딥러닝) | 난이도 university_level → middle_level"
       },
       {
         "Preceding_ID": 46,
         "Target_ID": 62,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.15,
-        "Logic": "공통 스킬 ['kotlin'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 junior_level → middle_level"
+        "skill_overlap": 0.6987,
+        "scenario_similarity": 0.4941,
+        "combined_score": 0.6066,
+        "Logic": "공통 스킬 ['kotlin'] (임베딩 유사도=0.699) | 시나리오 의미 유사도=0.494 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 62,
+        "skill_overlap": 0.4864,
+        "scenario_similarity": 0.4563,
+        "combined_score": 0.5529,
+        "Logic": "스킬 의미 유사도=0.486 (딥러닝) | 시나리오 의미 유사도=0.456 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 47,
+        "Target_ID": 62,
+        "skill_overlap": 0.3977,
+        "scenario_similarity": 0.5457,
+        "combined_score": 0.5443,
+        "Logic": "스킬 의미 유사도=0.398 (딥러닝) | 시나리오 의미 유사도=0.546 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 63,
+        "skill_overlap": 0.6459,
+        "scenario_similarity": 0.4015,
+        "combined_score": 0.5359,
+        "Logic": "스킬 의미 유사도=0.646 (딥러닝) | 시나리오 의미 유사도=0.402 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 34,
+        "Target_ID": 63,
+        "skill_overlap": 0.5274,
+        "scenario_similarity": 0.3377,
+        "combined_score": 0.5221,
+        "Logic": "스킬 의미 유사도=0.527 (딥러닝) | 시나리오 의미 유사도=0.338 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Build System)"
+      },
+      {
+        "Preceding_ID": 50,
+        "Target_ID": 63,
+        "skill_overlap": 0.5127,
+        "scenario_similarity": 0.3694,
+        "combined_score": 0.4482,
+        "Logic": "스킬 의미 유사도=0.513 (딥러닝) | 시나리오 의미 유사도=0.369 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 36,
+        "Target_ID": 64,
+        "skill_overlap": 0.6813,
+        "scenario_similarity": 0.2807,
+        "combined_score": 0.501,
+        "Logic": "스킬 의미 유사도=0.681 (딥러닝) | 시나리오 의미 유사도=0.281 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 64,
+        "skill_overlap": 0.4888,
+        "scenario_similarity": 0.3866,
+        "combined_score": 0.4428,
+        "Logic": "스킬 의미 유사도=0.489 (딥러닝) | 시나리오 의미 유사도=0.387 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 17,
+        "Target_ID": 64,
+        "skill_overlap": 0.6018,
+        "scenario_similarity": 0.1931,
+        "combined_score": 0.4179,
+        "Logic": "스킬 의미 유사도=0.602 (딥러닝) | 시나리오 의미 유사도=0.193 (딥러닝) | 난이도 university_level → middle_level"
       },
       {
         "Preceding_ID": 15,
         "Target_ID": 65,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.3,
-        "Logic": "공통 스킬 ['auto layout'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 university_level → middle_level | 동일 카테고리(iOS)"
+        "skill_overlap": 0.9321,
+        "scenario_similarity": 0.1638,
+        "combined_score": 0.6663,
+        "Logic": "공통 스킬 ['auto layout'] (임베딩 유사도=0.932) | 시나리오 의미 유사도=0.164 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(iOS)"
+      },
+      {
+        "Preceding_ID": 12,
+        "Target_ID": 65,
+        "skill_overlap": 0.418,
+        "scenario_similarity": 0.6634,
+        "combined_score": 0.6085,
+        "Logic": "스킬 의미 유사도=0.418 (딥러닝) | 시나리오 의미 유사도=0.663 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(iOS)"
+      },
+      {
+        "Preceding_ID": 42,
+        "Target_ID": 65,
+        "skill_overlap": 0.4162,
+        "scenario_similarity": 0.3046,
+        "combined_score": 0.446,
+        "Logic": "스킬 의미 유사도=0.416 (딥러닝) | 시나리오 의미 유사도=0.305 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(iOS)"
+      },
+      {
+        "Preceding_ID": 13,
+        "Target_ID": 66,
+        "skill_overlap": 0.5744,
+        "scenario_similarity": 0.5826,
+        "combined_score": 0.5781,
+        "Logic": "스킬 의미 유사도=0.574 (딥러닝) | 시나리오 의미 유사도=0.583 (딥러닝) | 난이도 university_level → middle_level"
       },
       {
         "Preceding_ID": 50,
-        "Target_ID": 67,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.126,
-        "combined_score": 0.1504,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.13 | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+        "Target_ID": 66,
+        "skill_overlap": 0.4768,
+        "scenario_similarity": 0.6611,
+        "combined_score": 0.5598,
+        "Logic": "스킬 의미 유사도=0.477 (딥러닝) | 시나리오 의미 유사도=0.661 (딥러닝) | 난이도 junior_level → middle_level"
       },
       {
-        "Preceding_ID": 9,
+        "Preceding_ID": 38,
+        "Target_ID": 66,
+        "skill_overlap": 0.4629,
+        "scenario_similarity": 0.4056,
+        "combined_score": 0.5171,
+        "Logic": "스킬 의미 유사도=0.463 (딥러닝) | 시나리오 의미 유사도=0.406 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 67,
+        "skill_overlap": 0.515,
+        "scenario_similarity": 0.3017,
+        "combined_score": 0.499,
+        "Logic": "스킬 의미 유사도=0.515 (딥러닝) | 시나리오 의미 유사도=0.302 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 67,
+        "skill_overlap": 0.6346,
+        "scenario_similarity": 0.3168,
+        "combined_score": 0.4916,
+        "Logic": "스킬 의미 유사도=0.635 (딥러닝) | 시나리오 의미 유사도=0.317 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 20,
+        "Target_ID": 67,
+        "skill_overlap": 0.5389,
+        "scenario_similarity": 0.2322,
+        "combined_score": 0.4808,
+        "Logic": "스킬 의미 유사도=0.539 (딥러닝) | 시나리오 의미 유사도=0.232 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
         "Target_ID": 68,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.14,
-        "combined_score": 0.156,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.14 | 난이도 university_level → middle_level | 동일 카테고리(General)"
+        "skill_overlap": 0.5783,
+        "scenario_similarity": 0.5155,
+        "combined_score": 0.6301,
+        "Logic": "스킬 의미 유사도=0.578 (딥러닝) | 시나리오 의미 유사도=0.516 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 19,
+        "Target_ID": 68,
+        "skill_overlap": 0.5939,
+        "scenario_similarity": 0.3023,
+        "combined_score": 0.5427,
+        "Logic": "스킬 의미 유사도=0.594 (딥러닝) | 시나리오 의미 유사도=0.302 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 68,
+        "skill_overlap": 0.5579,
+        "scenario_similarity": 0.4896,
+        "combined_score": 0.5272,
+        "Logic": "스킬 의미 유사도=0.558 (딥러닝) | 시나리오 의미 유사도=0.490 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 13,
+        "Target_ID": 69,
+        "skill_overlap": 0.5176,
+        "scenario_similarity": 0.5102,
+        "combined_score": 0.5143,
+        "Logic": "스킬 의미 유사도=0.518 (딥러닝) | 시나리오 의미 유사도=0.510 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 38,
+        "Target_ID": 69,
+        "skill_overlap": 0.3923,
+        "scenario_similarity": 0.6511,
+        "combined_score": 0.5088,
+        "Logic": "스킬 의미 유사도=0.392 (딥러닝) | 시나리오 의미 유사도=0.651 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 69,
+        "skill_overlap": 0.5215,
+        "scenario_similarity": 0.4532,
+        "combined_score": 0.4908,
+        "Logic": "스킬 의미 유사도=0.522 (딥러닝) | 시나리오 의미 유사도=0.453 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 70,
+        "skill_overlap": 0.4432,
+        "scenario_similarity": 0.3994,
+        "combined_score": 0.5035,
+        "Logic": "스킬 의미 유사도=0.443 (딥러닝) | 시나리오 의미 유사도=0.399 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 43,
+        "Target_ID": 70,
+        "skill_overlap": 0.2663,
+        "scenario_similarity": 0.5392,
+        "combined_score": 0.4691,
+        "Logic": "스킬 의미 유사도=0.266 (딥러닝) | 시나리오 의미 유사도=0.539 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 50,
+        "Target_ID": 70,
+        "skill_overlap": 0.4974,
+        "scenario_similarity": 0.2342,
+        "combined_score": 0.459,
+        "Logic": "스킬 의미 유사도=0.497 (딥러닝) | 시나리오 의미 유사도=0.234 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 39,
+        "Target_ID": 71,
+        "skill_overlap": 0.6323,
+        "scenario_similarity": 0.4515,
+        "combined_score": 0.6309,
+        "Logic": "스킬 의미 유사도=0.632 (딥러닝) | 시나리오 의미 유사도=0.451 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Data Management)"
       },
       {
         "Preceding_ID": 19,
         "Target_ID": 71,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.2,
-        "Logic": "공통 스킬 ['sqlite'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 university_level → middle_level"
+        "skill_overlap": 0.6699,
+        "scenario_similarity": 0.3896,
+        "combined_score": 0.5438,
+        "Logic": "공통 스킬 ['sqlite'] (임베딩 유사도=0.670) | 시나리오 의미 유사도=0.390 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 32,
+        "Target_ID": 71,
+        "skill_overlap": 0.3929,
+        "scenario_similarity": 0.4109,
+        "combined_score": 0.401,
+        "Logic": "스킬 의미 유사도=0.393 (딥러닝) | 시나리오 의미 유사도=0.411 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 72,
+        "skill_overlap": 0.6458,
+        "scenario_similarity": 0.1477,
+        "combined_score": 0.5017,
+        "Logic": "스킬 의미 유사도=0.646 (딥러닝) | 시나리오 의미 유사도=0.148 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 18,
+        "Target_ID": 72,
+        "skill_overlap": 0.4997,
+        "scenario_similarity": 0.2666,
+        "combined_score": 0.4748,
+        "Logic": "스킬 의미 유사도=0.500 (딥러닝) | 시나리오 의미 유사도=0.267 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 50,
+        "Target_ID": 72,
+        "skill_overlap": 0.4934,
+        "scenario_similarity": 0.2262,
+        "combined_score": 0.4531,
+        "Logic": "스킬 의미 유사도=0.493 (딥러닝) | 시나리오 의미 유사도=0.226 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 45,
+        "Target_ID": 73,
+        "skill_overlap": 0.5395,
+        "scenario_similarity": 0.7192,
+        "combined_score": 0.6204,
+        "Logic": "스킬 의미 유사도=0.540 (딥러닝) | 시나리오 의미 유사도=0.719 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 25,
+        "Target_ID": 73,
+        "skill_overlap": 0.3695,
+        "scenario_similarity": 0.3915,
+        "combined_score": 0.4594,
+        "Logic": "스킬 의미 유사도=0.370 (딥러닝) | 시나리오 의미 유사도=0.392 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(Security)"
+      },
+      {
+        "Preceding_ID": 12,
+        "Target_ID": 73,
+        "skill_overlap": 0.5844,
+        "scenario_similarity": 0.2556,
+        "combined_score": 0.4365,
+        "Logic": "스킬 의미 유사도=0.584 (딥러닝) | 시나리오 의미 유사도=0.256 (딥러닝) | 난이도 university_level → middle_level"
       },
       {
         "Preceding_ID": 40,
         "Target_ID": 74,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1384,
-        "combined_score": 0.1554,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.14 | 난이도 junior_level → middle_level | 동일 카테고리(Networking)"
+        "skill_overlap": 0.483,
+        "scenario_similarity": 0.8094,
+        "combined_score": 0.7099,
+        "Logic": "스킬 의미 유사도=0.483 (딥러닝) | 시나리오 의미 유사도=0.809 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 17,
+        "Target_ID": 74,
+        "skill_overlap": 0.6358,
+        "scenario_similarity": 0.5931,
+        "combined_score": 0.6166,
+        "Logic": "스킬 의미 유사도=0.636 (딥러닝) | 시나리오 의미 유사도=0.593 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 38,
+        "Target_ID": 74,
+        "skill_overlap": 0.4041,
+        "scenario_similarity": 0.4448,
+        "combined_score": 0.5024,
+        "Logic": "스킬 의미 유사도=0.404 (딥러닝) | 시나리오 의미 유사도=0.445 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 32,
+        "Target_ID": 75,
+        "skill_overlap": 0.5065,
+        "scenario_similarity": 0.35,
+        "combined_score": 0.5161,
+        "Logic": "스킬 의미 유사도=0.506 (딥러닝) | 시나리오 의미 유사도=0.350 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(QA)"
+      },
+      {
+        "Preceding_ID": 6,
+        "Target_ID": 75,
+        "skill_overlap": 0.4908,
+        "scenario_similarity": 0.5045,
+        "combined_score": 0.497,
+        "Logic": "스킬 의미 유사도=0.491 (딥러닝) | 시나리오 의미 유사도=0.505 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 75,
+        "skill_overlap": 0.45,
+        "scenario_similarity": 0.4693,
+        "combined_score": 0.4587,
+        "Logic": "스킬 의미 유사도=0.450 (딥러닝) | 시나리오 의미 유사도=0.469 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 50,
+        "Target_ID": 76,
+        "skill_overlap": 0.4553,
+        "scenario_similarity": 0.5909,
+        "combined_score": 0.5963,
+        "Logic": "스킬 의미 유사도=0.455 (딥러닝) | 시나리오 의미 유사도=0.591 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 13,
+        "Target_ID": 76,
+        "skill_overlap": 0.3169,
+        "scenario_similarity": 0.5345,
+        "combined_score": 0.4948,
+        "Logic": "스킬 의미 유사도=0.317 (딥러닝) | 시나리오 의미 유사도=0.535 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 33,
+        "Target_ID": 76,
+        "skill_overlap": 0.3775,
+        "scenario_similarity": 0.4503,
+        "combined_score": 0.4902,
+        "Logic": "스킬 의미 유사도=0.377 (딥러닝) | 시나리오 의미 유사도=0.450 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 44,
+        "Target_ID": 77,
+        "skill_overlap": 0.5617,
+        "scenario_similarity": 0.619,
+        "combined_score": 0.5875,
+        "Logic": "스킬 의미 유사도=0.562 (딥러닝) | 시나리오 의미 유사도=0.619 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 77,
+        "skill_overlap": 0.4877,
+        "scenario_similarity": 0.601,
+        "combined_score": 0.5386,
+        "Logic": "스킬 의미 유사도=0.488 (딥러닝) | 시나리오 의미 유사도=0.601 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 77,
+        "skill_overlap": 0.7083,
+        "scenario_similarity": 0.2468,
+        "combined_score": 0.5006,
+        "Logic": "스킬 의미 유사도=0.708 (딥러닝) | 시나리오 의미 유사도=0.247 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 41,
+        "Target_ID": 78,
+        "skill_overlap": 0.4113,
+        "scenario_similarity": 0.552,
+        "combined_score": 0.5546,
+        "Logic": "스킬 의미 유사도=0.411 (딥러닝) | 시나리오 의미 유사도=0.552 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 14,
+        "Target_ID": 78,
+        "skill_overlap": 0.2601,
+        "scenario_similarity": 0.6906,
+        "combined_score": 0.5339,
+        "Logic": "스킬 의미 유사도=0.260 (딥러닝) | 시나리오 의미 유사도=0.691 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 45,
+        "Target_ID": 78,
+        "skill_overlap": 0.4269,
+        "scenario_similarity": 0.5552,
+        "combined_score": 0.4847,
+        "Logic": "스킬 의미 유사도=0.427 (딥러닝) | 시나리오 의미 유사도=0.555 (딥러닝) | 난이도 junior_level → middle_level"
       },
       {
         "Preceding_ID": 19,
         "Target_ID": 79,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.1799,
-        "combined_score": 0.272,
-        "Logic": "공통 스킬 ['sqlite'] (Jaccard=0.33) | 시나리오 유사도=0.18 | 난이도 university_level → middle_level"
+        "skill_overlap": 0.7359,
+        "scenario_similarity": 0.5049,
+        "combined_score": 0.632,
+        "Logic": "공통 스킬 ['sqlite'] (임베딩 유사도=0.736) | 시나리오 의미 유사도=0.505 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 39,
+        "Target_ID": 79,
+        "skill_overlap": 0.6604,
+        "scenario_similarity": 0.3897,
+        "combined_score": 0.6186,
+        "Logic": "스킬 의미 유사도=0.660 (딥러닝) | 시나리오 의미 유사도=0.390 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Data Management)"
       },
       {
         "Preceding_ID": 22,
         "Target_ID": 79,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.079,
-        "combined_score": 0.2316,
-        "Logic": "공통 스킬 ['preferences'] (Jaccard=0.33) | 시나리오 유사도=0.08 | 난이도 university_level → middle_level"
+        "skill_overlap": 0.6399,
+        "scenario_similarity": 0.4392,
+        "combined_score": 0.5496,
+        "Logic": "공통 스킬 ['preferences'] (임베딩 유사도=0.640) | 시나리오 의미 유사도=0.439 (딥러닝) | 난이도 university_level → middle_level"
       },
       {
-        "Preceding_ID": 28,
-        "Target_ID": 79,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1421,
-        "combined_score": 0.1569,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.14 | 난이도 junior_level → middle_level | 동일 카테고리(Data Management)"
+        "Preceding_ID": 40,
+        "Target_ID": 80,
+        "skill_overlap": 0.5517,
+        "scenario_similarity": 0.2778,
+        "combined_score": 0.5084,
+        "Logic": "스킬 의미 유사도=0.552 (딥러닝) | 시나리오 의미 유사도=0.278 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 4,
+        "Target_ID": 80,
+        "skill_overlap": 0.6117,
+        "scenario_similarity": 0.3643,
+        "combined_score": 0.5004,
+        "Logic": "스킬 의미 유사도=0.612 (딥러닝) | 시나리오 의미 유사도=0.364 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 38,
+        "Target_ID": 80,
+        "skill_overlap": 0.3405,
+        "scenario_similarity": 0.3615,
+        "combined_score": 0.4299,
+        "Logic": "스킬 의미 유사도=0.341 (딥러닝) | 시나리오 의미 유사도=0.361 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 81,
+        "skill_overlap": 0.3689,
+        "scenario_similarity": 0.6846,
+        "combined_score": 0.511,
+        "Logic": "스킬 의미 유사도=0.369 (딥러닝) | 시나리오 의미 유사도=0.685 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 44,
+        "Target_ID": 81,
+        "skill_overlap": 0.4326,
+        "scenario_similarity": 0.5595,
+        "combined_score": 0.4897,
+        "Logic": "스킬 의미 유사도=0.433 (딥러닝) | 시나리오 의미 유사도=0.559 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 81,
+        "skill_overlap": 0.4584,
+        "scenario_similarity": 0.5065,
+        "combined_score": 0.48,
+        "Logic": "스킬 의미 유사도=0.458 (딥러닝) | 시나리오 의미 유사도=0.506 (딥러닝) | 난이도 junior_level → middle_level"
       },
       {
         "Preceding_ID": 12,
         "Target_ID": 82,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1859,
-        "combined_score": 0.1744,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.19 | 난이도 university_level → middle_level | 동일 카테고리(iOS)"
+        "skill_overlap": 0.4987,
+        "scenario_similarity": 0.5862,
+        "combined_score": 0.6181,
+        "Logic": "스킬 의미 유사도=0.499 (딥러닝) | 시나리오 의미 유사도=0.586 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(iOS)"
       },
       {
-        "Preceding_ID": 21,
-        "Target_ID": 83,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1554,
-        "combined_score": 0.1621,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.16 | 난이도 university_level → middle_level | 동일 카테고리(General)"
+        "Preceding_ID": 43,
+        "Target_ID": 82,
+        "skill_overlap": 0.4888,
+        "scenario_similarity": 0.6042,
+        "combined_score": 0.5407,
+        "Logic": "스킬 의미 유사도=0.489 (딥러닝) | 시나리오 의미 유사도=0.604 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 41,
+        "Target_ID": 82,
+        "skill_overlap": 0.5244,
+        "scenario_similarity": 0.5451,
+        "combined_score": 0.5337,
+        "Logic": "스킬 의미 유사도=0.524 (딥러닝) | 시나리오 의미 유사도=0.545 (딥러닝) | 난이도 junior_level → middle_level"
       },
       {
         "Preceding_ID": 24,
         "Target_ID": 83,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1514,
-        "combined_score": 0.1606,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.15 | 난이도 university_level → middle_level | 동일 카테고리(General)"
+        "skill_overlap": 0.3359,
+        "scenario_similarity": 0.6858,
+        "combined_score": 0.5733,
+        "Logic": "스킬 의미 유사도=0.336 (딥러닝) | 시나리오 의미 유사도=0.686 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 43,
+        "Target_ID": 83,
+        "skill_overlap": 0.5302,
+        "scenario_similarity": 0.4149,
+        "combined_score": 0.5583,
+        "Logic": "스킬 의미 유사도=0.530 (딥러닝) | 시나리오 의미 유사도=0.415 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 18,
+        "Target_ID": 83,
+        "skill_overlap": 0.4869,
+        "scenario_similarity": 0.4396,
+        "combined_score": 0.5456,
+        "Logic": "스킬 의미 유사도=0.487 (딥러닝) | 시나리오 의미 유사도=0.440 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 84,
+        "skill_overlap": 0.4887,
+        "scenario_similarity": 0.4933,
+        "combined_score": 0.4908,
+        "Logic": "스킬 의미 유사도=0.489 (딥러닝) | 시나리오 의미 유사도=0.493 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 50,
+        "Target_ID": 84,
+        "skill_overlap": 0.5418,
+        "scenario_similarity": 0.4029,
+        "combined_score": 0.4793,
+        "Logic": "스킬 의미 유사도=0.542 (딥러닝) | 시나리오 의미 유사도=0.403 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 13,
+        "Target_ID": 84,
+        "skill_overlap": 0.3811,
+        "scenario_similarity": 0.5918,
+        "combined_score": 0.476,
+        "Logic": "스킬 의미 유사도=0.381 (딥러닝) | 시나리오 의미 유사도=0.592 (딥러닝) | 난이도 university_level → middle_level"
       },
       {
         "Preceding_ID": 9,
         "Target_ID": 85,
-        "skill_overlap": 0.5,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.4,
-        "Logic": "공통 스킬 ['git'] (Jaccard=0.50) | 시나리오 유사도=0.00 | 난이도 university_level → middle_level | 동일 카테고리(General)"
+        "skill_overlap": 0.7651,
+        "scenario_similarity": 0.1491,
+        "combined_score": 0.5679,
+        "Logic": "공통 스킬 ['git'] (임베딩 유사도=0.765) | 시나리오 의미 유사도=0.149 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 50,
+        "Target_ID": 85,
+        "skill_overlap": 0.5017,
+        "scenario_similarity": 0.2674,
+        "combined_score": 0.4762,
+        "Logic": "스킬 의미 유사도=0.502 (딥러닝) | 시나리오 의미 유사도=0.267 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 17,
+        "Target_ID": 85,
+        "skill_overlap": 0.382,
+        "scenario_similarity": 0.2954,
+        "combined_score": 0.423,
+        "Logic": "스킬 의미 유사도=0.382 (딥러닝) | 시나리오 의미 유사도=0.295 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 36,
         "Target_ID": 86,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.3,
-        "Logic": "공통 스킬 ['context'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 junior_level → middle_level | 동일 카테고리(Android)"
+        "skill_overlap": 0.711,
+        "scenario_similarity": 0.4596,
+        "combined_score": 0.6778,
+        "Logic": "공통 스킬 ['context'] (임베딩 유사도=0.711) | 시나리오 의미 유사도=0.460 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 41,
+        "Target_ID": 86,
+        "skill_overlap": 0.6046,
+        "scenario_similarity": 0.3878,
+        "combined_score": 0.5871,
+        "Logic": "스킬 의미 유사도=0.605 (딥러닝) | 시나리오 의미 유사도=0.388 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 48,
+        "Target_ID": 86,
+        "skill_overlap": 0.5869,
+        "scenario_similarity": 0.2771,
+        "combined_score": 0.5275,
+        "Logic": "스킬 의미 유사도=0.587 (딥러닝) | 시나리오 의미 유사도=0.277 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 43,
+        "Target_ID": 87,
+        "skill_overlap": 0.4832,
+        "scenario_similarity": 0.7893,
+        "combined_score": 0.7009,
+        "Logic": "스킬 의미 유사도=0.483 (딥러닝) | 시나리오 의미 유사도=0.789 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 20,
         "Target_ID": 87,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.2209,
-        "combined_score": 0.1884,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.22 | 난이도 university_level → middle_level | 동일 카테고리(General)"
+        "skill_overlap": 0.4247,
+        "scenario_similarity": 0.6203,
+        "combined_score": 0.5927,
+        "Logic": "스킬 의미 유사도=0.425 (딥러닝) | 시나리오 의미 유사도=0.620 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 87,
+        "skill_overlap": 0.3671,
+        "scenario_similarity": 0.5459,
+        "combined_score": 0.5276,
+        "Logic": "스킬 의미 유사도=0.367 (딥러닝) | 시나리오 의미 유사도=0.546 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 34,
         "Target_ID": 88,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0691,
-        "combined_score": 0.3277,
-        "Logic": "공통 스킬 ['gradle'] (Jaccard=0.33) | 시나리오 유사도=0.07 | 난이도 junior_level → middle_level | 동일 카테고리(Build System)"
+        "skill_overlap": 0.6823,
+        "scenario_similarity": 0.6026,
+        "combined_score": 0.7264,
+        "Logic": "공통 스킬 ['gradle'] (임베딩 유사도=0.682) | 시나리오 의미 유사도=0.603 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Build System)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 88,
+        "skill_overlap": 0.5227,
+        "scenario_similarity": 0.6645,
+        "combined_score": 0.5865,
+        "Logic": "스킬 의미 유사도=0.523 (딥러닝) | 시나리오 의미 유사도=0.664 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 88,
+        "skill_overlap": 0.5298,
+        "scenario_similarity": 0.5395,
+        "combined_score": 0.5342,
+        "Logic": "스킬 의미 유사도=0.530 (딥러닝) | 시나리오 의미 유사도=0.540 (딥러닝) | 난이도 university_level → middle_level"
       },
       {
         "Preceding_ID": 39,
         "Target_ID": 89,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.3,
-        "Logic": "공통 스킬 ['sql'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 junior_level → middle_level | 동일 카테고리(Data Management)"
+        "skill_overlap": 0.7716,
+        "scenario_similarity": 0.4278,
+        "combined_score": 0.6969,
+        "Logic": "공통 스킬 ['sql'] (임베딩 유사도=0.772) | 시나리오 의미 유사도=0.428 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Data Management)"
+      },
+      {
+        "Preceding_ID": 19,
+        "Target_ID": 89,
+        "skill_overlap": 0.8446,
+        "scenario_similarity": 0.3919,
+        "combined_score": 0.6409,
+        "Logic": "스킬 의미 유사도=0.845 (딥러닝) | 시나리오 의미 유사도=0.392 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 16,
+        "Target_ID": 89,
+        "skill_overlap": 0.6109,
+        "scenario_similarity": 0.3518,
+        "combined_score": 0.4943,
+        "Logic": "스킬 의미 유사도=0.611 (딥러닝) | 시나리오 의미 유사도=0.352 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 27,
+        "Target_ID": 90,
+        "skill_overlap": 0.3894,
+        "scenario_similarity": 0.6154,
+        "combined_score": 0.4911,
+        "Logic": "스킬 의미 유사도=0.389 (딥러닝) | 시나리오 의미 유사도=0.615 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 10,
+        "Target_ID": 90,
+        "skill_overlap": 0.4049,
+        "scenario_similarity": 0.5648,
+        "combined_score": 0.4769,
+        "Logic": "스킬 의미 유사도=0.405 (딥러닝) | 시나리오 의미 유사도=0.565 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 90,
+        "skill_overlap": 0.4881,
+        "scenario_similarity": 0.4514,
+        "combined_score": 0.4716,
+        "Logic": "스킬 의미 유사도=0.488 (딥러닝) | 시나리오 의미 유사도=0.451 (딥러닝) | 난이도 university_level → middle_level"
       },
       {
         "Preceding_ID": 44,
         "Target_ID": 91,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.3,
-        "Logic": "공통 스킬 ['lifecycle'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 junior_level → middle_level | 동일 카테고리(Android)"
+        "skill_overlap": 0.7736,
+        "scenario_similarity": 0.4564,
+        "combined_score": 0.7109,
+        "Logic": "공통 스킬 ['lifecycle'] (임베딩 유사도=0.774) | 시나리오 의미 유사도=0.456 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 6,
+        "Target_ID": 91,
+        "skill_overlap": 0.5137,
+        "scenario_similarity": 0.3393,
+        "combined_score": 0.5152,
+        "Logic": "스킬 의미 유사도=0.514 (딥러닝) | 시나리오 의미 유사도=0.339 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 46,
+        "Target_ID": 91,
+        "skill_overlap": 0.5306,
+        "scenario_similarity": 0.3078,
+        "combined_score": 0.5104,
+        "Logic": "스킬 의미 유사도=0.531 (딥러닝) | 시나리오 의미 유사도=0.308 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Android)"
       },
       {
         "Preceding_ID": 38,
         "Target_ID": 92,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.3,
-        "Logic": "공통 스킬 ['rest'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 junior_level → middle_level | 동일 카테고리(Networking)"
+        "skill_overlap": 0.7207,
+        "scenario_similarity": 0.4506,
+        "combined_score": 0.6791,
+        "Logic": "공통 스킬 ['rest'] (임베딩 유사도=0.721) | 시나리오 의미 유사도=0.451 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 92,
+        "skill_overlap": 0.4698,
+        "scenario_similarity": 0.66,
+        "combined_score": 0.6354,
+        "Logic": "스킬 의미 유사도=0.470 (딥러닝) | 시나리오 의미 유사도=0.660 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 44,
+        "Target_ID": 92,
+        "skill_overlap": 0.4372,
+        "scenario_similarity": 0.5083,
+        "combined_score": 0.4692,
+        "Logic": "스킬 의미 유사도=0.437 (딥러닝) | 시나리오 의미 유사도=0.508 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 93,
+        "skill_overlap": 0.6316,
+        "scenario_similarity": 0.3576,
+        "combined_score": 0.5883,
+        "Logic": "스킬 의미 유사도=0.632 (딥러닝) | 시나리오 의미 유사도=0.358 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 50,
+        "Target_ID": 93,
+        "skill_overlap": 0.4851,
+        "scenario_similarity": 0.3892,
+        "combined_score": 0.522,
+        "Logic": "스킬 의미 유사도=0.485 (딥러닝) | 시나리오 의미 유사도=0.389 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 33,
+        "Target_ID": 93,
+        "skill_overlap": 0.3484,
+        "scenario_similarity": 0.4862,
+        "combined_score": 0.4904,
+        "Logic": "스킬 의미 유사도=0.348 (딥러닝) | 시나리오 의미 유사도=0.486 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 41,
         "Target_ID": 94,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.3,
-        "Logic": "공통 스킬 ['service'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 junior_level → middle_level | 동일 카테고리(Android)"
+        "skill_overlap": 0.7117,
+        "scenario_similarity": 0.3532,
+        "combined_score": 0.6304,
+        "Logic": "공통 스킬 ['service'] (임베딩 유사도=0.712) | 시나리오 의미 유사도=0.353 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 38,
+        "Target_ID": 94,
+        "skill_overlap": 0.5369,
+        "scenario_similarity": 0.6096,
+        "combined_score": 0.5696,
+        "Logic": "스킬 의미 유사도=0.537 (딥러닝) | 시나리오 의미 유사도=0.610 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 94,
+        "skill_overlap": 0.4984,
+        "scenario_similarity": 0.6147,
+        "combined_score": 0.5507,
+        "Logic": "스킬 의미 유사도=0.498 (딥러닝) | 시나리오 의미 유사도=0.615 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 43,
+        "Target_ID": 95,
+        "skill_overlap": 0.3274,
+        "scenario_similarity": 0.5184,
+        "combined_score": 0.4934,
+        "Logic": "스킬 의미 유사도=0.327 (딥러닝) | 시나리오 의미 유사도=0.518 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 19,
+        "Target_ID": 95,
+        "skill_overlap": 0.3839,
+        "scenario_similarity": 0.4372,
+        "combined_score": 0.4879,
+        "Logic": "스킬 의미 유사도=0.384 (딥러닝) | 시나리오 의미 유사도=0.437 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 18,
+        "Target_ID": 95,
+        "skill_overlap": 0.4097,
+        "scenario_similarity": 0.35,
+        "combined_score": 0.4628,
+        "Logic": "스킬 의미 유사도=0.410 (딥러닝) | 시나리오 의미 유사도=0.350 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 50,
+        "Target_ID": 96,
+        "skill_overlap": 0.3583,
+        "scenario_similarity": 0.4228,
+        "combined_score": 0.4674,
+        "Logic": "스킬 의미 유사도=0.358 (딥러닝) | 시나리오 의미 유사도=0.423 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 96,
+        "skill_overlap": 0.3415,
+        "scenario_similarity": 0.2955,
+        "combined_score": 0.4008,
+        "Logic": "스킬 의미 유사도=0.341 (딥러닝) | 시나리오 의미 유사도=0.295 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 22,
+        "Target_ID": 96,
+        "skill_overlap": 0.3049,
+        "scenario_similarity": 0.326,
+        "combined_score": 0.3944,
+        "Logic": "스킬 의미 유사도=0.305 (딥러닝) | 시나리오 의미 유사도=0.326 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 8,
+        "Target_ID": 97,
+        "skill_overlap": 0.5914,
+        "scenario_similarity": 0.4917,
+        "combined_score": 0.5465,
+        "Logic": "스킬 의미 유사도=0.591 (딥러닝) | 시나리오 의미 유사도=0.492 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 12,
+        "Target_ID": 97,
+        "skill_overlap": 0.4579,
+        "scenario_similarity": 0.4064,
+        "combined_score": 0.5147,
+        "Logic": "스킬 의미 유사도=0.458 (딥러닝) | 시나리오 의미 유사도=0.406 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(iOS)"
+      },
+      {
+        "Preceding_ID": 10,
+        "Target_ID": 97,
+        "skill_overlap": 0.5122,
+        "scenario_similarity": 0.4899,
+        "combined_score": 0.5022,
+        "Logic": "스킬 의미 유사도=0.512 (딥러닝) | 시나리오 의미 유사도=0.490 (딥러닝) | 난이도 university_level → middle_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 98,
+        "skill_overlap": 0.3638,
+        "scenario_similarity": 0.6898,
+        "combined_score": 0.5905,
+        "Logic": "스킬 의미 유사도=0.364 (딥러닝) | 시나리오 의미 유사도=0.690 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 38,
+        "Target_ID": 98,
+        "skill_overlap": 0.4693,
+        "scenario_similarity": 0.5782,
+        "combined_score": 0.5183,
+        "Logic": "스킬 의미 유사도=0.469 (딥러닝) | 시나리오 의미 유사도=0.578 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 44,
+        "Target_ID": 98,
+        "skill_overlap": 0.4179,
+        "scenario_similarity": 0.6393,
+        "combined_score": 0.5175,
+        "Logic": "스킬 의미 유사도=0.418 (딥러닝) | 시나리오 의미 유사도=0.639 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 17,
+        "Target_ID": 99,
+        "skill_overlap": 0.5441,
+        "scenario_similarity": 0.5209,
+        "combined_score": 0.6136,
+        "Logic": "스킬 의미 유사도=0.544 (딥러닝) | 시나리오 의미 유사도=0.521 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 99,
+        "skill_overlap": 0.6251,
+        "scenario_similarity": 0.3704,
+        "combined_score": 0.5105,
+        "Logic": "스킬 의미 유사도=0.625 (딥러닝) | 시나리오 의미 유사도=0.370 (딥러닝) | 난이도 junior_level → middle_level"
+      },
+      {
+        "Preceding_ID": 22,
+        "Target_ID": 99,
+        "skill_overlap": 0.4588,
+        "scenario_similarity": 0.3655,
+        "combined_score": 0.4968,
+        "Logic": "스킬 의미 유사도=0.459 (딥러닝) | 시나리오 의미 유사도=0.365 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 44,
         "Target_ID": 100,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.3,
-        "Logic": "공통 스킬 ['fragment'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 junior_level → middle_level | 동일 카테고리(Android)"
+        "skill_overlap": 0.724,
+        "scenario_similarity": 0.3135,
+        "combined_score": 0.6193,
+        "Logic": "공통 스킬 ['fragment'] (임베딩 유사도=0.724) | 시나리오 의미 유사도=0.314 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 48,
+        "Target_ID": 100,
+        "skill_overlap": 0.4461,
+        "scenario_similarity": 0.4779,
+        "combined_score": 0.5404,
+        "Logic": "스킬 의미 유사도=0.446 (딥러닝) | 시나리오 의미 유사도=0.478 (딥러닝) | 난이도 junior_level → middle_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 8,
+        "Target_ID": 100,
+        "skill_overlap": 0.3059,
+        "scenario_similarity": 0.6174,
+        "combined_score": 0.5261,
+        "Logic": "스킬 의미 유사도=0.306 (딥러닝) | 시나리오 의미 유사도=0.617 (딥러닝) | 난이도 university_level → middle_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 101,
+        "skill_overlap": 0.532,
+        "scenario_similarity": 0.421,
+        "combined_score": 0.482,
+        "Logic": "스킬 의미 유사도=0.532 (딥러닝) | 시나리오 의미 유사도=0.421 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 38,
+        "Target_ID": 101,
+        "skill_overlap": 0.4581,
+        "scenario_similarity": 0.4986,
+        "combined_score": 0.4763,
+        "Logic": "스킬 의미 유사도=0.458 (딥러닝) | 시나리오 의미 유사도=0.499 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 5,
+        "Target_ID": 101,
+        "skill_overlap": 0.5238,
+        "scenario_similarity": 0.3936,
+        "combined_score": 0.4652,
+        "Logic": "스킬 의미 유사도=0.524 (딥러닝) | 시나리오 의미 유사도=0.394 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 62,
+        "Target_ID": 102,
+        "skill_overlap": 0.3045,
+        "scenario_similarity": 0.7749,
+        "combined_score": 0.5162,
+        "Logic": "스킬 의미 유사도=0.305 (딥러닝) | 시나리오 의미 유사도=0.775 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 45,
+        "Target_ID": 102,
+        "skill_overlap": 0.45,
+        "scenario_similarity": 0.3733,
+        "combined_score": 0.4955,
+        "Logic": "스킬 의미 유사도=0.450 (딥러닝) | 시나리오 의미 유사도=0.373 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 92,
+        "Target_ID": 102,
+        "skill_overlap": 0.372,
+        "scenario_similarity": 0.4226,
+        "combined_score": 0.4748,
+        "Logic": "스킬 의미 유사도=0.372 (딥러닝) | 시나리오 의미 유사도=0.423 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 50,
+        "Target_ID": 103,
+        "skill_overlap": 0.4829,
+        "scenario_similarity": 0.6547,
+        "combined_score": 0.5602,
+        "Logic": "스킬 의미 유사도=0.483 (딥러닝) | 시나리오 의미 유사도=0.655 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 53,
+        "Target_ID": 103,
+        "skill_overlap": 0.5612,
+        "scenario_similarity": 0.3947,
+        "combined_score": 0.4863,
+        "Logic": "스킬 의미 유사도=0.561 (딥러닝) | 시나리오 의미 유사도=0.395 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 103,
+        "skill_overlap": 0.5789,
+        "scenario_similarity": 0.3598,
+        "combined_score": 0.4803,
+        "Logic": "스킬 의미 유사도=0.579 (딥러닝) | 시나리오 의미 유사도=0.360 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 104,
+        "skill_overlap": 0.6572,
+        "scenario_similarity": 0.6735,
+        "combined_score": 0.6645,
+        "Logic": "스킬 의미 유사도=0.657 (딥러닝) | 시나리오 의미 유사도=0.674 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 56,
+        "Target_ID": 104,
+        "skill_overlap": 0.544,
+        "scenario_similarity": 0.6882,
+        "combined_score": 0.6089,
+        "Logic": "스킬 의미 유사도=0.544 (딥러닝) | 시나리오 의미 유사도=0.688 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 5,
+        "Target_ID": 104,
+        "skill_overlap": 0.6069,
+        "scenario_similarity": 0.562,
+        "combined_score": 0.5867,
+        "Logic": "스킬 의미 유사도=0.607 (딥러닝) | 시나리오 의미 유사도=0.562 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 63,
+        "Target_ID": 105,
+        "skill_overlap": 0.7128,
+        "scenario_similarity": 0.3831,
+        "combined_score": 0.5644,
+        "Logic": "공통 스킬 ['obfuscation'] (임베딩 유사도=0.713) | 시나리오 의미 유사도=0.383 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 55,
+        "Target_ID": 105,
+        "skill_overlap": 0.4173,
+        "scenario_similarity": 0.7274,
+        "combined_score": 0.5569,
+        "Logic": "스킬 의미 유사도=0.417 (딥러닝) | 시나리오 의미 유사도=0.727 (딥러닝) | 난이도 middle_level → senior_level"
       },
       {
         "Preceding_ID": 54,
-        "Target_ID": 101,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.15,
-        "Logic": "공통 스킬 ['clean architecture'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 middle_level → senior_level"
+        "Target_ID": 105,
+        "skill_overlap": 0.5502,
+        "scenario_similarity": 0.4932,
+        "combined_score": 0.5246,
+        "Logic": "스킬 의미 유사도=0.550 (딥러닝) | 시나리오 의미 유사도=0.493 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 93,
+        "Target_ID": 106,
+        "skill_overlap": 0.4349,
+        "scenario_similarity": 0.5097,
+        "combined_score": 0.5486,
+        "Logic": "스킬 의미 유사도=0.435 (딥러닝) | 시나리오 의미 유사도=0.510 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 50,
+        "Target_ID": 106,
+        "skill_overlap": 0.4273,
+        "scenario_similarity": 0.5176,
+        "combined_score": 0.5479,
+        "Logic": "스킬 의미 유사도=0.427 (딥러닝) | 시나리오 의미 유사도=0.518 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 76,
+        "Target_ID": 106,
+        "skill_overlap": 0.3804,
+        "scenario_similarity": 0.5488,
+        "combined_score": 0.5362,
+        "Logic": "스킬 의미 유사도=0.380 (딥러닝) | 시나리오 의미 유사도=0.549 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 83,
+        "Target_ID": 107,
+        "skill_overlap": 0.5382,
+        "scenario_similarity": 0.4353,
+        "combined_score": 0.5719,
+        "Logic": "스킬 의미 유사도=0.538 (딥러닝) | 시나리오 의미 유사도=0.435 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 70,
+        "Target_ID": 107,
+        "skill_overlap": 0.3729,
+        "scenario_similarity": 0.5628,
+        "combined_score": 0.5384,
+        "Logic": "스킬 의미 유사도=0.373 (딥러닝) | 시나리오 의미 유사도=0.563 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 43,
+        "Target_ID": 107,
+        "skill_overlap": 0.4755,
+        "scenario_similarity": 0.4357,
+        "combined_score": 0.5376,
+        "Logic": "스킬 의미 유사도=0.476 (딥러닝) | 시나리오 의미 유사도=0.436 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 23,
+        "Target_ID": 108,
+        "skill_overlap": 0.5306,
+        "scenario_similarity": 0.5899,
+        "combined_score": 0.5573,
+        "Logic": "스킬 의미 유사도=0.531 (딥러닝) | 시나리오 의미 유사도=0.590 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 108,
+        "skill_overlap": 0.6009,
+        "scenario_similarity": 0.4921,
+        "combined_score": 0.552,
+        "Logic": "스킬 의미 유사도=0.601 (딥러닝) | 시나리오 의미 유사도=0.492 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 56,
+        "Target_ID": 108,
+        "skill_overlap": 0.6434,
+        "scenario_similarity": 0.4088,
+        "combined_score": 0.5378,
+        "Logic": "스킬 의미 유사도=0.643 (딥러닝) | 시나리오 의미 유사도=0.409 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 74,
+        "Target_ID": 109,
+        "skill_overlap": 0.4043,
+        "scenario_similarity": 0.4433,
+        "combined_score": 0.5019,
+        "Logic": "스킬 의미 유사도=0.404 (딥러닝) | 시나리오 의미 유사도=0.443 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 109,
+        "skill_overlap": 0.3765,
+        "scenario_similarity": 0.4692,
+        "combined_score": 0.4982,
+        "Logic": "스킬 의미 유사도=0.376 (딥러닝) | 시나리오 의미 유사도=0.469 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 83,
+        "Target_ID": 109,
+        "skill_overlap": 0.5014,
+        "scenario_similarity": 0.4679,
+        "combined_score": 0.4863,
+        "Logic": "스킬 의미 유사도=0.501 (딥러닝) | 시나리오 의미 유사도=0.468 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 11,
+        "Target_ID": 110,
+        "skill_overlap": 0.4736,
+        "scenario_similarity": 0.4362,
+        "combined_score": 0.5368,
+        "Logic": "스킬 의미 유사도=0.474 (딥러닝) | 시나리오 의미 유사도=0.436 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 10,
+        "Target_ID": 110,
+        "skill_overlap": 0.4296,
+        "scenario_similarity": 0.4885,
+        "combined_score": 0.5361,
+        "Logic": "스킬 의미 유사도=0.430 (딥러닝) | 시나리오 의미 유사도=0.489 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 8,
+        "Target_ID": 110,
+        "skill_overlap": 0.3904,
+        "scenario_similarity": 0.448,
+        "combined_score": 0.4963,
+        "Logic": "스킬 의미 유사도=0.390 (딥러닝) | 시나리오 의미 유사도=0.448 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(Android)"
       },
       {
         "Preceding_ID": 84,
         "Target_ID": 111,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1602,
-        "combined_score": 0.1641,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.16 | 난이도 middle_level → senior_level | 동일 카테고리(Performance)"
+        "skill_overlap": 0.4582,
+        "scenario_similarity": 0.787,
+        "combined_score": 0.6862,
+        "Logic": "스킬 의미 유사도=0.458 (딥러닝) | 시나리오 의미 유사도=0.787 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Performance)"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 111,
+        "skill_overlap": 0.547,
+        "scenario_similarity": 0.4954,
+        "combined_score": 0.5238,
+        "Logic": "스킬 의미 유사도=0.547 (딥러닝) | 시나리오 의미 유사도=0.495 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 27,
+        "Target_ID": 111,
+        "skill_overlap": 0.4536,
+        "scenario_similarity": 0.4967,
+        "combined_score": 0.473,
+        "Logic": "스킬 의미 유사도=0.454 (딥러닝) | 시나리오 의미 유사도=0.497 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 75,
+        "Target_ID": 112,
+        "skill_overlap": 0.5121,
+        "scenario_similarity": 0.29,
+        "combined_score": 0.4921,
+        "Logic": "스킬 의미 유사도=0.512 (딥러닝) | 시나리오 의미 유사도=0.290 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(QA)"
       },
       {
         "Preceding_ID": 32,
         "Target_ID": 112,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1702,
-        "combined_score": 0.1681,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.17 | 난이도 junior_level → senior_level | 동일 카테고리(QA)"
+        "skill_overlap": 0.4001,
+        "scenario_similarity": 0.3872,
+        "combined_score": 0.4743,
+        "Logic": "스킬 의미 유사도=0.400 (딥러닝) | 시나리오 의미 유사도=0.387 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(QA)"
+      },
+      {
+        "Preceding_ID": 29,
+        "Target_ID": 112,
+        "skill_overlap": 0.547,
+        "scenario_similarity": 0.3779,
+        "combined_score": 0.4709,
+        "Logic": "스킬 의미 유사도=0.547 (딥러닝) | 시나리오 의미 유사도=0.378 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 75,
+        "Target_ID": 113,
+        "skill_overlap": 0.6987,
+        "scenario_similarity": 0.5164,
+        "combined_score": 0.6166,
+        "Logic": "스킬 의미 유사도=0.699 (딥러닝) | 시나리오 의미 유사도=0.516 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 113,
+        "skill_overlap": 0.5108,
+        "scenario_similarity": 0.5156,
+        "combined_score": 0.513,
+        "Logic": "스킬 의미 유사도=0.511 (딥러닝) | 시나리오 의미 유사도=0.516 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 98,
+        "Target_ID": 113,
+        "skill_overlap": 0.4115,
+        "scenario_similarity": 0.6193,
+        "combined_score": 0.505,
+        "Logic": "스킬 의미 유사도=0.411 (딥러닝) | 시나리오 의미 유사도=0.619 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 34,
+        "Target_ID": 114,
+        "skill_overlap": 0.5211,
+        "scenario_similarity": 0.4561,
+        "combined_score": 0.5718,
+        "Logic": "스킬 의미 유사도=0.521 (딥러닝) | 시나리오 의미 유사도=0.456 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(Build System)"
+      },
+      {
+        "Preceding_ID": 88,
+        "Target_ID": 114,
+        "skill_overlap": 0.5537,
+        "scenario_similarity": 0.344,
+        "combined_score": 0.5393,
+        "Logic": "스킬 의미 유사도=0.554 (딥러닝) | 시나리오 의미 유사도=0.344 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Build System)"
+      },
+      {
+        "Preceding_ID": 59,
+        "Target_ID": 114,
+        "skill_overlap": 0.5627,
+        "scenario_similarity": 0.4359,
+        "combined_score": 0.5056,
+        "Logic": "스킬 의미 유사도=0.563 (딥러닝) | 시나리오 의미 유사도=0.436 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 13,
+        "Target_ID": 115,
+        "skill_overlap": 0.4951,
+        "scenario_similarity": 0.6291,
+        "combined_score": 0.6354,
+        "Logic": "스킬 의미 유사도=0.495 (딥러닝) | 시나리오 의미 유사도=0.629 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 115,
+        "skill_overlap": 0.4965,
+        "scenario_similarity": 0.6229,
+        "combined_score": 0.6334,
+        "Logic": "스킬 의미 유사도=0.496 (딥러닝) | 시나리오 의미 유사도=0.623 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 68,
+        "Target_ID": 115,
+        "skill_overlap": 0.541,
+        "scenario_similarity": 0.5571,
+        "combined_score": 0.6282,
+        "Logic": "스킬 의미 유사도=0.541 (딥러닝) | 시나리오 의미 유사도=0.557 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 2,
         "Target_ID": 116,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.25,
-        "Logic": "공통 스킬 ['swift'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 university_level → senior_level | 동일 카테고리(iOS)"
+        "skill_overlap": 0.6964,
+        "scenario_similarity": 0.3908,
+        "combined_score": 0.6389,
+        "Logic": "공통 스킬 ['swift'] (임베딩 유사도=0.696) | 시나리오 의미 유사도=0.391 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(iOS)"
       },
       {
-        "Preceding_ID": 7,
+        "Preceding_ID": 36,
         "Target_ID": 116,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.25,
-        "Logic": "공통 스킬 ['swift'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 university_level → senior_level | 동일 카테고리(iOS)"
+        "skill_overlap": 0.5031,
+        "scenario_similarity": 0.5837,
+        "combined_score": 0.5394,
+        "Logic": "스킬 의미 유사도=0.503 (딥러닝) | 시나리오 의미 유사도=0.584 (딥러닝) | 난이도 junior_level → senior_level"
       },
       {
         "Preceding_ID": 35,
         "Target_ID": 116,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.25,
-        "Logic": "공통 스킬 ['swift'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 junior_level → senior_level | 동일 카테고리(iOS)"
+        "skill_overlap": 0.6836,
+        "scenario_similarity": 0.1474,
+        "combined_score": 0.5223,
+        "Logic": "공통 스킬 ['swift'] (임베딩 유사도=0.684) | 시나리오 의미 유사도=0.147 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(iOS)"
       },
       {
-        "Preceding_ID": 71,
-        "Target_ID": 119,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.25,
-        "Logic": "공통 스킬 ['sqlite'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 middle_level → senior_level | 동일 카테고리(Data Management)"
+        "Preceding_ID": 43,
+        "Target_ID": 117,
+        "skill_overlap": 0.7556,
+        "scenario_similarity": 0.6704,
+        "combined_score": 0.7973,
+        "Logic": "스킬 의미 유사도=0.756 (딥러닝) | 시나리오 의미 유사도=0.670 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
       },
       {
-        "Preceding_ID": 79,
-        "Target_ID": 119,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.25,
-        "Logic": "공통 스킬 ['sqlite'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 middle_level → senior_level | 동일 카테고리(Data Management)"
+        "Preceding_ID": 20,
+        "Target_ID": 117,
+        "skill_overlap": 0.4789,
+        "scenario_similarity": 0.5254,
+        "combined_score": 0.5798,
+        "Logic": "스킬 의미 유사도=0.479 (딥러닝) | 시나리오 의미 유사도=0.525 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
       },
       {
-        "Preceding_ID": 19,
+        "Preceding_ID": 21,
+        "Target_ID": 117,
+        "skill_overlap": 0.3754,
+        "scenario_similarity": 0.5609,
+        "combined_score": 0.5389,
+        "Logic": "스킬 의미 유사도=0.375 (딥러닝) | 시나리오 의미 유사도=0.561 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 52,
+        "Target_ID": 118,
+        "skill_overlap": 0.6274,
+        "scenario_similarity": 0.4496,
+        "combined_score": 0.6274,
+        "Logic": "스킬 의미 유사도=0.627 (딥러닝) | 시나리오 의미 유사도=0.450 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 118,
+        "skill_overlap": 0.5633,
+        "scenario_similarity": 0.5858,
+        "combined_score": 0.5735,
+        "Logic": "스킬 의미 유사도=0.563 (딥러닝) | 시나리오 의미 유사도=0.586 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 118,
+        "skill_overlap": 0.4545,
+        "scenario_similarity": 0.5306,
+        "combined_score": 0.5687,
+        "Logic": "스킬 의미 유사도=0.454 (딥러닝) | 시나리오 의미 유사도=0.531 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 89,
         "Target_ID": 119,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.15,
-        "Logic": "공통 스킬 ['sqlite'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 university_level → senior_level"
+        "skill_overlap": 0.6291,
+        "scenario_similarity": 0.4935,
+        "combined_score": 0.6481,
+        "Logic": "스킬 의미 유사도=0.629 (딥러닝) | 시나리오 의미 유사도=0.494 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Data Management)"
+      },
+      {
+        "Preceding_ID": 39,
+        "Target_ID": 119,
+        "skill_overlap": 0.6666,
+        "scenario_similarity": 0.4315,
+        "combined_score": 0.6408,
+        "Logic": "스킬 의미 유사도=0.667 (딥러닝) | 시나리오 의미 유사도=0.432 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(Data Management)"
+      },
+      {
+        "Preceding_ID": 94,
+        "Target_ID": 119,
+        "skill_overlap": 0.5666,
+        "scenario_similarity": 0.6249,
+        "combined_score": 0.5928,
+        "Logic": "스킬 의미 유사도=0.567 (딥러닝) | 시나리오 의미 유사도=0.625 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 120,
+        "skill_overlap": 0.4844,
+        "scenario_similarity": 0.6895,
+        "combined_score": 0.5767,
+        "Logic": "스킬 의미 유사도=0.484 (딥러닝) | 시나리오 의미 유사도=0.689 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 17,
+        "Target_ID": 120,
+        "skill_overlap": 0.4481,
+        "scenario_similarity": 0.529,
+        "combined_score": 0.5645,
+        "Logic": "스킬 의미 유사도=0.448 (딥러닝) | 시나리오 의미 유사도=0.529 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 99,
+        "Target_ID": 120,
+        "skill_overlap": 0.4953,
+        "scenario_similarity": 0.4524,
+        "combined_score": 0.556,
+        "Logic": "스킬 의미 유사도=0.495 (딥러닝) | 시나리오 의미 유사도=0.452 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 56,
+        "Target_ID": 121,
+        "skill_overlap": 0.6042,
+        "scenario_similarity": 0.6375,
+        "combined_score": 0.6192,
+        "Logic": "스킬 의미 유사도=0.604 (딥러닝) | 시나리오 의미 유사도=0.637 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 121,
+        "skill_overlap": 0.4822,
+        "scenario_similarity": 0.7584,
+        "combined_score": 0.6065,
+        "Logic": "스킬 의미 유사도=0.482 (딥러닝) | 시나리오 의미 유사도=0.758 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 77,
+        "Target_ID": 121,
+        "skill_overlap": 0.5688,
+        "scenario_similarity": 0.4242,
+        "combined_score": 0.5838,
+        "Logic": "스킬 의미 유사도=0.569 (딥러닝) | 시나리오 의미 유사도=0.424 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Architecture)"
+      },
+      {
+        "Preceding_ID": 51,
+        "Target_ID": 122,
+        "skill_overlap": 0.6268,
+        "scenario_similarity": 0.6747,
+        "combined_score": 0.6483,
+        "Logic": "스킬 의미 유사도=0.627 (딥러닝) | 시나리오 의미 유사도=0.675 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 64,
+        "Target_ID": 122,
+        "skill_overlap": 0.6436,
+        "scenario_similarity": 0.5533,
+        "combined_score": 0.603,
+        "Logic": "스킬 의미 유사도=0.644 (딥러닝) | 시나리오 의미 유사도=0.553 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 100,
+        "Target_ID": 122,
+        "skill_overlap": 0.4519,
+        "scenario_similarity": 0.537,
+        "combined_score": 0.5702,
+        "Logic": "스킬 의미 유사도=0.452 (딥러닝) | 시나리오 의미 유사도=0.537 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 68,
+        "Target_ID": 123,
+        "skill_overlap": 0.609,
+        "scenario_similarity": 0.4883,
+        "combined_score": 0.6347,
+        "Logic": "스킬 의미 유사도=0.609 (딥러닝) | 시나리오 의미 유사도=0.488 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 18,
+        "Target_ID": 123,
+        "skill_overlap": 0.6581,
+        "scenario_similarity": 0.2516,
+        "combined_score": 0.5552,
+        "Logic": "스킬 의미 유사도=0.658 (딥러닝) | 시나리오 의미 유사도=0.252 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 123,
+        "skill_overlap": 0.5082,
+        "scenario_similarity": 0.3133,
+        "combined_score": 0.5005,
+        "Logic": "스킬 의미 유사도=0.508 (딥러닝) | 시나리오 의미 유사도=0.313 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 25,
+        "Target_ID": 124,
+        "skill_overlap": 0.484,
+        "scenario_similarity": 0.4017,
+        "combined_score": 0.527,
+        "Logic": "스킬 의미 유사도=0.484 (딥러닝) | 시나리오 의미 유사도=0.402 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(Security)"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 124,
+        "skill_overlap": 0.3867,
+        "scenario_similarity": 0.6697,
+        "combined_score": 0.5141,
+        "Logic": "스킬 의미 유사도=0.387 (딥러닝) | 시나리오 의미 유사도=0.670 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 82,
+        "Target_ID": 124,
+        "skill_overlap": 0.5657,
+        "scenario_similarity": 0.4487,
+        "combined_score": 0.513,
+        "Logic": "스킬 의미 유사도=0.566 (딥러닝) | 시나리오 의미 유사도=0.449 (딥러닝) | 난이도 middle_level → senior_level"
       },
       {
         "Preceding_ID": 81,
         "Target_ID": 125,
-        "skill_overlap": 0.6667,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.4,
-        "Logic": "공통 스킬 ['fastlane', 'jenkins'] (Jaccard=0.67) | 시나리오 유사도=0.00 | 난이도 middle_level → senior_level"
+        "skill_overlap": 0.8625,
+        "scenario_similarity": 0.6482,
+        "combined_score": 0.7661,
+        "Logic": "공통 스킬 ['fastlane', 'jenkins'] (임베딩 유사도=0.863) | 시나리오 의미 유사도=0.648 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 125,
+        "skill_overlap": 0.4505,
+        "scenario_similarity": 0.5575,
+        "combined_score": 0.5786,
+        "Logic": "스킬 의미 유사도=0.450 (딥러닝) | 시나리오 의미 유사도=0.558 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 9,
+        "Target_ID": 125,
+        "skill_overlap": 0.5407,
+        "scenario_similarity": 0.438,
+        "combined_score": 0.5745,
+        "Logic": "스킬 의미 유사도=0.541 (딥러닝) | 시나리오 의미 유사도=0.438 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 77,
+        "Target_ID": 126,
+        "skill_overlap": 0.6624,
+        "scenario_similarity": 0.5859,
+        "combined_score": 0.708,
+        "Logic": "스킬 의미 유사도=0.662 (딥러닝) | 시나리오 의미 유사도=0.586 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Architecture)"
+      },
+      {
+        "Preceding_ID": 44,
+        "Target_ID": 126,
+        "skill_overlap": 0.5138,
+        "scenario_similarity": 0.6922,
+        "combined_score": 0.5941,
+        "Logic": "스킬 의미 유사도=0.514 (딥러닝) | 시나리오 의미 유사도=0.692 (딥러닝) | 난이도 junior_level → senior_level"
       },
       {
         "Preceding_ID": 54,
         "Target_ID": 126,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.15,
-        "Logic": "공통 스킬 ['hilt'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 middle_level → senior_level"
+        "skill_overlap": 0.7193,
+        "scenario_similarity": 0.4045,
+        "combined_score": 0.5776,
+        "Logic": "공통 스킬 ['hilt'] (임베딩 유사도=0.719) | 시나리오 의미 유사도=0.404 (딥러닝) | 난이도 middle_level → senior_level"
       },
       {
         "Preceding_ID": 62,
         "Target_ID": 127,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.25,
-        "Logic": "공통 스킬 ['kotlin'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.7153,
+        "scenario_similarity": 0.495,
+        "combined_score": 0.6962,
+        "Logic": "공통 스킬 ['kotlin'] (임베딩 유사도=0.715) | 시나리오 의미 유사도=0.495 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 46,
         "Target_ID": 127,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0648,
-        "combined_score": 0.2259,
-        "Logic": "공통 스킬 ['kotlin'] (Jaccard=0.33) | 시나리오 유사도=0.06 | 난이도 junior_level → senior_level"
+        "skill_overlap": 0.7751,
+        "scenario_similarity": 0.4028,
+        "combined_score": 0.6075,
+        "Logic": "공통 스킬 ['kotlin'] (임베딩 유사도=0.775) | 시나리오 의미 유사도=0.403 (딥러닝) | 난이도 junior_level → senior_level"
       },
       {
-        "Preceding_ID": 6,
+        "Preceding_ID": 40,
         "Target_ID": 127,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0362,
-        "combined_score": 0.2145,
-        "Logic": "공통 스킬 ['kotlin'] (Jaccard=0.33) | 시나리오 유사도=0.04 | 난이도 university_level → senior_level"
+        "skill_overlap": 0.6114,
+        "scenario_similarity": 0.5754,
+        "combined_score": 0.5952,
+        "Logic": "스킬 의미 유사도=0.611 (딥러닝) | 시나리오 의미 유사도=0.575 (딥러닝) | 난이도 junior_level → senior_level"
       },
       {
         "Preceding_ID": 64,
         "Target_ID": 128,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.3,
-        "Logic": "공통 스킬 ['memory dump'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 middle_level → senior_level | 동일 카테고리(Performance)"
+        "skill_overlap": 0.7621,
+        "scenario_similarity": 0.5565,
+        "combined_score": 0.7496,
+        "Logic": "공통 스킬 ['memory dump'] (임베딩 유사도=0.762) | 시나리오 의미 유사도=0.557 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Performance)"
+      },
+      {
+        "Preceding_ID": 51,
+        "Target_ID": 128,
+        "skill_overlap": 0.6649,
+        "scenario_similarity": 0.5421,
+        "combined_score": 0.6896,
+        "Logic": "스킬 의미 유사도=0.665 (딥러닝) | 시나리오 의미 유사도=0.542 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Performance)"
+      },
+      {
+        "Preceding_ID": 53,
+        "Target_ID": 128,
+        "skill_overlap": 0.6216,
+        "scenario_similarity": 0.5263,
+        "combined_score": 0.5787,
+        "Logic": "스킬 의미 유사도=0.622 (딥러닝) | 시나리오 의미 유사도=0.526 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 25,
+        "Target_ID": 129,
+        "skill_overlap": 0.5397,
+        "scenario_similarity": 0.3426,
+        "combined_score": 0.531,
+        "Logic": "스킬 의미 유사도=0.540 (딥러닝) | 시나리오 의미 유사도=0.343 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(Security)"
       },
       {
         "Preceding_ID": 55,
         "Target_ID": 129,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.15,
-        "Logic": "공통 스킬 ['ssl pinning'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 middle_level → senior_level"
+        "skill_overlap": 0.6854,
+        "scenario_similarity": 0.2795,
+        "combined_score": 0.5028,
+        "Logic": "공통 스킬 ['ssl pinning'] (임베딩 유사도=0.685) | 시나리오 의미 유사도=0.279 (딥러닝) | 난이도 middle_level → senior_level"
       },
       {
-        "Preceding_ID": 18,
+        "Preceding_ID": 69,
+        "Target_ID": 129,
+        "skill_overlap": 0.4235,
+        "scenario_similarity": 0.3011,
+        "combined_score": 0.4484,
+        "Logic": "스킬 의미 유사도=0.423 (딥러닝) | 시나리오 의미 유사도=0.301 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Security)"
+      },
+      {
+        "Preceding_ID": 46,
+        "Target_ID": 130,
+        "skill_overlap": 0.6183,
+        "scenario_similarity": 0.3389,
+        "combined_score": 0.5725,
+        "Logic": "스킬 의미 유사도=0.618 (딥러닝) | 시나리오 의미 유사도=0.339 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 44,
+        "Target_ID": 130,
+        "skill_overlap": 0.491,
+        "scenario_similarity": 0.4004,
+        "combined_score": 0.5302,
+        "Logic": "스킬 의미 유사도=0.491 (딥러닝) | 시나리오 의미 유사도=0.400 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 56,
+        "Target_ID": 130,
+        "skill_overlap": 0.5798,
+        "scenario_similarity": 0.2425,
+        "combined_score": 0.508,
+        "Logic": "스킬 의미 유사도=0.580 (딥러닝) | 시나리오 의미 유사도=0.242 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 131,
+        "skill_overlap": 0.6502,
+        "scenario_similarity": 0.2599,
+        "combined_score": 0.5546,
+        "Logic": "스킬 의미 유사도=0.650 (딥러닝) | 시나리오 의미 유사도=0.260 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 22,
+        "Target_ID": 131,
+        "skill_overlap": 0.458,
+        "scenario_similarity": 0.3771,
+        "combined_score": 0.5016,
+        "Logic": "스킬 의미 유사도=0.458 (딥러닝) | 시나리오 의미 유사도=0.377 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 98,
+        "Target_ID": 131,
+        "skill_overlap": 0.494,
+        "scenario_similarity": 0.3064,
+        "combined_score": 0.4896,
+        "Logic": "스킬 의미 유사도=0.494 (딥러닝) | 시나리오 의미 유사도=0.306 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 93,
+        "Target_ID": 132,
+        "skill_overlap": 0.4429,
+        "scenario_similarity": 0.6217,
+        "combined_score": 0.6034,
+        "Logic": "스킬 의미 유사도=0.443 (딥러닝) | 시나리오 의미 유사도=0.622 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 76,
+        "Target_ID": 132,
+        "skill_overlap": 0.4446,
+        "scenario_similarity": 0.5355,
+        "combined_score": 0.5655,
+        "Logic": "스킬 의미 유사도=0.445 (딥러닝) | 시나리오 의미 유사도=0.536 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 132,
+        "skill_overlap": 0.4053,
+        "scenario_similarity": 0.4955,
+        "combined_score": 0.5259,
+        "Logic": "스킬 의미 유사도=0.405 (딥러닝) | 시나리오 의미 유사도=0.495 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 58,
+        "Target_ID": 133,
+        "skill_overlap": 0.4626,
+        "scenario_similarity": 0.4145,
+        "combined_score": 0.521,
+        "Logic": "스킬 의미 유사도=0.463 (딥러닝) | 시나리오 의미 유사도=0.415 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 85,
+        "Target_ID": 133,
+        "skill_overlap": 0.4092,
+        "scenario_similarity": 0.3744,
+        "combined_score": 0.4735,
+        "Logic": "스킬 의미 유사도=0.409 (딥러닝) | 시나리오 의미 유사도=0.374 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 67,
+        "Target_ID": 133,
+        "skill_overlap": 0.4377,
+        "scenario_similarity": 0.3302,
+        "combined_score": 0.4693,
+        "Logic": "스킬 의미 유사도=0.438 (딥러닝) | 시나리오 의미 유사도=0.330 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 43,
+        "Target_ID": 134,
+        "skill_overlap": 0.5698,
+        "scenario_similarity": 0.4525,
+        "combined_score": 0.597,
+        "Logic": "스킬 의미 유사도=0.570 (딥러닝) | 시나리오 의미 유사도=0.452 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 62,
+        "Target_ID": 134,
+        "skill_overlap": 0.5367,
+        "scenario_similarity": 0.4045,
+        "combined_score": 0.5572,
+        "Logic": "스킬 의미 유사도=0.537 (딥러닝) | 시나리오 의미 유사도=0.405 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 72,
+        "Target_ID": 134,
+        "skill_overlap": 0.5008,
+        "scenario_similarity": 0.415,
+        "combined_score": 0.5422,
+        "Logic": "스킬 의미 유사도=0.501 (딥러닝) | 시나리오 의미 유사도=0.415 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 55,
+        "Target_ID": 135,
+        "skill_overlap": 0.5277,
+        "scenario_similarity": 0.7287,
+        "combined_score": 0.6181,
+        "Logic": "스킬 의미 유사도=0.528 (딥러닝) | 시나리오 의미 유사도=0.729 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 25,
+        "Target_ID": 135,
+        "skill_overlap": 0.5877,
+        "scenario_similarity": 0.2138,
+        "combined_score": 0.4994,
+        "Logic": "스킬 의미 유사도=0.588 (딥러닝) | 시나리오 의미 유사도=0.214 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(Security)"
+      },
+      {
+        "Preceding_ID": 28,
+        "Target_ID": 135,
+        "skill_overlap": 0.5681,
+        "scenario_similarity": 0.3984,
+        "combined_score": 0.4917,
+        "Logic": "스킬 의미 유사도=0.568 (딥러닝) | 시나리오 의미 유사도=0.398 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 40,
         "Target_ID": 136,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1527,
-        "combined_score": 0.1611,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.15 | 난이도 university_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.6523,
+        "scenario_similarity": 0.5924,
+        "combined_score": 0.6253,
+        "Logic": "스킬 의미 유사도=0.652 (딥러닝) | 시나리오 의미 유사도=0.592 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 99,
+        "Target_ID": 136,
+        "skill_overlap": 0.64,
+        "scenario_similarity": 0.2682,
+        "combined_score": 0.5527,
+        "Logic": "스킬 의미 유사도=0.640 (딥러닝) | 시나리오 의미 유사도=0.268 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 62,
+        "Target_ID": 136,
+        "skill_overlap": 0.5346,
+        "scenario_similarity": 0.3484,
+        "combined_score": 0.5308,
+        "Logic": "스킬 의미 유사도=0.535 (딥러닝) | 시나리오 의미 유사도=0.348 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 5,
         "Target_ID": 137,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.3,
-        "Logic": "공통 스킬 ['view hierarchy'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 university_level → senior_level | 동일 카테고리(UI Framework)"
+        "skill_overlap": 0.7198,
+        "scenario_similarity": 0.4275,
+        "combined_score": 0.6683,
+        "Logic": "공통 스킬 ['view hierarchy'] (임베딩 유사도=0.720) | 시나리오 의미 유사도=0.427 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(UI Framework)"
+      },
+      {
+        "Preceding_ID": 53,
+        "Target_ID": 137,
+        "skill_overlap": 0.5664,
+        "scenario_similarity": 0.4455,
+        "combined_score": 0.592,
+        "Logic": "스킬 의미 유사도=0.566 (딥러닝) | 시나리오 의미 유사도=0.445 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(UI Framework)"
+      },
+      {
+        "Preceding_ID": 92,
+        "Target_ID": 137,
+        "skill_overlap": 0.4538,
+        "scenario_similarity": 0.6203,
+        "combined_score": 0.5287,
+        "Logic": "스킬 의미 유사도=0.454 (딥러닝) | 시나리오 의미 유사도=0.620 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 17,
+        "Target_ID": 138,
+        "skill_overlap": 0.4974,
+        "scenario_similarity": 0.5213,
+        "combined_score": 0.5882,
+        "Logic": "스킬 의미 유사도=0.497 (딥러닝) | 시나리오 의미 유사도=0.521 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 138,
+        "skill_overlap": 0.37,
+        "scenario_similarity": 0.5351,
+        "combined_score": 0.5243,
+        "Logic": "스킬 의미 유사도=0.370 (딥러닝) | 시나리오 의미 유사도=0.535 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 138,
+        "skill_overlap": 0.4202,
+        "scenario_similarity": 0.4621,
+        "combined_score": 0.519,
+        "Logic": "스킬 의미 유사도=0.420 (딥러닝) | 시나리오 의미 유사도=0.462 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 139,
+        "skill_overlap": 0.42,
+        "scenario_similarity": 0.4403,
+        "combined_score": 0.5091,
+        "Logic": "스킬 의미 유사도=0.420 (딥러닝) | 시나리오 의미 유사도=0.440 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 19,
+        "Target_ID": 139,
+        "skill_overlap": 0.3832,
+        "scenario_similarity": 0.4341,
+        "combined_score": 0.4861,
+        "Logic": "스킬 의미 유사도=0.383 (딥러닝) | 시나리오 의미 유사도=0.434 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 20,
+        "Target_ID": 139,
+        "skill_overlap": 0.4554,
+        "scenario_similarity": 0.3225,
+        "combined_score": 0.4756,
+        "Logic": "스킬 의미 유사도=0.455 (딥러닝) | 시나리오 의미 유사도=0.323 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 56,
+        "Target_ID": 140,
+        "skill_overlap": 0.5443,
+        "scenario_similarity": 0.5503,
+        "combined_score": 0.627,
+        "Logic": "스킬 의미 유사도=0.544 (딥러닝) | 시나리오 의미 유사도=0.550 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 44,
+        "Target_ID": 140,
+        "skill_overlap": 0.4037,
+        "scenario_similarity": 0.5213,
+        "combined_score": 0.5366,
+        "Logic": "스킬 의미 유사도=0.404 (딥러닝) | 시나리오 의미 유사도=0.521 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 140,
+        "skill_overlap": 0.4581,
+        "scenario_similarity": 0.5741,
+        "combined_score": 0.5103,
+        "Logic": "스킬 의미 유사도=0.458 (딥러닝) | 시나리오 의미 유사도=0.574 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 43,
+        "Target_ID": 141,
+        "skill_overlap": 0.6244,
+        "scenario_similarity": 0.5552,
+        "combined_score": 0.6732,
+        "Logic": "스킬 의미 유사도=0.624 (딥러닝) | 시나리오 의미 유사도=0.555 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 141,
+        "skill_overlap": 0.3098,
+        "scenario_similarity": 0.6389,
+        "combined_score": 0.5379,
+        "Logic": "스킬 의미 유사도=0.310 (딥러닝) | 시나리오 의미 유사도=0.639 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 83,
-        "Target_ID": 138,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1687,
-        "combined_score": 0.1675,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.17 | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+        "Target_ID": 141,
+        "skill_overlap": 0.5391,
+        "scenario_similarity": 0.3486,
+        "combined_score": 0.5334,
+        "Logic": "스킬 의미 유사도=0.539 (딥러닝) | 시나리오 의미 유사도=0.349 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       },
       {
-        "Preceding_ID": 4,
+        "Preceding_ID": 94,
+        "Target_ID": 142,
+        "skill_overlap": 0.4463,
+        "scenario_similarity": 0.7238,
+        "combined_score": 0.5711,
+        "Logic": "스킬 의미 유사도=0.446 (딥러닝) | 시나리오 의미 유사도=0.724 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 93,
+        "Target_ID": 142,
+        "skill_overlap": 0.3695,
+        "scenario_similarity": 0.629,
+        "combined_score": 0.5663,
+        "Logic": "스킬 의미 유사도=0.369 (딥러닝) | 시나리오 의미 유사도=0.629 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 142,
+        "skill_overlap": 0.3379,
+        "scenario_similarity": 0.6466,
+        "combined_score": 0.5568,
+        "Logic": "스킬 의미 유사도=0.338 (딥러닝) | 시나리오 의미 유사도=0.647 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 40,
         "Target_ID": 143,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0225,
-        "combined_score": 0.159,
-        "Logic": "공통 스킬 ['json'] (Jaccard=0.25) | 시나리오 유사도=0.02 | 난이도 university_level → senior_level"
+        "skill_overlap": 0.5872,
+        "scenario_similarity": 0.6232,
+        "combined_score": 0.6834,
+        "Logic": "스킬 의미 유사도=0.587 (딥러닝) | 시나리오 의미 유사도=0.623 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(Networking)"
       },
       {
-        "Preceding_ID": 95,
+        "Preceding_ID": 74,
+        "Target_ID": 143,
+        "skill_overlap": 0.4904,
+        "scenario_similarity": 0.615,
+        "combined_score": 0.6265,
+        "Logic": "스킬 의미 유사도=0.490 (딥러닝) | 시나리오 의미 유사도=0.615 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 80,
+        "Target_ID": 143,
+        "skill_overlap": 0.6737,
+        "scenario_similarity": 0.2889,
+        "combined_score": 0.5805,
+        "Logic": "스킬 의미 유사도=0.674 (딥러닝) | 시나리오 의미 유사도=0.289 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Networking)"
+      },
+      {
+        "Preceding_ID": 23,
+        "Target_ID": 144,
+        "skill_overlap": 0.7669,
+        "scenario_similarity": 0.5184,
+        "combined_score": 0.655,
+        "Logic": "스킬 의미 유사도=0.767 (딥러닝) | 시나리오 의미 유사도=0.518 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 57,
+        "Target_ID": 144,
+        "skill_overlap": 0.5062,
+        "scenario_similarity": 0.4284,
+        "combined_score": 0.4712,
+        "Logic": "스킬 의미 유사도=0.506 (딥러닝) | 시나리오 의미 유사도=0.428 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 144,
+        "skill_overlap": 0.3213,
+        "scenario_similarity": 0.5348,
+        "combined_score": 0.4174,
+        "Logic": "스킬 의미 유사도=0.321 (딥러닝) | 시나리오 의미 유사도=0.535 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 87,
         "Target_ID": 145,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1582,
-        "combined_score": 0.1633,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.16 | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.5482,
+        "scenario_similarity": 0.5889,
+        "combined_score": 0.6465,
+        "Logic": "스킬 의미 유사도=0.548 (딥러닝) | 시나리오 의미 유사도=0.589 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 43,
+        "Target_ID": 145,
+        "skill_overlap": 0.3974,
+        "scenario_similarity": 0.6348,
+        "combined_score": 0.5842,
+        "Logic": "스킬 의미 유사도=0.397 (딥러닝) | 시나리오 의미 유사도=0.635 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 20,
+        "Target_ID": 145,
+        "skill_overlap": 0.3922,
+        "scenario_similarity": 0.5061,
+        "combined_score": 0.5235,
+        "Logic": "스킬 의미 유사도=0.392 (딥러닝) | 시나리오 의미 유사도=0.506 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 93,
+        "Target_ID": 146,
+        "skill_overlap": 0.4845,
+        "scenario_similarity": 0.5799,
+        "combined_score": 0.6074,
+        "Logic": "스킬 의미 유사도=0.485 (딥러닝) | 시나리오 의미 유사도=0.580 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 67,
+        "Target_ID": 146,
+        "skill_overlap": 0.5035,
+        "scenario_similarity": 0.474,
+        "combined_score": 0.5702,
+        "Logic": "스킬 의미 유사도=0.503 (딥러닝) | 시나리오 의미 유사도=0.474 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 84,
+        "Target_ID": 146,
+        "skill_overlap": 0.5009,
+        "scenario_similarity": 0.5667,
+        "combined_score": 0.5305,
+        "Logic": "스킬 의미 유사도=0.501 (딥러닝) | 시나리오 의미 유사도=0.567 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 55,
+        "Target_ID": 147,
+        "skill_overlap": 0.6093,
+        "scenario_similarity": 0.4136,
+        "combined_score": 0.5212,
+        "Logic": "스킬 의미 유사도=0.609 (딥러닝) | 시나리오 의미 유사도=0.414 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 25,
+        "Target_ID": 147,
+        "skill_overlap": 0.6296,
+        "scenario_similarity": 0.3858,
+        "combined_score": 0.5199,
+        "Logic": "스킬 의미 유사도=0.630 (딥러닝) | 시나리오 의미 유사도=0.386 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 28,
+        "Target_ID": 147,
+        "skill_overlap": 0.4223,
+        "scenario_similarity": 0.6336,
+        "combined_score": 0.5174,
+        "Logic": "스킬 의미 유사도=0.422 (딥러닝) | 시나리오 의미 유사도=0.634 (딥러닝) | 난이도 junior_level → senior_level"
       },
       {
         "Preceding_ID": 19,
         "Target_ID": 148,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0196,
-        "combined_score": 0.2578,
-        "Logic": "공통 스킬 ['sqlite'] (Jaccard=0.25) | 시나리오 유사도=0.02 | 난이도 university_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.7747,
+        "scenario_similarity": 0.4168,
+        "combined_score": 0.6937,
+        "Logic": "공통 스킬 ['sqlite'] (임베딩 유사도=0.775) | 시나리오 의미 유사도=0.417 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 71,
         "Target_ID": 148,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.1293,
-        "combined_score": 0.2017,
-        "Logic": "공통 스킬 ['sqlite'] (Jaccard=0.25) | 시나리오 유사도=0.13 | 난이도 middle_level → senior_level"
+        "skill_overlap": 0.8181,
+        "scenario_similarity": 0.4733,
+        "combined_score": 0.6629,
+        "Logic": "공통 스킬 ['sqlite'] (임베딩 유사도=0.818) | 시나리오 의미 유사도=0.473 (딥러닝) | 난이도 middle_level → senior_level"
       },
       {
-        "Preceding_ID": 79,
+        "Preceding_ID": 39,
         "Target_ID": 148,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0181,
-        "combined_score": 0.1572,
-        "Logic": "공통 스킬 ['sqlite'] (Jaccard=0.25) | 시나리오 유사도=0.02 | 난이도 middle_level → senior_level"
+        "skill_overlap": 0.7666,
+        "scenario_similarity": 0.4166,
+        "combined_score": 0.6091,
+        "Logic": "스킬 의미 유사도=0.767 (딥러닝) | 시나리오 의미 유사도=0.417 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 149,
+        "skill_overlap": 0.4582,
+        "scenario_similarity": 0.7238,
+        "combined_score": 0.5777,
+        "Logic": "스킬 의미 유사도=0.458 (딥러닝) | 시나리오 의미 유사도=0.724 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 19,
+        "Target_ID": 149,
+        "skill_overlap": 0.4488,
+        "scenario_similarity": 0.4796,
+        "combined_score": 0.5427,
+        "Logic": "스킬 의미 유사도=0.449 (딥러닝) | 시나리오 의미 유사도=0.480 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 18,
+        "Target_ID": 149,
+        "skill_overlap": 0.4343,
+        "scenario_similarity": 0.49,
+        "combined_score": 0.5393,
+        "Logic": "스킬 의미 유사도=0.434 (딥러닝) | 시나리오 의미 유사도=0.490 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 83,
+        "Target_ID": 150,
+        "skill_overlap": 0.3808,
+        "scenario_similarity": 0.5211,
+        "combined_score": 0.5239,
+        "Logic": "스킬 의미 유사도=0.381 (딥러닝) | 시나리오 의미 유사도=0.521 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 90,
+        "Target_ID": 150,
+        "skill_overlap": 0.4768,
+        "scenario_similarity": 0.5253,
+        "combined_score": 0.4986,
+        "Logic": "스킬 의미 유사도=0.477 (딥러닝) | 시나리오 의미 유사도=0.525 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 51,
+        "Target_ID": 150,
+        "skill_overlap": 0.5275,
+        "scenario_similarity": 0.4514,
+        "combined_score": 0.4932,
+        "Logic": "스킬 의미 유사도=0.527 (딥러닝) | 시나리오 의미 유사도=0.451 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 10,
+        "Target_ID": 151,
+        "skill_overlap": 0.597,
+        "scenario_similarity": 0.4663,
+        "combined_score": 0.5381,
+        "Logic": "스킬 의미 유사도=0.597 (딥러닝) | 시나리오 의미 유사도=0.466 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 151,
+        "skill_overlap": 0.3592,
+        "scenario_similarity": 0.5572,
+        "combined_score": 0.5283,
+        "Logic": "스킬 의미 유사도=0.359 (딥러닝) | 시나리오 의미 유사도=0.557 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 76,
-        "Target_ID": 149,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1574,
-        "combined_score": 0.163,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.16 | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+        "Target_ID": 151,
+        "skill_overlap": 0.3169,
+        "scenario_similarity": 0.5993,
+        "combined_score": 0.524,
+        "Logic": "스킬 의미 유사도=0.317 (딥러닝) | 시나리오 의미 유사도=0.599 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 23,
+        "Target_ID": 152,
+        "skill_overlap": 0.4819,
+        "scenario_similarity": 0.4449,
+        "combined_score": 0.4652,
+        "Logic": "스킬 의미 유사도=0.482 (딥러닝) | 시나리오 의미 유사도=0.445 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 75,
+        "Target_ID": 152,
+        "skill_overlap": 0.3314,
+        "scenario_similarity": 0.4149,
+        "combined_score": 0.449,
+        "Logic": "스킬 의미 유사도=0.331 (딥러닝) | 시나리오 의미 유사도=0.415 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(QA)"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 152,
+        "skill_overlap": 0.4858,
+        "scenario_similarity": 0.3969,
+        "combined_score": 0.4458,
+        "Logic": "스킬 의미 유사도=0.486 (딥러닝) | 시나리오 의미 유사도=0.397 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 153,
+        "skill_overlap": 0.4373,
+        "scenario_similarity": 0.3656,
+        "combined_score": 0.4851,
+        "Logic": "스킬 의미 유사도=0.437 (딥러닝) | 시나리오 의미 유사도=0.366 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 43,
+        "Target_ID": 153,
+        "skill_overlap": 0.5156,
+        "scenario_similarity": 0.2386,
+        "combined_score": 0.471,
+        "Logic": "스킬 의미 유사도=0.516 (딥러닝) | 시나리오 의미 유사도=0.239 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 98,
+        "Target_ID": 153,
+        "skill_overlap": 0.4187,
+        "scenario_similarity": 0.3516,
+        "combined_score": 0.4685,
+        "Logic": "스킬 의미 유사도=0.419 (딥러닝) | 시나리오 의미 유사도=0.352 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 34,
         "Target_ID": 154,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1523,
-        "combined_score": 0.1609,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.15 | 난이도 junior_level → senior_level | 동일 카테고리(Build System)"
+        "skill_overlap": 0.412,
+        "scenario_similarity": 0.6199,
+        "combined_score": 0.5856,
+        "Logic": "스킬 의미 유사도=0.412 (딥러닝) | 시나리오 의미 유사도=0.620 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(Build System)"
+      },
+      {
+        "Preceding_ID": 33,
+        "Target_ID": 154,
+        "skill_overlap": 0.5146,
+        "scenario_similarity": 0.6036,
+        "combined_score": 0.5546,
+        "Logic": "스킬 의미 유사도=0.515 (딥러닝) | 시나리오 의미 유사도=0.604 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 88,
+        "Target_ID": 154,
+        "skill_overlap": 0.5316,
+        "scenario_similarity": 0.3725,
+        "combined_score": 0.54,
+        "Logic": "스킬 의미 유사도=0.532 (딥러닝) | 시나리오 의미 유사도=0.373 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Build System)"
+      },
+      {
+        "Preceding_ID": 3,
+        "Target_ID": 155,
+        "skill_overlap": 0.5108,
+        "scenario_similarity": 0.5616,
+        "combined_score": 0.5337,
+        "Logic": "스킬 의미 유사도=0.511 (딥러닝) | 시나리오 의미 유사도=0.562 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 155,
+        "skill_overlap": 0.3773,
+        "scenario_similarity": 0.4984,
+        "combined_score": 0.5118,
+        "Logic": "스킬 의미 유사도=0.377 (딥러닝) | 시나리오 의미 유사도=0.498 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 43,
+        "Target_ID": 155,
+        "skill_overlap": 0.3469,
+        "scenario_similarity": 0.5211,
+        "combined_score": 0.5053,
+        "Logic": "스킬 의미 유사도=0.347 (딥러닝) | 시나리오 의미 유사도=0.521 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 25,
         "Target_ID": 156,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.2451,
-        "combined_score": 0.298,
-        "Logic": "공통 스킬 ['security'] (Jaccard=0.33) | 시나리오 유사도=0.25 | 난이도 university_level → senior_level"
+        "skill_overlap": 0.6155,
+        "scenario_similarity": 0.5983,
+        "combined_score": 0.6078,
+        "Logic": "공통 스킬 ['security'] (임베딩 유사도=0.616) | 시나리오 의미 유사도=0.598 (딥러닝) | 난이도 university_level → senior_level"
       },
       {
-        "Preceding_ID": 55,
+        "Preceding_ID": 13,
         "Target_ID": 156,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.15,
-        "Logic": "공통 스킬 ['security'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 middle_level → senior_level"
+        "skill_overlap": 0.3201,
+        "scenario_similarity": 0.5659,
+        "combined_score": 0.5107,
+        "Logic": "스킬 의미 유사도=0.320 (딥러닝) | 시나리오 의미 유사도=0.566 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 36,
+        "Target_ID": 156,
+        "skill_overlap": 0.4445,
+        "scenario_similarity": 0.5433,
+        "combined_score": 0.4889,
+        "Logic": "스킬 의미 유사도=0.444 (딥러닝) | 시나리오 의미 유사도=0.543 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 43,
+        "Target_ID": 157,
+        "skill_overlap": 0.4726,
+        "scenario_similarity": 0.8377,
+        "combined_score": 0.7169,
+        "Logic": "스킬 의미 유사도=0.473 (딥러닝) | 시나리오 의미 유사도=0.838 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 157,
+        "skill_overlap": 0.4238,
+        "scenario_similarity": 0.6021,
+        "combined_score": 0.584,
+        "Logic": "스킬 의미 유사도=0.424 (딥러닝) | 시나리오 의미 유사도=0.602 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 87,
+        "Target_ID": 157,
+        "skill_overlap": 0.305,
+        "scenario_similarity": 0.7033,
+        "combined_score": 0.5642,
+        "Logic": "스킬 의미 유사도=0.305 (딥러닝) | 시나리오 의미 유사도=0.703 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 17,
+        "Target_ID": 158,
+        "skill_overlap": 0.4545,
+        "scenario_similarity": 0.6345,
+        "combined_score": 0.6155,
+        "Logic": "스킬 의미 유사도=0.455 (딥러닝) | 시나리오 의미 유사도=0.634 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 99,
+        "Target_ID": 158,
+        "skill_overlap": 0.5115,
+        "scenario_similarity": 0.4652,
+        "combined_score": 0.5706,
+        "Logic": "스킬 의미 유사도=0.511 (딥러닝) | 시나리오 의미 유사도=0.465 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 158,
+        "skill_overlap": 0.3838,
+        "scenario_similarity": 0.6207,
+        "combined_score": 0.5704,
+        "Logic": "스킬 의미 유사도=0.384 (딥러닝) | 시나리오 의미 유사도=0.621 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 28,
+        "Target_ID": 159,
+        "skill_overlap": 0.6993,
+        "scenario_similarity": 0.4818,
+        "combined_score": 0.6014,
+        "Logic": "스킬 의미 유사도=0.699 (딥러닝) | 시나리오 의미 유사도=0.482 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 19,
+        "Target_ID": 159,
+        "skill_overlap": 0.5284,
+        "scenario_similarity": 0.423,
+        "combined_score": 0.561,
+        "Logic": "스킬 의미 유사도=0.528 (딥러닝) | 시나리오 의미 유사도=0.423 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 25,
+        "Target_ID": 159,
+        "skill_overlap": 0.6013,
+        "scenario_similarity": 0.4157,
+        "combined_score": 0.5178,
+        "Logic": "스킬 의미 유사도=0.601 (딥러닝) | 시나리오 의미 유사도=0.416 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 96,
+        "Target_ID": 160,
+        "skill_overlap": 0.4899,
+        "scenario_similarity": 0.4759,
+        "combined_score": 0.5636,
+        "Logic": "스킬 의미 유사도=0.490 (딥러닝) | 시나리오 의미 유사도=0.476 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 58,
+        "Target_ID": 160,
+        "skill_overlap": 0.4098,
+        "scenario_similarity": 0.5005,
+        "combined_score": 0.5306,
+        "Logic": "스킬 의미 유사도=0.410 (딥러닝) | 시나리오 의미 유사도=0.500 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 62,
+        "Target_ID": 160,
+        "skill_overlap": 0.415,
+        "scenario_similarity": 0.489,
+        "combined_score": 0.5283,
+        "Logic": "스킬 의미 유사도=0.415 (딥러닝) | 시나리오 의미 유사도=0.489 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 77,
         "Target_ID": 161,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.2126,
-        "combined_score": 0.1851,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.21 | 난이도 middle_level → senior_level | 동일 카테고리(Architecture)"
+        "skill_overlap": 0.5742,
+        "scenario_similarity": 0.7693,
+        "combined_score": 0.742,
+        "Logic": "스킬 의미 유사도=0.574 (딥러닝) | 시나리오 의미 유사도=0.769 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Architecture)"
+      },
+      {
+        "Preceding_ID": 88,
+        "Target_ID": 161,
+        "skill_overlap": 0.6329,
+        "scenario_similarity": 0.4441,
+        "combined_score": 0.548,
+        "Logic": "스킬 의미 유사도=0.633 (딥러닝) | 시나리오 의미 유사도=0.444 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 98,
+        "Target_ID": 161,
+        "skill_overlap": 0.5442,
+        "scenario_similarity": 0.5489,
+        "combined_score": 0.5463,
+        "Logic": "스킬 의미 유사도=0.544 (딥러닝) | 시나리오 의미 유사도=0.549 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 93,
+        "Target_ID": 162,
+        "skill_overlap": 0.3266,
+        "scenario_similarity": 0.5764,
+        "combined_score": 0.519,
+        "Logic": "스킬 의미 유사도=0.327 (딥러닝) | 시나리오 의미 유사도=0.576 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 35,
+        "Target_ID": 162,
+        "skill_overlap": 0.5965,
+        "scenario_similarity": 0.3937,
+        "combined_score": 0.5052,
+        "Logic": "스킬 의미 유사도=0.597 (딥러닝) | 시나리오 의미 유사도=0.394 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 85,
+        "Target_ID": 162,
+        "skill_overlap": 0.3548,
+        "scenario_similarity": 0.4895,
+        "combined_score": 0.4954,
+        "Logic": "스킬 의미 유사도=0.355 (딥러닝) | 시나리오 의미 유사도=0.489 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 163,
+        "skill_overlap": 0.5787,
+        "scenario_similarity": 0.543,
+        "combined_score": 0.6427,
+        "Logic": "스킬 의미 유사도=0.579 (딥러닝) | 시나리오 의미 유사도=0.543 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 163,
+        "skill_overlap": 0.4694,
+        "scenario_similarity": 0.5943,
+        "combined_score": 0.6056,
+        "Logic": "스킬 의미 유사도=0.469 (딥러닝) | 시나리오 의미 유사도=0.594 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 98,
+        "Target_ID": 163,
+        "skill_overlap": 0.4079,
+        "scenario_similarity": 0.6047,
+        "combined_score": 0.5765,
+        "Logic": "스킬 의미 유사도=0.408 (딥러닝) | 시나리오 의미 유사도=0.605 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 75,
         "Target_ID": 164,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.2,
-        "Logic": "공통 스킬 ['tdd'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 middle_level → senior_level"
+        "skill_overlap": 0.7541,
+        "scenario_similarity": 0.6181,
+        "combined_score": 0.6929,
+        "Logic": "공통 스킬 ['tdd'] (임베딩 유사도=0.754) | 시나리오 의미 유사도=0.618 (딥러닝) | 난이도 middle_level → senior_level"
       },
       {
-        "Preceding_ID": 8,
+        "Preceding_ID": 68,
+        "Target_ID": 164,
+        "skill_overlap": 0.5124,
+        "scenario_similarity": 0.3713,
+        "combined_score": 0.5289,
+        "Logic": "스킬 의미 유사도=0.512 (딥러닝) | 시나리오 의미 유사도=0.371 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 164,
+        "skill_overlap": 0.534,
+        "scenario_similarity": 0.3109,
+        "combined_score": 0.5136,
+        "Logic": "스킬 의미 유사도=0.534 (딥러닝) | 시나리오 의미 유사도=0.311 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 56,
+        "Target_ID": 165,
+        "skill_overlap": 0.5939,
+        "scenario_similarity": 0.5593,
+        "combined_score": 0.6583,
+        "Logic": "스킬 의미 유사도=0.594 (딥러닝) | 시나리오 의미 유사도=0.559 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 44,
+        "Target_ID": 165,
+        "skill_overlap": 0.5296,
+        "scenario_similarity": 0.5869,
+        "combined_score": 0.6354,
+        "Logic": "스킬 의미 유사도=0.530 (딥러닝) | 시나리오 의미 유사도=0.587 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 11,
+        "Target_ID": 165,
+        "skill_overlap": 0.6118,
+        "scenario_similarity": 0.4697,
+        "combined_score": 0.6279,
+        "Logic": "스킬 의미 유사도=0.612 (딥러닝) | 시나리오 의미 유사도=0.470 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 35,
+        "Target_ID": 166,
+        "skill_overlap": 0.6059,
+        "scenario_similarity": 0.4863,
+        "combined_score": 0.6321,
+        "Logic": "스킬 의미 유사도=0.606 (딥러닝) | 시나리오 의미 유사도=0.486 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(iOS)"
+      },
+      {
+        "Preceding_ID": 2,
+        "Target_ID": 166,
+        "skill_overlap": 0.558,
+        "scenario_similarity": 0.3827,
+        "combined_score": 0.5591,
+        "Logic": "스킬 의미 유사도=0.558 (딥러닝) | 시나리오 의미 유사도=0.383 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(iOS)"
+      },
+      {
+        "Preceding_ID": 93,
+        "Target_ID": 166,
+        "skill_overlap": 0.5636,
+        "scenario_similarity": 0.4103,
+        "combined_score": 0.4946,
+        "Logic": "스킬 의미 유사도=0.564 (딥러닝) | 시나리오 의미 유사도=0.410 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 47,
         "Target_ID": 167,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.2,
-        "Logic": "공통 스킬 ['exception handling'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 university_level → senior_level"
+        "skill_overlap": 0.3963,
+        "scenario_similarity": 0.6847,
+        "combined_score": 0.6061,
+        "Logic": "스킬 의미 유사도=0.396 (딥러닝) | 시나리오 의미 유사도=0.685 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
       },
       {
-        "Preceding_ID": 83,
+        "Preceding_ID": 96,
+        "Target_ID": 167,
+        "skill_overlap": 0.5538,
+        "scenario_similarity": 0.3253,
+        "combined_score": 0.531,
+        "Logic": "스킬 의미 유사도=0.554 (딥러닝) | 시나리오 의미 유사도=0.325 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 7,
+        "Target_ID": 167,
+        "skill_overlap": 0.3563,
+        "scenario_similarity": 0.7207,
+        "combined_score": 0.5203,
+        "Logic": "스킬 의미 유사도=0.356 (딥러닝) | 시나리오 의미 유사도=0.721 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 45,
         "Target_ID": 168,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1406,
-        "combined_score": 0.1562,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.14 | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.4638,
+        "scenario_similarity": 0.6921,
+        "combined_score": 0.5666,
+        "Logic": "스킬 의미 유사도=0.464 (딥러닝) | 시나리오 의미 유사도=0.692 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 43,
+        "Target_ID": 168,
+        "skill_overlap": 0.504,
+        "scenario_similarity": 0.427,
+        "combined_score": 0.5493,
+        "Logic": "스킬 의미 유사도=0.504 (딥러닝) | 시나리오 의미 유사도=0.427 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 99,
+        "Target_ID": 168,
+        "skill_overlap": 0.429,
+        "scenario_similarity": 0.5177,
+        "combined_score": 0.5489,
+        "Logic": "스킬 의미 유사도=0.429 (딥러닝) | 시나리오 의미 유사도=0.518 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 64,
+        "Target_ID": 169,
+        "skill_overlap": 0.7025,
+        "scenario_similarity": 0.4805,
+        "combined_score": 0.6026,
+        "Logic": "스킬 의미 유사도=0.703 (딥러닝) | 시나리오 의미 유사도=0.481 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 51,
+        "Target_ID": 169,
+        "skill_overlap": 0.5878,
+        "scenario_similarity": 0.4598,
+        "combined_score": 0.5302,
+        "Logic": "스킬 의미 유사도=0.588 (딥러닝) | 시나리오 의미 유사도=0.460 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 18,
+        "Target_ID": 169,
+        "skill_overlap": 0.3985,
+        "scenario_similarity": 0.3781,
+        "combined_score": 0.4693,
+        "Logic": "스킬 의미 유사도=0.399 (딥러닝) | 시나리오 의미 유사도=0.378 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 67,
         "Target_ID": 170,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.2204,
-        "combined_score": 0.2882,
-        "Logic": "공통 스킬 ['anr'] (Jaccard=0.33) | 시나리오 유사도=0.22 | 난이도 middle_level → senior_level"
+        "skill_overlap": 0.6993,
+        "scenario_similarity": 0.5016,
+        "combined_score": 0.6103,
+        "Logic": "공통 스킬 ['anr'] (임베딩 유사도=0.699) | 시나리오 의미 유사도=0.502 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 10,
+        "Target_ID": 170,
+        "skill_overlap": 0.3761,
+        "scenario_similarity": 0.4399,
+        "combined_score": 0.4848,
+        "Logic": "스킬 의미 유사도=0.376 (딥러닝) | 시나리오 의미 유사도=0.440 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 46,
+        "Target_ID": 170,
+        "skill_overlap": 0.4672,
+        "scenario_similarity": 0.2808,
+        "combined_score": 0.4633,
+        "Logic": "스킬 의미 유사도=0.467 (딥러닝) | 시나리오 의미 유사도=0.281 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(Android)"
+      },
+      {
+        "Preceding_ID": 82,
+        "Target_ID": 171,
+        "skill_overlap": 0.3697,
+        "scenario_similarity": 0.4379,
+        "combined_score": 0.4804,
+        "Logic": "스킬 의미 유사도=0.370 (딥러닝) | 시나리오 의미 유사도=0.438 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(iOS)"
+      },
+      {
+        "Preceding_ID": 48,
+        "Target_ID": 171,
+        "skill_overlap": 0.3197,
+        "scenario_similarity": 0.6766,
+        "combined_score": 0.4803,
+        "Logic": "스킬 의미 유사도=0.320 (딥러닝) | 시나리오 의미 유사도=0.677 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 17,
+        "Target_ID": 171,
+        "skill_overlap": 0.4287,
+        "scenario_similarity": 0.5383,
+        "combined_score": 0.478,
+        "Logic": "스킬 의미 유사도=0.429 (딥러닝) | 시나리오 의미 유사도=0.538 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 33,
+        "Target_ID": 172,
+        "skill_overlap": 0.3432,
+        "scenario_similarity": 0.5199,
+        "combined_score": 0.5027,
+        "Logic": "스킬 의미 유사도=0.343 (딥러닝) | 시나리오 의미 유사도=0.520 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 99,
+        "Target_ID": 172,
+        "skill_overlap": 0.5225,
+        "scenario_similarity": 0.2736,
+        "combined_score": 0.4905,
+        "Logic": "스킬 의미 유사도=0.523 (딥러닝) | 시나리오 의미 유사도=0.274 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 172,
+        "skill_overlap": 0.3957,
+        "scenario_similarity": 0.4247,
+        "combined_score": 0.4887,
+        "Logic": "스킬 의미 유사도=0.396 (딥러닝) | 시나리오 의미 유사도=0.425 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 72,
         "Target_ID": 173,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1572,
-        "combined_score": 0.1629,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.16 | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.4656,
+        "scenario_similarity": 0.6394,
+        "combined_score": 0.6238,
+        "Logic": "스킬 의미 유사도=0.466 (딥러닝) | 시나리오 의미 유사도=0.639 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       },
       {
-        "Preceding_ID": 24,
+        "Preceding_ID": 93,
+        "Target_ID": 173,
+        "skill_overlap": 0.5793,
+        "scenario_similarity": 0.2671,
+        "combined_score": 0.5188,
+        "Logic": "스킬 의미 유사도=0.579 (딥러닝) | 시나리오 의미 유사도=0.267 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 62,
+        "Target_ID": 173,
+        "skill_overlap": 0.5052,
+        "scenario_similarity": 0.3177,
+        "combined_score": 0.5008,
+        "Logic": "스킬 의미 유사도=0.505 (딥러닝) | 시나리오 의미 유사도=0.318 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 54,
         "Target_ID": 174,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1318,
-        "combined_score": 0.1527,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.13 | 난이도 university_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.601,
+        "scenario_similarity": 0.3664,
+        "combined_score": 0.5754,
+        "Logic": "스킬 의미 유사도=0.601 (딥러닝) | 시나리오 의미 유사도=0.366 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 11,
+        "Target_ID": 174,
+        "skill_overlap": 0.5538,
+        "scenario_similarity": 0.5121,
+        "combined_score": 0.535,
+        "Logic": "스킬 의미 유사도=0.554 (딥러닝) | 시나리오 의미 유사도=0.512 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 40,
+        "Target_ID": 174,
+        "skill_overlap": 0.5903,
+        "scenario_similarity": 0.4623,
+        "combined_score": 0.5327,
+        "Logic": "스킬 의미 유사도=0.590 (딥러닝) | 시나리오 의미 유사도=0.462 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 175,
+        "skill_overlap": 0.5948,
+        "scenario_similarity": 0.5004,
+        "combined_score": 0.6323,
+        "Logic": "스킬 의미 유사도=0.595 (딥러닝) | 시나리오 의미 유사도=0.500 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 43,
+        "Target_ID": 175,
+        "skill_overlap": 0.4577,
+        "scenario_similarity": 0.6673,
+        "combined_score": 0.632,
+        "Logic": "스킬 의미 유사도=0.458 (딥러닝) | 시나리오 의미 유사도=0.667 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 175,
+        "skill_overlap": 0.5261,
+        "scenario_similarity": 0.3931,
+        "combined_score": 0.5462,
+        "Logic": "스킬 의미 유사도=0.526 (딥러닝) | 시나리오 의미 유사도=0.393 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 176,
+        "skill_overlap": 0.3593,
+        "scenario_similarity": 0.5261,
+        "combined_score": 0.5144,
+        "Logic": "스킬 의미 유사도=0.359 (딥러닝) | 시나리오 의미 유사도=0.526 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 96,
         "Target_ID": 176,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1455,
-        "combined_score": 0.1582,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.15 | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.3931,
+        "scenario_similarity": 0.4295,
+        "combined_score": 0.4895,
+        "Logic": "스킬 의미 유사도=0.393 (딥러닝) | 시나리오 의미 유사도=0.429 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       },
       {
-        "Preceding_ID": 83,
+        "Preceding_ID": 3,
+        "Target_ID": 176,
+        "skill_overlap": 0.4902,
+        "scenario_similarity": 0.4729,
+        "combined_score": 0.4824,
+        "Logic": "스킬 의미 유사도=0.490 (딥러닝) | 시나리오 의미 유사도=0.473 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 21,
         "Target_ID": 177,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1351,
-        "combined_score": 0.154,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.14 | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.4338,
+        "scenario_similarity": 0.5186,
+        "combined_score": 0.552,
+        "Logic": "스킬 의미 유사도=0.434 (딥러닝) | 시나리오 의미 유사도=0.519 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 20,
+        "Target_ID": 177,
+        "skill_overlap": 0.55,
+        "scenario_similarity": 0.3683,
+        "combined_score": 0.5483,
+        "Logic": "스킬 의미 유사도=0.550 (딥러닝) | 시나리오 의미 유사도=0.368 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 177,
+        "skill_overlap": 0.4985,
+        "scenario_similarity": 0.4297,
+        "combined_score": 0.5475,
+        "Logic": "스킬 의미 유사도=0.499 (딥러닝) | 시나리오 의미 유사도=0.430 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 62,
+        "Target_ID": 178,
+        "skill_overlap": 0.6699,
+        "scenario_similarity": 0.3275,
+        "combined_score": 0.5958,
+        "Logic": "스킬 의미 유사도=0.670 (딥러닝) | 시나리오 의미 유사도=0.328 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 99,
+        "Target_ID": 178,
+        "skill_overlap": 0.5701,
+        "scenario_similarity": 0.4224,
+        "combined_score": 0.5837,
+        "Logic": "스킬 의미 유사도=0.570 (딥러닝) | 시나리오 의미 유사도=0.422 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 59,
+        "Target_ID": 178,
+        "skill_overlap": 0.5453,
+        "scenario_similarity": 0.3541,
+        "combined_score": 0.5393,
+        "Logic": "스킬 의미 유사도=0.545 (딥러닝) | 시나리오 의미 유사도=0.354 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 19,
+        "Target_ID": 179,
+        "skill_overlap": 0.6975,
+        "scenario_similarity": 0.6004,
+        "combined_score": 0.7338,
+        "Logic": "스킬 의미 유사도=0.697 (딥러닝) | 시나리오 의미 유사도=0.600 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 39,
+        "Target_ID": 179,
+        "skill_overlap": 0.6896,
+        "scenario_similarity": 0.5029,
+        "combined_score": 0.6056,
+        "Logic": "스킬 의미 유사도=0.690 (딥러닝) | 시나리오 의미 유사도=0.503 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 18,
+        "Target_ID": 179,
+        "skill_overlap": 0.4414,
+        "scenario_similarity": 0.5852,
+        "combined_score": 0.5861,
+        "Logic": "스킬 의미 유사도=0.441 (딥러닝) | 시나리오 의미 유사도=0.585 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 180,
+        "skill_overlap": 0.6042,
+        "scenario_similarity": 0.563,
+        "combined_score": 0.6657,
+        "Logic": "스킬 의미 유사도=0.604 (딥러닝) | 시나리오 의미 유사도=0.563 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 180,
+        "skill_overlap": 0.498,
+        "scenario_similarity": 0.549,
+        "combined_score": 0.6009,
+        "Logic": "스킬 의미 유사도=0.498 (딥러닝) | 시나리오 의미 유사도=0.549 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 62,
+        "Target_ID": 180,
+        "skill_overlap": 0.4476,
+        "scenario_similarity": 0.593,
+        "combined_score": 0.593,
+        "Logic": "스킬 의미 유사도=0.448 (딥러닝) | 시나리오 의미 유사도=0.593 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 18,
+        "Target_ID": 181,
+        "skill_overlap": 0.5164,
+        "scenario_similarity": 0.4715,
+        "combined_score": 0.5762,
+        "Logic": "스킬 의미 유사도=0.516 (딥러닝) | 시나리오 의미 유사도=0.471 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 94,
+        "Target_ID": 181,
+        "skill_overlap": 0.5418,
+        "scenario_similarity": 0.5809,
+        "combined_score": 0.5594,
+        "Logic": "스킬 의미 유사도=0.542 (딥러닝) | 시나리오 의미 유사도=0.581 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 13,
+        "Target_ID": 181,
+        "skill_overlap": 0.5298,
+        "scenario_similarity": 0.3772,
+        "combined_score": 0.5411,
+        "Logic": "스킬 의미 유사도=0.530 (딥러닝) | 시나리오 의미 유사도=0.377 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 62,
         "Target_ID": 182,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.142,
-        "combined_score": 0.1568,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.14 | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.4056,
+        "scenario_similarity": 0.6391,
+        "combined_score": 0.5907,
+        "Logic": "스킬 의미 유사도=0.406 (딥러닝) | 시나리오 의미 유사도=0.639 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 58,
+        "Target_ID": 182,
+        "skill_overlap": 0.4659,
+        "scenario_similarity": 0.5541,
+        "combined_score": 0.5856,
+        "Logic": "스킬 의미 유사도=0.466 (딥러닝) | 시나리오 의미 유사도=0.554 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 96,
+        "Target_ID": 182,
+        "skill_overlap": 0.4048,
+        "scenario_similarity": 0.5048,
+        "combined_score": 0.5298,
+        "Logic": "스킬 의미 유사도=0.405 (딥러닝) | 시나리오 의미 유사도=0.505 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 183,
+        "skill_overlap": 0.429,
+        "scenario_similarity": 0.507,
+        "combined_score": 0.5441,
+        "Logic": "스킬 의미 유사도=0.429 (딥러닝) | 시나리오 의미 유사도=0.507 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 43,
+        "Target_ID": 183,
+        "skill_overlap": 0.2736,
+        "scenario_similarity": 0.5185,
+        "combined_score": 0.4638,
+        "Logic": "스킬 의미 유사도=0.274 (딥러닝) | 시나리오 의미 유사도=0.518 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 68,
+        "Target_ID": 183,
+        "skill_overlap": 0.2859,
+        "scenario_similarity": 0.4887,
+        "combined_score": 0.4572,
+        "Logic": "스킬 의미 유사도=0.286 (딥러닝) | 시나리오 의미 유사도=0.489 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 99,
         "Target_ID": 184,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.3,
-        "Logic": "공통 스킬 ['ux'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.7339,
+        "scenario_similarity": 0.336,
+        "combined_score": 0.6348,
+        "Logic": "공통 스킬 ['ux'] (임베딩 유사도=0.734) | 시나리오 의미 유사도=0.336 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 58,
+        "Target_ID": 184,
+        "skill_overlap": 0.4564,
+        "scenario_similarity": 0.5092,
+        "combined_score": 0.5601,
+        "Logic": "스킬 의미 유사도=0.456 (딥러닝) | 시나리오 의미 유사도=0.509 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 95,
         "Target_ID": 184,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1332,
-        "combined_score": 0.1533,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.13 | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.4738,
+        "scenario_similarity": 0.4795,
+        "combined_score": 0.5563,
+        "Logic": "스킬 의미 유사도=0.474 (딥러닝) | 시나리오 의미 유사도=0.479 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 83,
+        "Target_ID": 185,
+        "skill_overlap": 0.35,
+        "scenario_similarity": 0.5245,
+        "combined_score": 0.5085,
+        "Logic": "스킬 의미 유사도=0.350 (딥러닝) | 시나리오 의미 유사도=0.525 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 185,
+        "skill_overlap": 0.4915,
+        "scenario_similarity": 0.3261,
+        "combined_score": 0.4971,
+        "Logic": "스킬 의미 유사도=0.492 (딥러닝) | 시나리오 의미 유사도=0.326 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 24,
+        "Target_ID": 185,
+        "skill_overlap": 0.3264,
+        "scenario_similarity": 0.512,
+        "combined_score": 0.4899,
+        "Logic": "스킬 의미 유사도=0.326 (딥러닝) | 시나리오 의미 유사도=0.512 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 17,
         "Target_ID": 186,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.2599,
-        "combined_score": 0.204,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.26 | 난이도 university_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.6933,
+        "scenario_similarity": 0.585,
+        "combined_score": 0.7246,
+        "Logic": "스킬 의미 유사도=0.693 (딥러닝) | 시나리오 의미 유사도=0.585 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 51,
+        "Target_ID": 186,
+        "skill_overlap": 0.7267,
+        "scenario_similarity": 0.547,
+        "combined_score": 0.6459,
+        "Logic": "스킬 의미 유사도=0.727 (딥러닝) | 시나리오 의미 유사도=0.547 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 99,
+        "Target_ID": 186,
+        "skill_overlap": 0.6034,
+        "scenario_similarity": 0.4393,
+        "combined_score": 0.6096,
+        "Logic": "스킬 의미 유사도=0.603 (딥러닝) | 시나리오 의미 유사도=0.439 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 85,
+        "Target_ID": 187,
+        "skill_overlap": 0.4395,
+        "scenario_similarity": 0.3471,
+        "combined_score": 0.4779,
+        "Logic": "스킬 의미 유사도=0.440 (딥러닝) | 시나리오 의미 유사도=0.347 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 58,
+        "Target_ID": 187,
+        "skill_overlap": 0.2896,
+        "scenario_similarity": 0.4969,
+        "combined_score": 0.4629,
+        "Logic": "스킬 의미 유사도=0.290 (딥러닝) | 시나리오 의미 유사도=0.497 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 26,
+        "Target_ID": 187,
+        "skill_overlap": 0.5242,
+        "scenario_similarity": 0.3615,
+        "combined_score": 0.451,
+        "Logic": "스킬 의미 유사도=0.524 (딥러닝) | 시나리오 의미 유사도=0.361 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 22,
+        "Target_ID": 188,
+        "skill_overlap": 0.3507,
+        "scenario_similarity": 0.5126,
+        "combined_score": 0.5036,
+        "Logic": "스킬 의미 유사도=0.351 (딥러닝) | 시나리오 의미 유사도=0.513 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 25,
         "Target_ID": 188,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.2,
-        "Logic": "공통 스킬 ['security'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 university_level → senior_level"
+        "skill_overlap": 0.6553,
+        "scenario_similarity": 0.3145,
+        "combined_score": 0.502,
+        "Logic": "공통 스킬 ['security'] (임베딩 유사도=0.655) | 시나리오 의미 유사도=0.315 (딥러닝) | 난이도 university_level → senior_level"
       },
       {
-        "Preceding_ID": 55,
+        "Preceding_ID": 50,
         "Target_ID": 188,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.15,
-        "Logic": "공통 스킬 ['security'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 middle_level → senior_level"
+        "skill_overlap": 0.4557,
+        "scenario_similarity": 0.3265,
+        "combined_score": 0.4776,
+        "Logic": "스킬 의미 유사도=0.456 (딥러닝) | 시나리오 의미 유사도=0.327 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 76,
-        "Target_ID": 192,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.146,
-        "combined_score": 0.1584,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.15 | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+        "Target_ID": 189,
+        "skill_overlap": 0.3212,
+        "scenario_similarity": 0.6309,
+        "combined_score": 0.5405,
+        "Logic": "스킬 의미 유사도=0.321 (딥러닝) | 시나리오 의미 유사도=0.631 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       },
       {
-        "Preceding_ID": 25,
-        "Target_ID": 194,
-        "skill_overlap": 0.3333,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.2,
-        "Logic": "공통 스킬 ['security'] (Jaccard=0.33) | 시나리오 유사도=0.00 | 난이도 university_level → senior_level"
+        "Preceding_ID": 50,
+        "Target_ID": 189,
+        "skill_overlap": 0.3675,
+        "scenario_similarity": 0.5149,
+        "combined_score": 0.5138,
+        "Logic": "스킬 의미 유사도=0.368 (딥러닝) | 시나리오 의미 유사도=0.515 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 83,
+        "Target_ID": 189,
+        "skill_overlap": 0.3787,
+        "scenario_similarity": 0.4894,
+        "combined_score": 0.5085,
+        "Logic": "스킬 의미 유사도=0.379 (딥러닝) | 시나리오 의미 유사도=0.489 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 41,
+        "Target_ID": 190,
+        "skill_overlap": 0.6296,
+        "scenario_similarity": 0.5414,
+        "combined_score": 0.5899,
+        "Logic": "스킬 의미 유사도=0.630 (딥러닝) | 시나리오 의미 유사도=0.541 (딥러닝) | 난이도 junior_level → senior_level"
+      },
+      {
+        "Preceding_ID": 98,
+        "Target_ID": 190,
+        "skill_overlap": 0.5459,
+        "scenario_similarity": 0.4435,
+        "combined_score": 0.5798,
+        "Logic": "스킬 의미 유사도=0.546 (딥러닝) | 시나리오 의미 유사도=0.443 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 190,
+        "skill_overlap": 0.4065,
+        "scenario_similarity": 0.6061,
+        "combined_score": 0.5763,
+        "Logic": "스킬 의미 유사도=0.406 (딥러닝) | 시나리오 의미 유사도=0.606 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 68,
+        "Target_ID": 191,
+        "skill_overlap": 0.5014,
+        "scenario_similarity": 0.4574,
+        "combined_score": 0.5616,
+        "Logic": "스킬 의미 유사도=0.501 (딥러닝) | 시나리오 의미 유사도=0.457 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 50,
+        "Target_ID": 191,
+        "skill_overlap": 0.578,
+        "scenario_similarity": 0.3435,
+        "combined_score": 0.5525,
+        "Logic": "스킬 의미 유사도=0.578 (딥러닝) | 시나리오 의미 유사도=0.344 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 70,
+        "Target_ID": 191,
+        "skill_overlap": 0.4296,
+        "scenario_similarity": 0.5067,
+        "combined_score": 0.5443,
+        "Logic": "스킬 의미 유사도=0.430 (딥러닝) | 시나리오 의미 유사도=0.507 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 192,
+        "skill_overlap": 0.4428,
+        "scenario_similarity": 0.5822,
+        "combined_score": 0.5855,
+        "Logic": "스킬 의미 유사도=0.443 (딥러닝) | 시나리오 의미 유사도=0.582 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 93,
+        "Target_ID": 192,
+        "skill_overlap": 0.4926,
+        "scenario_similarity": 0.4525,
+        "combined_score": 0.5546,
+        "Logic": "스킬 의미 유사도=0.493 (딥러닝) | 시나리오 의미 유사도=0.453 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 59,
+        "Target_ID": 192,
+        "skill_overlap": 0.479,
+        "scenario_similarity": 0.4477,
+        "combined_score": 0.5449,
+        "Logic": "스킬 의미 유사도=0.479 (딥러닝) | 시나리오 의미 유사도=0.448 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 193,
+        "skill_overlap": 0.5893,
+        "scenario_similarity": 0.3791,
+        "combined_score": 0.5747,
+        "Logic": "스킬 의미 유사도=0.589 (딥러닝) | 시나리오 의미 유사도=0.379 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 193,
+        "skill_overlap": 0.5734,
+        "scenario_similarity": 0.3846,
+        "combined_score": 0.5685,
+        "Logic": "스킬 의미 유사도=0.573 (딥러닝) | 시나리오 의미 유사도=0.385 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 33,
+        "Target_ID": 193,
+        "skill_overlap": 0.4888,
+        "scenario_similarity": 0.4572,
+        "combined_score": 0.5546,
+        "Logic": "스킬 의미 유사도=0.489 (딥러닝) | 시나리오 의미 유사도=0.457 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 55,
         "Target_ID": 194,
-        "skill_overlap": 0.25,
-        "scenario_similarity": 0.0,
-        "combined_score": 0.15,
-        "Logic": "공통 스킬 ['security'] (Jaccard=0.25) | 시나리오 유사도=0.00 | 난이도 middle_level → senior_level"
+        "skill_overlap": 0.6993,
+        "scenario_similarity": 0.5698,
+        "combined_score": 0.641,
+        "Logic": "공통 스킬 ['security'] (임베딩 유사도=0.699) | 시나리오 의미 유사도=0.570 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 59,
+        "Target_ID": 194,
+        "skill_overlap": 0.3164,
+        "scenario_similarity": 0.4717,
+        "combined_score": 0.4663,
+        "Logic": "스킬 의미 유사도=0.316 (딥러닝) | 시나리오 의미 유사도=0.472 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 25,
+        "Target_ID": 194,
+        "skill_overlap": 0.6674,
+        "scenario_similarity": 0.2135,
+        "combined_score": 0.4631,
+        "Logic": "공통 스킬 ['security'] (임베딩 유사도=0.667) | 시나리오 의미 유사도=0.214 (딥러닝) | 난이도 university_level → senior_level"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 195,
+        "skill_overlap": 0.3288,
+        "scenario_similarity": 0.4112,
+        "combined_score": 0.4459,
+        "Logic": "스킬 의미 유사도=0.329 (딥러닝) | 시나리오 의미 유사도=0.411 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 195,
+        "skill_overlap": 0.272,
+        "scenario_similarity": 0.4366,
+        "combined_score": 0.4261,
+        "Logic": "스킬 의미 유사도=0.272 (딥러닝) | 시나리오 의미 유사도=0.437 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 88,
+        "Target_ID": 195,
+        "skill_overlap": 0.417,
+        "scenario_similarity": 0.429,
+        "combined_score": 0.4224,
+        "Logic": "스킬 의미 유사도=0.417 (딥러닝) | 시나리오 의미 유사도=0.429 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 98,
+        "Target_ID": 196,
+        "skill_overlap": 0.3506,
+        "scenario_similarity": 0.4668,
+        "combined_score": 0.4829,
+        "Logic": "스킬 의미 유사도=0.351 (딥러닝) | 시나리오 의미 유사도=0.467 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 16,
+        "Target_ID": 196,
+        "skill_overlap": 0.3312,
+        "scenario_similarity": 0.4875,
+        "combined_score": 0.4816,
+        "Logic": "스킬 의미 유사도=0.331 (딥러닝) | 시나리오 의미 유사도=0.488 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 196,
+        "skill_overlap": 0.5088,
+        "scenario_similarity": 0.2526,
+        "combined_score": 0.4735,
+        "Logic": "스킬 의미 유사도=0.509 (딥러닝) | 시나리오 의미 유사도=0.253 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 21,
+        "Target_ID": 197,
+        "skill_overlap": 0.6721,
+        "scenario_similarity": 0.6539,
+        "combined_score": 0.7439,
+        "Logic": "스킬 의미 유사도=0.672 (딥러닝) | 시나리오 의미 유사도=0.654 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 68,
+        "Target_ID": 197,
+        "skill_overlap": 0.5129,
+        "scenario_similarity": 0.52,
+        "combined_score": 0.5961,
+        "Logic": "스킬 의미 유사도=0.513 (딥러닝) | 시나리오 의미 유사도=0.520 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 54,
+        "Target_ID": 197,
+        "skill_overlap": 0.4709,
+        "scenario_similarity": 0.5029,
+        "combined_score": 0.5653,
+        "Logic": "스킬 의미 유사도=0.471 (딥러닝) | 시나리오 의미 유사도=0.503 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 13,
+        "Target_ID": 198,
+        "skill_overlap": 0.4016,
+        "scenario_similarity": 0.6821,
+        "combined_score": 0.6079,
+        "Logic": "스킬 의미 유사도=0.402 (딥러닝) | 시나리오 의미 유사도=0.682 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 38,
+        "Target_ID": 198,
+        "skill_overlap": 0.4291,
+        "scenario_similarity": 0.7827,
+        "combined_score": 0.5882,
+        "Logic": "스킬 의미 유사도=0.429 (딥러닝) | 시나리오 의미 유사도=0.783 (딥러닝) | 난이도 junior_level → senior_level"
       },
       {
         "Preceding_ID": 21,
         "Target_ID": 198,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1484,
-        "combined_score": 0.1593,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.15 | 난이도 university_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.456,
+        "scenario_similarity": 0.5605,
+        "combined_score": 0.583,
+        "Logic": "스킬 의미 유사도=0.456 (딥러닝) | 시나리오 의미 유사도=0.561 (딥러닝) | 난이도 university_level → senior_level | 동일 카테고리(General)"
       },
       {
-        "Preceding_ID": 93,
-        "Target_ID": 198,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1291,
-        "combined_score": 0.1516,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.13 | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+        "Preceding_ID": 33,
+        "Target_ID": 199,
+        "skill_overlap": 0.6313,
+        "scenario_similarity": 0.4418,
+        "combined_score": 0.6261,
+        "Logic": "스킬 의미 유사도=0.631 (딥러닝) | 시나리오 의미 유사도=0.442 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
       },
       {
         "Preceding_ID": 93,
         "Target_ID": 199,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1289,
-        "combined_score": 0.1516,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.13 | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.4695,
+        "scenario_similarity": 0.5693,
+        "combined_score": 0.5944,
+        "Logic": "스킬 의미 유사도=0.469 (딥러닝) | 시나리오 의미 유사도=0.569 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       },
       {
-        "Preceding_ID": 22,
+        "Preceding_ID": 53,
+        "Target_ID": 199,
+        "skill_overlap": 0.5561,
+        "scenario_similarity": 0.6233,
+        "combined_score": 0.5864,
+        "Logic": "스킬 의미 유사도=0.556 (딥러닝) | 시나리오 의미 유사도=0.623 (딥러닝) | 난이도 middle_level → senior_level"
+      },
+      {
+        "Preceding_ID": 93,
         "Target_ID": 200,
-        "skill_overlap": 0.0,
-        "scenario_similarity": 0.1397,
-        "combined_score": 0.1559,
-        "Logic": "스킬 Jaccard=0.00 | 시나리오 유사도=0.14 | 난이도 university_level → senior_level | 동일 카테고리(General)"
+        "skill_overlap": 0.5485,
+        "scenario_similarity": 0.5031,
+        "combined_score": 0.6081,
+        "Logic": "스킬 의미 유사도=0.548 (딥러닝) | 시나리오 의미 유사도=0.503 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 50,
+        "Target_ID": 200,
+        "skill_overlap": 0.4092,
+        "scenario_similarity": 0.6356,
+        "combined_score": 0.5911,
+        "Logic": "스킬 의미 유사도=0.409 (딥러닝) | 시나리오 의미 유사도=0.636 (딥러닝) | 난이도 junior_level → senior_level | 동일 카테고리(General)"
+      },
+      {
+        "Preceding_ID": 76,
+        "Target_ID": 200,
+        "skill_overlap": 0.3412,
+        "scenario_similarity": 0.6591,
+        "combined_score": 0.5643,
+        "Logic": "스킬 의미 유사도=0.341 (딥러닝) | 시나리오 의미 유사도=0.659 (딥러닝) | 난이도 middle_level → senior_level | 동일 카테고리(General)"
       }
     ]
   },
@@ -5341,7 +8851,10 @@
     32,
     33,
     34,
+    35,
     36,
+    37,
+    38,
     39,
     40,
     41,
@@ -5349,64 +8862,62 @@
     43,
     44,
     45,
+    46,
     47,
+    48,
     49,
     50,
-    38,
-    48,
-    35,
-    46,
-    37,
-    53,
-    54,
-    59,
-    60,
-    61,
-    63,
-    64,
-    66,
-    69,
-    70,
-    72,
-    73,
-    75,
-    76,
-    77,
-    78,
-    80,
-    81,
-    84,
-    90,
-    93,
-    95,
-    96,
-    97,
-    98,
-    99,
     51,
     52,
+    53,
+    54,
     55,
     56,
     57,
     58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
     65,
+    66,
     67,
     68,
+    69,
+    70,
     71,
+    72,
+    73,
     74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
     82,
+    83,
+    84,
     85,
     86,
     87,
     88,
     89,
+    90,
     91,
     92,
+    93,
     94,
+    95,
+    96,
+    97,
+    98,
+    99,
     100,
-    62,
-    83,
-    79,
+    101,
     102,
     103,
     104,
@@ -5416,188 +8927,96 @@
     108,
     109,
     110,
+    111,
+    112,
     113,
     114,
     115,
+    116,
     117,
     118,
+    119,
     120,
     121,
     122,
     123,
     124,
+    125,
+    126,
+    127,
+    128,
+    129,
     130,
     131,
     132,
     133,
     134,
     135,
-    139,
-    140,
-    141,
-    142,
-    144,
-    146,
-    147,
-    150,
-    151,
-    152,
-    153,
-    155,
-    157,
-    158,
-    159,
-    160,
-    162,
-    163,
-    165,
-    166,
-    169,
-    171,
-    172,
-    175,
-    178,
-    179,
-    180,
-    181,
-    183,
-    185,
-    187,
-    189,
-    190,
-    191,
-    193,
-    195,
-    196,
-    197,
-    101,
-    111,
-    112,
-    125,
-    126,
-    128,
-    129,
     136,
     137,
     138,
-    143,
-    145,
-    149,
-    154,
-    161,
-    164,
-    167,
-    168,
-    170,
-    173,
-    174,
-    176,
-    177,
-    182,
-    186,
-    192,
-    199,
-    200,
-    156,
-    184,
-    188,
-    194,
-    198,
-    116,
-    119,
-    127,
-    148
-  ],
-  "isolated_problems": [
-    3,
-    10,
-    13,
-    16,
-    29,
-    30,
-    31,
-    33,
-    42,
-    43,
-    45,
-    47,
-    49,
-    53,
-    59,
-    60,
-    61,
-    63,
-    66,
-    69,
-    70,
-    73,
-    78,
-    80,
-    90,
-    97,
-    98,
-    102,
-    103,
-    104,
-    105,
-    106,
-    107,
-    108,
-    109,
-    110,
-    113,
-    114,
-    115,
-    117,
-    118,
-    120,
-    121,
-    122,
-    123,
-    124,
-    130,
-    131,
-    132,
-    133,
-    134,
-    135,
     139,
     140,
     141,
     142,
+    143,
     144,
+    145,
     146,
     147,
+    148,
+    149,
     150,
     151,
     152,
     153,
+    154,
     155,
+    156,
     157,
     158,
     159,
     160,
+    161,
     162,
     163,
+    164,
     165,
     166,
+    167,
+    168,
     169,
+    170,
     171,
     172,
+    173,
+    174,
     175,
+    176,
+    177,
     178,
     179,
     180,
     181,
+    182,
     183,
+    184,
     185,
+    186,
     187,
+    188,
     189,
     190,
     191,
+    192,
     193,
+    194,
     195,
     196,
-    197
-  ]
+    197,
+    198,
+    199,
+    200
+  ],
+  "isolated_problems": []
 }
