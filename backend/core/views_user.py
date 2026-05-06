@@ -149,6 +149,7 @@ class GoalView(APIView):
                 "is_active":      g.is_active,
                 "has_curriculum": curriculum is not None,
                 "curriculum_id":  curriculum.id if curriculum else None,
+                "content_json":   curriculum.content_json if curriculum else None,
                 "created_at":     g.created_at.isoformat(),
             })
         return Response(goals)

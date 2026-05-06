@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { GraduationCap, Sparkles, CheckCircle2, Loader2, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { api } from "@/lib/api"
 
 // ─── 희망 직무 목록 ────────────────────────────────────────────────────────
 // [FE 수정 매뉴얼] job_fields 배열은 API로 가져올 수도 있음
@@ -78,26 +79,25 @@ export default function GoalSettingPage() {
     )
   }
 
-  // 목표 설정 완료 제출
-  // [BE 매뉴얼] POST /api/v1/users/goals
-  //   Request: { job_field: string, study_topics: string[] }
-  //   Response: { success: true, curriculum_id: number }
-  // [DB 매뉴얼] UserGoals 테이블: user_id, job_field_id, is_first_setup
-  //             UserStudyTopics 테이블: user_id, topic_id
+  const [goalError, setGoalError] = useState("")
+
   const handleComplete = async () => {
     if (!selectedJob) return
     setIsLoading(true)
+    setGoalError("")
     try {
-      // TODO: 실제 API 호출로 교체
-      // await fetch("/api/v1/users/goals", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      //   body: JSON.stringify({ job_field: selectedJob, study_topics: selectedTopics }),
-      // })
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      router.push("/home")
-    } catch (err) {
-      console.error("목표 설정 실패:", err)
+      const jobField = jobFields.find(j => j.id === selectedJob)
+      const res  = await api.createGoal({
+        goal_type:      'job',
+        field:          jobField?.name || selectedJob,
+        job_role:       jobField?.name || selectedJob,
+        duration_weeks: 12,
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || "목표 설정 실패")
+      router.push("/curriculum")
+    } catch (err: any) {
+      setGoalError(err.message || "목표 설정에 실패했습니다. 다시 시도해주세요.")
     } finally {
       setIsLoading(false)
     }

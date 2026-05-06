@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('DB/LearningPaths/AI_Engineer_path.json'\\)\\); print\\(json.dumps\\(d['edges'][:3], indent=2, ensure_ascii=False\\)\\)\")",
+      "Bash(python -c \"import json; d=json.load\\(open\\('DB/LearningPaths/AI_Engineer_path.json'\\)\\); print\\(json.dumps\\(d['edges'][:3], indent=2, ensure_ascii=False\\)\\)\")",
+      "Bash(python *)",
+      "Bash(git rm *)",
+      "Bash(npm run *)",
+      "Bash(netstat -ano)",
+      "Bash(curl *)",
+      "Bash(grep -oP 'NameError[^<]{0,200}')",
+      "Bash(tasklist)",
+      "Bash(wmic process *)",
+      "PowerShell(Get-Process *)",
+      "Bash(npx tsc *)",
+      "Bash(node -e \"require\\('clsx'\\); console.log\\('clsx ok'\\)\")",
+      "Bash(node -e \"require\\('tailwind-merge'\\); console.log\\('tw-merge ok'\\)\")"
+    ]
+  }
+}

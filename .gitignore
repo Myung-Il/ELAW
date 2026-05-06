@@ -207,3 +207,18 @@ marimo/_lsp/
 __marimo__/
 Miniconda3-latest-Linux-x86_64.sh
 Miniconda3-latest-Linux-x86_64.sh
+
+# Dependency directories
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Build logs
+build/
+dist/
+
+# OS metadata
+.DS_Store
+Thumbs.db

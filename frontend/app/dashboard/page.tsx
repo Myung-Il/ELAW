@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -31,50 +31,26 @@ import {
   Menu,
   X
 } from "lucide-react"
-
-/* * =========================================================================
- * [FE/BE/DB 전체 매뉴얼]
- * 하단에 선언된 배열들(learningProgress, recommendedCourses 등)은 현재 화면을 그리기 위해 프론트엔드에 하드코딩된 임시 데이터입니다.
- * * * 👨‍💻 [FE 담당] 화면이 렌더링될 때 useEffect나 React Query를 사용하여 백엔드 API로부터 이 데이터를 받아오도록 수정해야 합니다.
- * * ⚙️ [BE 담당] 아래 데이터 구조를 참고하여 각 섹션에 맞는 API(예: GET /api/v1/dashboard/progress)를 각각 또는 통합하여 개발해 주세요.
- * * 🗄️ [DB 담당] 대시보드는 여러 테이블(유저 활동, 강의, 기업 등)의 조인이 필요할 수 있으므로, 쿼리 최적화 및 적절한 인덱스 생성이 중요합니다.
- * =========================================================================
- */
-
-const learningProgress = [
-  { subject: "자료구조", progress: 85, total: 24, completed: 20 },
-  { subject: "알고리즘", progress: 62, total: 30, completed: 19 },
-  { subject: "운영체제", progress: 45, total: 20, completed: 9 },
-  { subject: "데이터베이스", progress: 28, total: 18, completed: 5 },
-]
-
-const recommendedCourses = [
-  { title: "알고리즘 심화: 동적 프로그래밍", duration: "2시간 30분", difficulty: "중급" },
-  { title: "운영체제: 프로세스와 스레드", duration: "1시간 45분", difficulty: "중급" },
-  { title: "데이터베이스 설계 기초", duration: "2시간", difficulty: "초급" },
-]
-
-const recommendedCompanies = [
-  { name: "삼성전자", match: 94, field: "IT/반도체", positions: 120, logo: "S" },
-  { name: "네이버", match: 91, field: "IT서비스", positions: 85, logo: "N" },
-  { name: "카카오", match: 88, field: "IT서비스", positions: 72, logo: "K" },
-  { name: "LG전자", match: 85, field: "전자", positions: 68, logo: "L" },
-]
-
-const upcomingEvents = [
-  { title: "삼성 SW 역량테스트", date: "2024.03.15", dDay: 5, type: "시험" },
-  { title: "전국 대학생 알고리즘 대회", date: "2024.03.22", dDay: 12, type: "대회" },
-  { title: "네이버 채용설명회", date: "2024.03.25", dDay: 15, type: "채용" },
-]
-
-const recentActivities = [
-  { action: "알고리즘 문제 풀이 완료", time: "10분 전", icon: Target },
-  { action: "자료구조 강의 시청", time: "1시간 전", icon: Play },
-  { action: "이력서 업데이트", time: "3시간 전", icon: FileText },
-]
+import { api } from "@/lib/api"
 
 export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [dashData, setDashData]       = useState<any>(null)
+  const [loading, setLoading]         = useState(true)
+
+  useEffect(() => {
+    api.getDashboard()
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setDashData(d) })
+      .finally(() => setLoading(false))
+  }, [])
+
+  const solveStats    = dashData?.solve_stats    || { total: 0, solved: 0, correct_rate: 0 }
+  const topMatches    = dashData?.top_matches    || []
+  const weakTags      = dashData?.weak_tags      || []
+  const topLangs      = dashData?.top_languages  || []
+  const goalData      = dashData?.goal           || null
+  const userName      = dashData?.user?.name     || "사용자"
 
   return (
       <div className="flex min-h-screen bg-background">
@@ -208,73 +184,73 @@ export default function DashboardPage() {
                 {/* Left Column - Learning */}
                 <div className="space-y-6 lg:col-span-2">
 
-                  {/* Learning Progress */}
+                  {/* Weak Tags Progress */}
                   <Card>
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div>
                           <CardTitle className="flex items-center gap-2">
                             <BookOpen className="h-5 w-5 text-primary" />
-                            학습 진행률
+                            취약 분야 진단
                           </CardTitle>
-                          <CardDescription>현재 수강 중인 과목의 진행 상황</CardDescription>
+                          <CardDescription>정답률 기반 AI 분석 결과</CardDescription>
                         </div>
-                        <Button variant="outline" size="sm">전체 보기</Button>
+                        <Link href="/study"><Button variant="outline" size="sm">문제 풀기</Button></Link>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {/* [FE 수정 매뉴얼] 상단의 하드코딩된 learningProgress 배열 대신, API에서 받아온 상태값으로 map 함수를 돌리세요. */}
-                      {learningProgress.map((item) => (
-                          <div key={item.subject}>
-                            <div className="mb-2 flex items-center justify-between text-sm">
-                              <span className="font-medium">{item.subject}</span>
-                              <span className="text-muted-foreground">
-                            {item.completed}/{item.total}강 완료
-                          </span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <Progress value={item.progress} className="flex-1" />
-                              <span className="w-12 text-right text-sm font-medium">{item.progress}%</span>
-                            </div>
+                      {weakTags.length > 0 ? weakTags.map((tag: any) => (
+                        <div key={tag.stat_key}>
+                          <div className="mb-2 flex items-center justify-between text-sm">
+                            <span className="font-medium">{tag.stat_key}</span>
+                            <span className="text-muted-foreground">정답률 {Math.round(tag.correct_rate || 0)}%</span>
                           </div>
-                      ))}
+                          <div className="flex items-center gap-3">
+                            <Progress value={tag.correct_rate || 0} className="flex-1" />
+                            <span className="w-12 text-right text-sm font-medium">{Math.round(tag.correct_rate || 0)}%</span>
+                          </div>
+                        </div>
+                      )) : (
+                        <div className="py-6 text-center text-sm text-muted-foreground">
+                          문제를 풀면 취약 분야를 분석해 드립니다.
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
 
-                  {/* Recommended Courses */}
+                  {/* Study Recommendations */}
                   <Card>
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div>
                           <CardTitle className="flex items-center gap-2">
                             <Brain className="h-5 w-5 text-primary" />
-                            맞춤 추천 강의
+                            AI 추천 문제
                           </CardTitle>
-                          <CardDescription>AI가 분석한 부족한 파트 보충 학습</CardDescription>
+                          <CardDescription>BKT/DKT 기반 맞춤 문제 추천</CardDescription>
                         </div>
-                        <Button variant="outline" size="sm">전체 보기</Button>
+                        <Link href="/study"><Button variant="outline" size="sm">전체 보기</Button></Link>
                       </div>
                     </CardHeader>
-                    <CardContent className="grid gap-4 md:grid-cols-2">
-                      {/* [FE/BE 매뉴얼] 추천 강의 API 결과를 렌더링하세요. */}
-                      {recommendedCourses.map((course, i) => (
-                          <div key={i} className="flex flex-col gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50">
-                            <div className="flex items-start justify-between gap-4">
-                              <h3 className="font-medium line-clamp-2">{course.title}</h3>
-                              <Badge variant="secondary" className="shrink-0">{course.difficulty}</Badge>
-                            </div>
-                            <div className="mt-auto flex items-center justify-between pt-4">
-                          <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Clock className="h-4 w-4" />
-                            {course.duration}
-                          </span>
-                              <Button size="sm" className="gap-2">
-                                <Play className="h-4 w-4" />
-                                재생
-                              </Button>
-                            </div>
-                          </div>
-                      ))}
+                    <CardContent>
+                      {goalData ? (
+                        <div className="space-y-3">
+                          <p className="text-sm text-muted-foreground">
+                            목표 직무 <span className="font-semibold text-foreground">{goalData.job_role}</span> 기반 문제를 추천합니다.
+                          </p>
+                          <Link href="/study">
+                            <Button className="w-full gap-2">
+                              <Play className="h-4 w-4" />
+                              추천 문제 풀기
+                            </Button>
+                          </Link>
+                        </div>
+                      ) : (
+                        <div className="py-4 text-center text-sm text-muted-foreground">
+                          목표를 설정하면 맞춤 문제를 추천해 드립니다.
+                          <Link href="/goal-setting"><Button variant="link" className="px-1">목표 설정</Button></Link>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
@@ -282,7 +258,7 @@ export default function DashboardPage() {
                 {/* Right Column */}
                 <div className="space-y-6">
 
-                  {/* Recommended Companies */}
+                  {/* Top Matches */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-lg">
@@ -291,73 +267,46 @@ export default function DashboardPage() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {/* [FE/DB 매뉴얼] 유저의 학습 데이터와 기업 정보를 조인하여 매칭률(match)이 높은 기업 3개를 렌더링하세요. */}
-                      {recommendedCompanies.slice(0, 3).map((company, i) => (
-                          <div key={i} className="flex items-center justify-between rounded-lg border p-3">
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 font-bold text-primary">
-                                {company.logo}
-                              </div>
-                              <div>
-                                <p className="font-medium">{company.name}</p>
-                                <p className="text-xs text-muted-foreground">{company.field}</p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <Badge variant="default" className="mb-1">{company.match}% 매칭</Badge>
-                              <p className="text-xs text-muted-foreground">{company.positions}개 포지션</p>
-                            </div>
-                          </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-
-                  {/* Upcoming Events */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-lg">
-                        <Calendar className="h-5 w-5 text-primary" />
-                        다가오는 일정
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {/* [FE/BE 매뉴얼] 일정 API 결과를 렌더링하세요. */}
-                      {upcomingEvents.map((event, i) => (
-                          <div key={i} className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 flex-col items-center justify-center rounded-lg bg-muted">
-                              <span className="text-xs text-muted-foreground">D-</span>
-                              <span className="font-bold text-primary">{event.dDay}</span>
+                      {topMatches.length > 0 ? topMatches.map((m: any, i: number) => (
+                        <div key={i} className="flex items-center justify-between rounded-lg border p-3">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 font-bold text-primary">
+                              {m.company.charAt(0)}
                             </div>
                             <div>
-                              <p className="font-medium">{event.title}</p>
-                              <p className="text-xs text-muted-foreground">{event.date} • {event.type}</p>
+                              <p className="font-medium">{m.company}</p>
+                              <p className="text-xs text-muted-foreground truncate max-w-[120px]">{m.posting_title}</p>
                             </div>
                           </div>
-                      ))}
+                          <Badge variant="default" className="shrink-0">{m.match_score}% 매칭</Badge>
+                        </div>
+                      )) : (
+                        <div className="py-4 text-center text-sm text-muted-foreground">
+                          <Link href="/jobs"><Button variant="outline" size="sm" className="gap-1"><Briefcase className="h-3.5 w-3.5" />매칭 분석 시작</Button></Link>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
 
-                  {/* Recent Activities */}
+                  {/* Top Languages */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-lg">
                         <TrendingUp className="h-5 w-5 text-primary" />
-                        최근 활동
+                        주요 언어 통계
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      {/* [FE/BE 매뉴얼] 유저의 최근 활동 로그 테이블 데이터를 렌더링하세요. */}
-                      {recentActivities.map((activity, i) => (
-                          <div key={i} className="flex items-center gap-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-                              <activity.icon className="h-4 w-4 text-muted-foreground" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm">{activity.action}</p>
-                              <p className="text-xs text-muted-foreground">{activity.time}</p>
-                            </div>
-                          </div>
-                      ))}
+                    <CardContent className="space-y-3">
+                      {topLangs.length > 0 ? topLangs.map((lang: any) => (
+                        <div key={lang.stat_key} className="flex items-center justify-between text-sm">
+                          <span className="font-medium">{lang.stat_key}</span>
+                          <span className="text-muted-foreground">정답률 {Math.round(lang.correct_rate || 0)}%</span>
+                        </div>
+                      )) : (
+                        <p className="py-4 text-center text-sm text-muted-foreground">
+                          언어 데이터가 없습니다. 백준 계정을 연동하면 자동으로 수집됩니다.
+                        </p>
+                      )}
                     </CardContent>
                   </Card>
 

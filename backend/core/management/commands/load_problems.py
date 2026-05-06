@@ -14,25 +14,47 @@ JobProblems.zip 와 LearningPaths.zip 데이터를 DB에 적재합니다.
 
 import os
 import json
+from django.conf import settings
 from django.core.management.base import BaseCommand
+
+# BASE_DIR 기준 기본 경로
+_BASE_DIR = getattr(settings, 'BASE_DIR', None)
+_DEFAULT_PROBLEMS_DIR = os.path.join(str(_BASE_DIR), '..', 'DB', 'JobProblems') if _BASE_DIR else None
+_DEFAULT_PATHS_DIR    = os.path.join(str(_BASE_DIR), '..', 'DB', 'LearningPaths') if _BASE_DIR else None
 
 
 ROLE_FILE_MAP = {
-    "AI Engineer":                    "AI_Engineer",
-    "AR&VR Engineer":                 "AR&VR_Engineer",
-    "Backend Engineer":               "Backend_Engineer",
-    "Big Data Engineer":              "Big_Data_Engineer",
-    "Blockchain Engineer":            "Blockchain_Engineer",
-    "Cloud Infrastructure Engineer":  "Cloud_Infrastructure_Engineer",
-    "Computer Vision Engineer":       "Computer_Vision_Engineer",
-    "Data Engineer":                  "Data_Engineer",
-    "Database Administrator":         "Database_Administrator",
-    "Data Scientist":                 "DataScientist",
-    "DevOps Engineer":                "DevOps_Engineer",
-    "Embedded Systems Engineer":      "Embedded_Systems_Engineer",
-    "Frontend Developer":             "Frontend_Developer",
-    "Full Stack Engineer":            "Full_Stack_Engineer",
-    # 나머지 16개 직군도 동일 패턴으로 추가 가능
+    "AI Engineer":                          "AI_Engineer",
+    "AR/VR Engineer":                       "AR_VR_Engineer",
+    "AR&VR Engineer":                       "AR&VR_Engineer",
+    "Backend Engineer":                     "Backend_Engineer",
+    "Big Data Engineer":                    "Big_Data_Engineer",
+    "Blockchain Engineer":                  "Blockchain_Engineer",
+    "Cloud Infrastructure Engineer":        "Cloud_Infrastructure_Engineer",
+    "Computer Vision Engineer":             "Computer_Vision_Engineer",
+    "Data Engineer":                        "Data_Engineer",
+    "Database Administrator":               "Database_Administrator",
+    "Data Scientist":                       "DataScientist",
+    "DevOps Engineer":                      "DevOps_Engineer",
+    "Embedded Systems Engineer":            "Embedded_Systems_Engineer",
+    "Frontend Developer":                   "Frontend_Developer",
+    "Full Stack Engineer":                  "Full_Stack_Engineer",
+    "Game Developer":                       "Game_Developer",
+    "IoT Engineer":                         "IoT_Engineer",
+    "Machine Learning Researcher":          "Machine_Learning_Researcher",
+    "Mobile App Developer":                 "Mobile_App_Developer",
+    "Natural Language Processing Engineer": "Natural_Language_Processing_Engineer",
+    "Network Engineer":                     "Network_Engineer",
+    "Quality Assurance Engineer (QA)":      "Quality_Assurance_Engineer_QA",
+    "Research Scientist":                   "Research_Scientist",
+    "Robotics Engineer":                    "Robotics_Engineer",
+    "Security Engineer":                    "Security_Engineer",
+    "Site Reliability Engineer (SRE)":      "Site_Reliability_Engineer_SRE",
+    "Software Architect":                   "Software_Architect",
+    "Software Engineer":                    "Software_Engineer",
+    "Systems Engineer":                     "Systems_Engineer",
+    "Technical Program Manager":            "Technical_Program_Manager",
+    "UI/UX Engineer":                       "UI_UX_Engineer",
 }
 
 
@@ -40,9 +62,9 @@ class Command(BaseCommand):
     help = "JobProblems / LearningPaths JSON 파일을 DB에 적재"
 
     def add_arguments(self, parser):
-        parser.add_argument('--problems_dir', type=str, default=None,
+        parser.add_argument('--problems_dir', type=str, default=_DEFAULT_PROBLEMS_DIR,
                             help='JobProblems JSON 파일이 있는 폴더 경로')
-        parser.add_argument('--paths_dir',    type=str, default=None,
+        parser.add_argument('--paths_dir',    type=str, default=_DEFAULT_PATHS_DIR,
                             help='LearningPaths JSON 파일이 있는 폴더 경로')
         parser.add_argument('--job_role',     type=str, default=None,
                             help='특정 직군만 적재 (예: "AI Engineer")')
@@ -64,18 +86,18 @@ class Command(BaseCommand):
             self.stdout.write("   완료")
 
         # ── 1. JobProblems 적재
-        if options['problems_dir']:
-            self._load_problems(
-                options['problems_dir'],
-                options.get('job_role')
-            )
+        problems_dir = options['problems_dir']
+        if problems_dir and os.path.isdir(problems_dir):
+            self._load_problems(problems_dir, options.get('job_role'))
+        elif problems_dir:
+            self.stderr.write(f"[경고] problems_dir 경로가 존재하지 않습니다: {problems_dir}")
 
         # ── 2. LearningPaths 적재
-        if options['paths_dir']:
-            self._load_paths(
-                options['paths_dir'],
-                options.get('job_role')
-            )
+        paths_dir = options['paths_dir']
+        if paths_dir and os.path.isdir(paths_dir):
+            self._load_paths(paths_dir, options.get('job_role'))
+        elif paths_dir:
+            self.stderr.write(f"[경고] paths_dir 경로가 존재하지 않습니다: {paths_dir}")
 
         # ── 최종 통계
         from core.models_problems import JobProblem, JobProblemCluster, ProblemEdge
@@ -196,39 +218,45 @@ class Command(BaseCommand):
                 cluster_count += 1
 
             # ── 엣지 저장 (dependency_graph.edges 구조 지원)
+            # dependency_graph의 edges는 선수관계이므로 is_prerequisite=True 고정
             edge_count = 0
-            raw_edges = (
-                data.get('dependency_graph', {}).get('edges', [])
-                or data.get('edges', [])
-            )
-            for e in raw_edges:
-                src_id = e.get('Preceding_ID') or e.get('source')
-                tgt_id = e.get('Target_ID')    or e.get('target')
-                try:
-                    src = JobProblem.objects.get(
-                        job_role=job_role,
-                        original_question_id=src_id
-                    )
-                    tgt = JobProblem.objects.get(
-                        job_role=job_role,
-                        original_question_id=tgt_id
-                    )
-                    ProblemEdge.objects.update_or_create(
-                        source_problem=src,
-                        target_problem=tgt,
-                        defaults={
-                            'job_role':            job_role,
-                            'combined_score':      e.get('combined_score', 0.0),
-                            'skill_overlap':       e.get('skill_overlap'),
-                            'scenario_similarity': e.get('scenario_similarity'),
-                            'is_prerequisite':     e.get('is_prerequisite', False),
-                        }
-                    )
-                    edge_count += 1
-                except JobProblem.DoesNotExist:
-                    self.stderr.write(
-                        f"   [경고]  문제 없음: {job_role} Q{src_id}→Q{tgt_id}"
-                    )
+            dep_edges   = data.get('dependency_graph', {}).get('edges', [])
+            other_edges = data.get('edges', [])
+            # dependency_graph.edges → is_prerequisite=True
+            # 최상위 edges → JSON 내 값 사용 (혹은 False)
+            edge_sources = [
+                (dep_edges,   True),
+                (other_edges, False),
+            ]
+            for raw_edges, default_prereq in edge_sources:
+                for e in raw_edges:
+                    src_id = e.get('Preceding_ID') or e.get('source')
+                    tgt_id = e.get('Target_ID')    or e.get('target')
+                    try:
+                        src = JobProblem.objects.get(
+                            job_role=job_role,
+                            original_question_id=src_id
+                        )
+                        tgt = JobProblem.objects.get(
+                            job_role=job_role,
+                            original_question_id=tgt_id
+                        )
+                        ProblemEdge.objects.update_or_create(
+                            source_problem=src,
+                            target_problem=tgt,
+                            defaults={
+                                'job_role':            job_role,
+                                'combined_score':      e.get('combined_score', 0.0),
+                                'skill_overlap':       e.get('skill_overlap'),
+                                'scenario_similarity': e.get('scenario_similarity'),
+                                'is_prerequisite':     default_prereq,
+                            }
+                        )
+                        edge_count += 1
+                    except JobProblem.DoesNotExist:
+                        self.stderr.write(
+                            f"   [경고]  문제 없음: {job_role} Q{src_id}→Q{tgt_id}"
+                        )
 
             self.stdout.write(
                 f"   [{job_role}] "

@@ -12,6 +12,11 @@ from core.views_db import (
     DBAiLogView, DBSummaryView,
 )
 from core.views_user import GoalView, MatchGenerateView, DashboardView
+from core.views_solve import (
+    JobProblemListView, SolveProblemView,
+    RecommendationView, SkillGapView,
+    PortfolioGenerateView, PortfolioFeedbackView,
+)
 
 # DB 조회 API (대시보드용)
 db_urls = [
@@ -32,9 +37,15 @@ db_urls = [
 
 # 사용자 기능 API
 core_urls = [
-    path('goals/',            GoalView.as_view()),
-    path('matches/generate/', MatchGenerateView.as_view()),
-    path('dashboard/',        DashboardView.as_view()),
+    path('goals/',                               GoalView.as_view()),
+    path('matches/generate/',                    MatchGenerateView.as_view()),
+    path('dashboard/',                           DashboardView.as_view()),
+    path('problems/',                            JobProblemListView.as_view()),
+    path('problems/<int:problem_id>/solve/',     SolveProblemView.as_view()),
+    path('recommendations/',                     RecommendationView.as_view()),
+    path('skill-gaps/',                          SkillGapView.as_view()),
+    path('portfolio/generate/',                  PortfolioGenerateView.as_view()),
+    path('portfolio/feedback/',                  PortfolioFeedbackView.as_view()),
 ]
 
 urlpatterns = [

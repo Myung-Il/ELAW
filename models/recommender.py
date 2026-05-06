@@ -49,7 +49,7 @@ _DEFAULT_USER_STATE_DIR = str(_DB_DIR / "user_states")    # ELAW/DB/user_states
 try:
     from dkt import DKTModel, MIN_RECORDS
     _DKT_AVAILABLE = True
-except ImportError:
+except Exception:
     _DKT_AVAILABLE = False
     MIN_RECORDS    = 30
 

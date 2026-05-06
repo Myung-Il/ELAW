@@ -1,269 +1,326 @@
-// 공부 목록 페이지
-// 커리큘럼에 포함된 공부 목록을 보여주고, 각 항목 클릭 시 소개와 예시 문제 표시
-// 커리큘럼 수정 여부도 확인 가능
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
 import AppHeader from "@/components/layout/app-header"
+import { api } from "@/lib/api"
 import {
-  BookOpen, ChevronRight, ChevronDown, Trophy, Clock,
-  Code, GraduationCap, Edit2, CheckCircle2, X,
+  Brain, BookOpen, CheckCircle2, XCircle, ChevronRight,
+  Loader2, RefreshCw, Trophy, Zap,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-// ─── 공부 목록 데이터 ─────────────────────────────────────────────────────
-// [FE 수정 매뉴얼] studyList를 GET /api/v1/study/my-list API로 교체
-// [BE 매뉴얼] GET /api/v1/study/my-list
-//   Response: { items: [{ id, title, category, desc, problems, duration, difficulty, examples }] }
-// [DB 매뉴얼] StudyTopics 테이블: id, title, category, description, difficulty, estimated_hours
-//             ExampleProblems 테이블: id, topic_id, title, level, platform
-const studyList = [
-  {
-    id: 1,
-    title: "이진 탐색 트리 (BST)",
-    category: "자료구조",
-    difficulty: "중",
-    problems: 12,
-    duration: "2시간",
-    desc: "이진 탐색 트리는 각 노드가 최대 두 개의 자식 노드를 가지며, 왼쪽 서브트리의 모든 값은 루트보다 작고, 오른쪽 서브트리의 모든 값은 루트보다 큰 자료구조입니다. 검색, 삽입, 삭제 연산을 O(log n) 시간에 수행할 수 있습니다.",
-    examples: [
-      { title: "BST에서 최솟값 찾기", level: "쉬움", platform: "백준" },
-      { title: "이진 탐색 트리 검증", level: "보통", platform: "LeetCode" },
-      { title: "BST의 k번째 작은 원소", level: "보통", platform: "LeetCode" },
-    ],
-    inCurriculum: true,
-  },
-  {
-    id: 2,
-    title: "다이나믹 프로그래밍",
-    category: "알고리즘",
-    difficulty: "상",
-    problems: 20,
-    duration: "4시간",
-    desc: "동적 프로그래밍(DP)은 복잡한 문제를 더 작은 하위 문제로 나누어 해결하는 알고리즘 설계 기법입니다. 메모이제이션(하향식)과 타뷸레이션(상향식) 두 가지 접근 방법이 있으며, 피보나치, LCS, 배낭 문제 등 다양한 곳에 응용됩니다.",
-    examples: [
-      { title: "피보나치 수열 (DP)", level: "쉬움", platform: "프로그래머스" },
-      { title: "계단 오르기", level: "보통", platform: "백준" },
-      { title: "LCS (최장 공통 부분 수열)", level: "어려움", platform: "백준" },
-    ],
-    inCurriculum: true,
-  },
-  {
-    id: 3,
-    title: "그래프 탐색 (BFS/DFS)",
-    category: "알고리즘",
-    difficulty: "중",
-    problems: 15,
-    duration: "3시간",
-    desc: "그래프는 정점(Vertex)과 간선(Edge)으로 이루어진 자료구조로, BFS(너비 우선 탐색)는 최단 경로 문제에, DFS(깊이 우선 탐색)는 경로 탐색 및 백트래킹에 주로 사용됩니다.",
-    examples: [
-      { title: "미로 최단 경로 (BFS)", level: "보통", platform: "백준" },
-      { title: "섬의 개수 세기 (DFS)", level: "보통", platform: "LeetCode" },
-      { title: "사이클 감지", level: "어려움", platform: "LeetCode" },
-    ],
-    inCurriculum: true,
-  },
-  {
-    id: 4,
-    title: "해시 테이블",
-    category: "자료구조",
-    difficulty: "중",
-    problems: 10,
-    duration: "2시간",
-    desc: "해시 테이블은 키-값 쌍을 저장하는 자료구조로, 해시 함수를 이용해 O(1) 평균 시간에 검색, 삽입, 삭제가 가능합니다. 충돌 처리 방법(체이닝, 개방 주소법)을 이해하는 것이 중요합니다.",
-    examples: [
-      { title: "두 수의 합 (Two Sum)", level: "쉬움", platform: "LeetCode" },
-      { title: "완주하지 못한 선수", level: "쉬움", platform: "프로그래머스" },
-      { title: "전화번호 목록", level: "보통", platform: "프로그래머스" },
-    ],
-    inCurriculum: false,
-  },
-  {
-    id: 5,
-    title: "정렬 알고리즘",
-    category: "알고리즘",
-    difficulty: "중",
-    problems: 12,
-    duration: "2.5시간",
-    desc: "다양한 정렬 알고리즘(버블, 선택, 삽입, 합병, 퀵, 힙 정렬)의 시간/공간 복잡도를 이해하고 각 상황에 맞는 정렬 알고리즘을 선택할 수 있어야 합니다.",
-    examples: [
-      { title: "K번째 큰 원소", level: "보통", platform: "LeetCode" },
-      { title: "회의실 배정", level: "보통", platform: "백준" },
-      { title: "가장 큰 수 만들기", level: "어려움", platform: "프로그래머스" },
-    ],
-    inCurriculum: true,
-  },
-]
+type Phase = "loading" | "idle" | "solving" | "result"
+
+interface Problem {
+  problem_id: number
+  original_question_id: number
+  job_role: string
+  difficulty: string
+  question_type: string
+  category: string
+  subcategory: string
+  scenario: string
+  question: string
+  choices: string[]
+  skills_required: string[]
+  estimated_mastery_pct: number
+  model: string
+  reason: string
+  rank: number
+}
+
+interface SolveResult {
+  is_correct: boolean
+  correct_answer: string
+  explanation: string
+  mastery_pct: number
+  xp_gained: number
+}
+
+const DIFFICULTY_COLOR: Record<string, string> = {
+  "대학 기초": "bg-blue-100 text-blue-700",
+  "주니어":   "bg-green-100 text-green-700",
+  "미들":     "bg-yellow-100 text-yellow-700",
+  "시니어":   "bg-red-100 text-red-700",
+}
 
 export default function StudyPage() {
-  const [expandedId, setExpandedId] = useState<number | null>(null)
-  const [editMode, setEditMode] = useState(false)
-  // [FE 수정 매뉴얼] curriculum 포함 여부 상태 관리
-  // [BE 매뉴얼] PUT /api/v1/curriculum/me/topics - 커리큘럼 주제 목록 업데이트
-  const [inCurriculum, setInCurriculum] = useState<Record<number, boolean>>(
-    Object.fromEntries(studyList.map((s) => [s.id, s.inCurriculum]))
-  )
+  const [phase, setPhase]             = useState<Phase>("loading")
+  const [jobRole, setJobRole]         = useState("")
+  const [problems, setProblems]       = useState<Problem[]>([])
+  const [current, setCurrent]         = useState<Problem | null>(null)
+  const [selected, setSelected]       = useState<string | null>(null)
+  const [result, setResult]           = useState<SolveResult | null>(null)
+  const [solvedCount, setSolvedCount] = useState(0)
+  const [xpTotal, setXpTotal]         = useState(0)
+  const [error, setError]             = useState("")
+  const [submitting, setSubmitting]   = useState(false)
+  const [solveStart, setSolveStart]   = useState(0)
 
-  const toggleExpand = (id: number) => {
-    setExpandedId(expandedId === id ? null : id)
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const dashRes = await api.getDashboard()
+        if (!dashRes.ok) { setPhase("idle"); return }
+        const dash = await dashRes.json()
+        const role = dash?.goal?.job_role || ""
+        setJobRole(role)
+        if (!role) { setPhase("idle"); return }
+        const recRes  = await api.getRecommendations(role, 10)
+        if (!recRes.ok) { setPhase("idle"); return }
+        const recData = await recRes.json()
+        setProblems(recData.results || [])
+      } catch { /* ignore */ } finally {
+        setPhase("idle")
+      }
+    }
+    load()
+  }, [])
+
+  const startProblem = (prob: Problem) => {
+    setCurrent(prob)
+    setSelected(null)
+    setResult(null)
+    setSolveStart(Date.now())
+    setPhase("solving")
   }
 
-  const toggleCurriculum = (id: number) => {
-    setInCurriculum((prev) => ({ ...prev, [id]: !prev[id] }))
+  const handleSubmit = async () => {
+    if (!selected || !current) return
+    setSubmitting(true)
+    setError("")
+    try {
+      const elapsed = Math.round((Date.now() - solveStart) / 1000)
+      const res     = await api.solveProblem(current.problem_id, selected, elapsed)
+      const data    = await res.json()
+      if (!res.ok) throw new Error(data.error || "제출 실패")
+      setResult(data)
+      if (data.is_correct) {
+        setSolvedCount(c => c + 1)
+        setXpTotal(x => x + (data.xp_gained || 0))
+      }
+      setPhase("result")
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  const difficultyColor = {
-    하: "bg-green-100 text-green-700",
-    중: "bg-yellow-100 text-yellow-700",
-    상: "bg-red-100 text-red-700",
+  const handleNext = () => {
+    const idx  = problems.findIndex(p => p.problem_id === current?.problem_id)
+    const next = problems[idx + 1]
+    if (next) startProblem(next)
+    else { setCurrent(null); setPhase("idle") }
   }
 
-  const levelColor = {
-    쉬움: "text-green-600",
-    보통: "text-yellow-600",
-    어려움: "text-red-600",
+  const refreshProblems = async () => {
+    if (!jobRole) return
+    setPhase("loading")
+    try {
+      const res  = await api.getRecommendations(jobRole, 10)
+      const data = await res.json()
+      setProblems(data.results || [])
+    } finally {
+      setPhase("idle")
+    }
   }
 
+  // ── 로딩 ──
+  if (phase === "loading") {
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <AppHeader />
+        <div className="flex flex-col items-center justify-center h-96 gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">AI 추천 문제를 불러오는 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // ── 문제 풀기 ──
+  if (phase === "solving" && current) {
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <AppHeader />
+        <main className="container mx-auto px-4 py-8 max-w-2xl">
+          <div className="mb-4 flex items-center justify-between">
+            <Badge variant="outline">{current.job_role}</Badge>
+            <div className="flex gap-2">
+              <Badge className={cn("border-0", DIFFICULTY_COLOR[current.difficulty] || "bg-gray-100 text-gray-700")}>
+                {current.difficulty}
+              </Badge>
+              <Badge variant="secondary">{current.question_type}</Badge>
+            </div>
+          </div>
+          <Card>
+            <CardHeader>
+              <p className="text-xs text-muted-foreground mb-1">{current.category} &gt; {current.subcategory}</p>
+              {current.scenario && (
+                <p className="text-sm text-muted-foreground bg-muted rounded p-3 mb-2">{current.scenario}</p>
+              )}
+              <CardTitle className="text-base leading-relaxed">{current.question}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {current.choices.map((choice, i) => (
+                <button
+                  key={i}
+                  onClick={() => setSelected(choice)}
+                  className={cn(
+                    "w-full text-left rounded-lg border p-3 text-sm transition-all",
+                    selected === choice
+                      ? "border-primary bg-primary/5 font-medium"
+                      : "hover:border-primary/50 hover:bg-muted/50"
+                  )}
+                >
+                  <span className="mr-2 font-semibold text-primary">{i + 1}.</span>{choice}
+                </button>
+              ))}
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <div className="flex gap-2 pt-2">
+                <Button variant="outline" onClick={() => setPhase("idle")} className="flex-1">목록으로</Button>
+                <Button onClick={handleSubmit} disabled={!selected || submitting} className="flex-1">
+                  {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}제출
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    )
+  }
+
+  // ── 결과 ──
+  if (phase === "result" && result && current) {
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <AppHeader />
+        <main className="container mx-auto px-4 py-8 max-w-2xl">
+          <Card>
+            <CardContent className="pt-8 pb-6 text-center space-y-4">
+              {result.is_correct
+                ? <CheckCircle2 className="h-14 w-14 text-green-500 mx-auto" />
+                : <XCircle className="h-14 w-14 text-destructive mx-auto" />}
+              <div>
+                <p className="text-xl font-bold mb-1">{result.is_correct ? "정답!" : "오답"}</p>
+                <p className="text-sm text-muted-foreground">
+                  정답: <span className="font-semibold text-foreground">{result.correct_answer}</span>
+                </p>
+              </div>
+              {result.xp_gained > 0 && (
+                <div className="flex items-center justify-center gap-2 text-amber-600 font-semibold">
+                  <Zap className="h-4 w-4" />+{result.xp_gained} XP
+                </div>
+              )}
+              {result.explanation && (
+                <div className="text-left bg-muted rounded-lg p-4">
+                  <p className="text-xs font-semibold text-muted-foreground mb-1">해설</p>
+                  <p className="text-sm">{result.explanation}</p>
+                </div>
+              )}
+              <div className="text-left">
+                <p className="text-xs text-muted-foreground mb-1">현재 숙련도</p>
+                <Progress value={result.mastery_pct} className="h-2" />
+                <p className="text-xs text-right mt-1 text-muted-foreground">{result.mastery_pct}%</p>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setPhase("idle")} className="flex-1">목록으로</Button>
+                <Button onClick={handleNext} className="flex-1">
+                  다음 문제 <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    )
+  }
+
+  // ── 추천 목록 ──
   return (
     <div className="min-h-screen bg-muted/30">
       <AppHeader />
-
       <main className="container mx-auto px-4 lg:px-8 py-8 max-w-4xl">
-        {/* 페이지 헤더 */}
-        <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
+        <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-2xl font-bold mb-1">공부 목록</h1>
+            <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
+              <Brain className="h-6 w-6 text-primary" />AI 추천 문제
+            </h1>
             <p className="text-sm text-muted-foreground">
-              ELAW에서 제공하는 학습 주제 목록 · 클릭하면 상세 내용과 예시 문제를 볼 수 있어요
+              {jobRole ? `${jobRole} · BKT/DKT 기반 약점 우선 추천` : "목표 설정 후 맞춤 문제가 추천됩니다"}
             </p>
           </div>
-          <Button
-            variant={editMode ? "default" : "outline"}
-            className="gap-2"
-            onClick={() => setEditMode(!editMode)}
-          >
-            <Edit2 className="h-4 w-4" />
-            {editMode ? "수정 완료" : "커리큘럼 수정"}
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Trophy className="h-4 w-4 text-amber-500" />
+              <span>오늘 {solvedCount}문제 · +{xpTotal} XP</span>
+            </div>
+            {jobRole && (
+              <Button variant="outline" size="sm" onClick={refreshProblems} className="gap-1">
+                <RefreshCw className="h-3.5 w-3.5" />새로 추천
+              </Button>
+            )}
+          </div>
         </div>
 
-        {/* 공부 목록 */}
-        {/* [FE 수정 매뉴얼] studyList 배열을 API 데이터로 교체 */}
+        {!jobRole && (
+          <Card className="text-center py-12">
+            <CardContent>
+              <BookOpen className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+              <p className="font-semibold mb-1">목표 직무가 설정되지 않았습니다</p>
+              <p className="text-sm text-muted-foreground mb-4">목표 설정 후 AI가 맞춤 문제를 추천합니다.</p>
+              <Button onClick={() => window.location.href = '/goal-setting'}>목표 설정하기</Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {jobRole && problems.length === 0 && (
+          <Card className="text-center py-12">
+            <CardContent>
+              <Brain className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+              <p className="font-semibold mb-1">문제 데이터가 없습니다</p>
+              <p className="text-sm text-muted-foreground">
+                서버에서 <code>python manage.py load_problems</code> 실행 후 이용 가능합니다.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="space-y-3">
-          {studyList.map((item) => {
-            const isExpanded = expandedId === item.id
-            const isInCurriculum = inCurriculum[item.id]
-
-            return (
-              <Card key={item.id} className={cn(
-                "shadow-sm overflow-hidden transition-all",
-                isExpanded && "border-primary/50 ring-1 ring-primary/20"
-              )}>
-                {/* 항목 헤더 - 클릭 시 상세 토글 */}
-                <button
-                  type="button"
-                  className="w-full text-left"
-                  onClick={() => toggleExpand(item.id)}
-                >
-                  <CardContent className="flex items-center gap-4 p-4">
-                    {/* 아이콘 */}
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 flex-shrink-0">
-                      <BookOpen className="h-5 w-5 text-primary" />
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-semibold text-sm">{item.title}</p>
-                        {isInCurriculum && (
-                          <Badge className="bg-primary/10 text-primary border-0 text-xs gap-1">
-                            <GraduationCap className="h-2.5 w-2.5" />
-                            내 커리큘럼
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                        <span>{item.category}</span>
-                        <span className="flex items-center gap-1">
-                          <Trophy className="h-3 w-3" />
-                          {item.problems}문제
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {item.duration}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <Badge className={cn("text-xs border-0", difficultyColor[item.difficulty as keyof typeof difficultyColor])}>
-                        {item.difficulty}
-                      </Badge>
-                      {isExpanded ? (
-                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </div>
-                  </CardContent>
-                </button>
-
-                {/* 상세 내용 (확장 시) */}
-                {isExpanded && (
-                  <div className="border-t px-4 pb-4 pt-4 bg-muted/20">
-                    {/* 설명 */}
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-4">{item.desc}</p>
-
-                    {/* 예시 문제 */}
-                    <div className="mb-4">
-                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                        예시 문제
-                      </h4>
-                      <div className="space-y-2">
-                        {item.examples.map((ex, i) => (
-                          <div key={i} className="flex items-center justify-between rounded-lg bg-card border px-3 py-2">
-                            <div className="flex items-center gap-2">
-                              <Code className="h-3.5 w-3.5 text-primary flex-shrink-0" />
-                              <span className="text-sm font-medium">{ex.title}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className={cn("text-xs font-medium", levelColor[ex.level as keyof typeof levelColor])}>
-                                {ex.level}
-                              </span>
-                              <Badge variant="secondary" className="text-xs">{ex.platform}</Badge>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* 커리큘럼 수정 버튼 */}
-                    {editMode && (
-                      <div className="flex items-center gap-3 pt-2 border-t">
-                        <p className="text-xs text-muted-foreground flex-1">
-                          {isInCurriculum ? "현재 내 커리큘럼에 포함되어 있습니다" : "내 커리큘럼에 포함되지 않은 항목입니다"}
-                        </p>
-                        <Button
-                          size="sm"
-                          variant={isInCurriculum ? "outline" : "default"}
-                          className="gap-1 text-xs"
-                          onClick={(e) => { e.stopPropagation(); toggleCurriculum(item.id) }}
-                        >
-                          {isInCurriculum ? (
-                            <><X className="h-3 w-3" />커리큘럼 제외</>
-                          ) : (
-                            <><CheckCircle2 className="h-3 w-3" />커리큘럼 추가</>
-                          )}
-                        </Button>
-                      </div>
-                    )}
+          {problems.map((prob) => (
+            <Card
+              key={prob.problem_id}
+              className="cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all"
+              onClick={() => startProblem(prob)}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 flex-shrink-0">
+                  <span className="text-sm font-bold text-primary">{prob.rank}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">{prob.question}</p>
+                  <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                    <span>{prob.category}</span><span>·</span>
+                    <span>{prob.subcategory}</span><span>·</span>
+                    <span className="text-primary font-medium">{prob.model}</span>
                   </div>
-                )}
-              </Card>
-            )
-          })}
+                  <p className="text-xs text-muted-foreground mt-0.5 truncate">{prob.reason}</p>
+                </div>
+                <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                  <Badge className={cn("border-0 text-xs", DIFFICULTY_COLOR[prob.difficulty] || "bg-gray-100 text-gray-700")}>
+                    {prob.difficulty}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">숙련도 {prob.estimated_mastery_pct}%</span>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </main>
     </div>

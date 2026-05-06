@@ -13,57 +13,44 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { GraduationCap, Smartphone, Eye, EyeOff, Loader2 } from "lucide-react"
+import { api, auth } from "@/lib/api"
 
 export default function LoginPage() {
   const router = useRouter()
 
-  // ─── 상태 관리 ─────────────────────────────────────────────────────────────
-  // [FE 수정 매뉴얼] 실제 API 연동 시 userId/password를 폼 submit 핸들러에서 사용
-  const [userId, setUserId] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading]   = useState(false)
+  const [errorMsg, setErrorMsg]     = useState("")
   const [rememberMe, setRememberMe] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [errorMsg, setErrorMsg] = useState("")
 
-  // ─── 로그인 처리 ────────────────────────────────────────────────────────────
-  // [BE 매뉴얼] POST /api/v1/auth/user/login
-  //   Request Body: { user_id: string, password: string }
-  //   Response: { access_token, refresh_token, is_first_login: boolean, user: { id, name, dept } }
-  // [DB 매뉴얼] Users 테이블에서 user_id 조회 후 bcrypt 비밀번호 비교
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMsg("")
 
-    if (!userId || !password) {
-      setErrorMsg("아이디와 비밀번호를 입력해주세요.")
+    if (!email || !password) {
+      setErrorMsg("이메일과 비밀번호를 입력해주세요.")
       return
     }
 
     setIsLoading(true)
     try {
-      // TODO: 실제 API 호출로 교체
-      // const res = await fetch("/api/v1/auth/user/login", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ user_id: userId, password }),
-      // })
-      // const data = await res.json()
-      // if (!res.ok) throw new Error(data.message)
-      //
-      // 토큰 저장
-      // localStorage.setItem("access_token", data.access_token)
-      // if (rememberMe) localStorage.setItem("refresh_token", data.refresh_token)
-      //
-      // 최초 로그인 여부 확인
-      // if (data.is_first_login) router.push("/goal-setting")
-      // else router.push("/home")
+      const res  = await api.login(email, password)
+      const data = await res.json()
 
-      // 임시: 바로 목표설정 페이지로 이동 (첫 로그인 시나리오 시뮬레이션)
-      await new Promise((resolve) => setTimeout(resolve, 800))
-      router.push("/goal-setting")
-    } catch (err) {
-      setErrorMsg("로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.")
+      if (!res.ok) {
+        throw new Error(data.detail || data.message || "로그인 실패")
+      }
+
+      auth.setTokens(data.access, data.refresh)
+
+      // 목표가 있으면 홈, 없으면 목표설정
+      const goalsRes = await api.getGoals()
+      const goals    = goalsRes.ok ? await goalsRes.json() : []
+      router.push(goals.length > 0 ? "/home" : "/goal-setting")
+    } catch (err: any) {
+      setErrorMsg(err.message || "로그인에 실패했습니다. 이메일 또는 비밀번호를 확인해주세요.")
     } finally {
       setIsLoading(false)
     }
@@ -117,14 +104,14 @@ export default function LoginPage() {
             {/* 로그인 폼 */}
             <form className="space-y-4" onSubmit={handleLogin}>
               <div className="space-y-2">
-                <Label htmlFor="user-id">아이디</Label>
-                {/* [FE 수정 매뉴얼] value와 onChange로 제어 컴포넌트(controlled)로 구현됨 */}
+                <Label htmlFor="user-email">이메일</Label>
                 <Input
-                  id="user-id"
-                  placeholder="아이디를 입력하세요"
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                  autoComplete="username"
+                  id="user-email"
+                  type="email"
+                  placeholder="이메일을 입력하세요"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
                 />
               </div>
 
