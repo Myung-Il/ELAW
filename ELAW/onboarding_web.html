@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELAW 온보딩</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f8f9fa;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+.app{width:100%;max-width:460px}
+.step-bar{display:flex;gap:6px;margin-bottom:1.5rem}
+.step-dot{flex:1;height:4px;border-radius:2px;background:#e2e8f0;transition:background .3s}
+.step-dot.done{background:#1D9E75}
+.step-dot.active{background:#378ADD}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+h2{font-size:16px;font-weight:500;color:#1a202c;margin-bottom:4px}
+.sub{font-size:13px;color:#718096;margin-bottom:1rem}
+.field{margin-bottom:12px}
+label{display:block;font-size:13px;color:#4a5568;margin-bottom:4px}
+input,select{width:100%;font-size:14px;padding:9px 11px;border:1px solid #e2e8f0;border-radius:8px;background:#f8f9fa;color:#1a202c;outline:none;transition:border .15s}
+input:focus,select:focus{border-color:#378ADD;background:#fff;box-shadow:0 0 0 3px rgba(55,138,221,0.12)}
+.btn{width:100%;padding:10px;border-radius:8px;border:none;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;margin-top:4px}
+.btn-primary{background:#378ADD;color:#fff}.btn-primary:hover{background:#185FA5}
+.btn-secondary{background:#f8f9fa;border:1px solid #e2e8f0;color:#4a5568}.btn-secondary:hover{background:#edf2f7}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.msg{font-size:12px;padding:8px 10px;border-radius:8px;margin-bottom:10px}
+.msg-ok{background:#f0fff4;color:#276749;border:1px solid #c6f6d5}
+.msg-err{background:#fff5f5;color:#c53030;border:1px solid #fed7d7}
+.msg-info{background:#ebf8ff;color:#2b6cb0;border:1px solid #bee3f8}
+.check-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;color:#4a5568}
+.check-row input[type=checkbox]{width:auto;accent-color:#378ADD}
+.tag-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tag{padding:5px 12px;border-radius:20px;font-size:12px;border:1px solid #e2e8f0;cursor:pointer;background:#f8f9fa;color:#4a5568;transition:all .12s}
+.tag.sel{background:#ebf8ff;border-color:#378ADD;color:#2b6cb0;font-weight:500}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f0f0f0;font-size:13px}
+.summary-row:last-child{border:none}
+.summary-key{color:#718096}
+.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:500}
+.badge-ok{background:#f0fff4;color:#276749}
+.badge-pend{background:#fffaf0;color:#b7791f}
+.hidden{display:none}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.srv-row{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;display:flex;gap:8px;align-items:center;margin-bottom:1rem}
+.srv-row input{border:1px solid #e2e8f0;background:#f8f9fa;font-size:12px;padding:5px 8px}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="step-bar">
+    <div class="step-dot active" id="d0"></div>
+    <div class="step-dot" id="d1"></div>
+    <div class="step-dot" id="d2"></div>
+    <div class="step-dot" id="d3"></div>
+    <div class="step-dot" id="d4"></div>
+    <div class="step-dot" id="d5"></div>
+  </div>
+
+  <div class="srv-row">
+    <input id="srv" value="http://127.0.0.1:8000" placeholder="서버 주소" style="flex:1">
+    <div class="dot" id="sdot" style="background:#e53e3e"></div>
+    <span id="sst" style="font-size:12px;color:#718096;white-space:nowrap">미연결</span>
+  </div>
+
+  <div id="s0">
+    <div class="card">
+      <h2>회원가입</h2><div class="sub">ELAW 계정을 만들어요</div>
+      <div id="msg0"></div>
+      <div class="field"><label>이름</label><input id="name" placeholder="홍길동"></div>
+      <div class="field"><label>이메일</label><input id="email" type="email" placeholder="you@gmail.com"></div>
+      <div class="field"><label>비밀번호 (8자 이상)</label><input id="pw" type="password" placeholder="elaw1234!"></div>
+      <div class="check-row"><input type="checkbox" id="ai_c" checked><label for="ai_c">AI 활용 동의</label></div>
+      <div class="check-row"><input type="checkbox" id="pr_c" checked><label for="pr_c">개인정보 처리 동의</label></div>
+      <button class="btn btn-primary" onclick="signup()">가입하기</button>
+    </div>
+  </div>
+
+  <div id="s1" class="hidden">
+    <div class="card">
+      <h2>로그인</h2><div class="sub">가입한 계정으로 로그인하세요</div>
+      <div id="msg1"></div>
+      <div class="field"><label>이메일</label><input id="l_email" type="email"></div>
+      <div class="field"><label>비밀번호</label><input id="l_pw" type="password"></div>
+      <button class="btn btn-primary" onclick="login()">로그인</button>
+    </div>
+  </div>
+
+  <div id="s2" class="hidden">
+    <div class="card">
+      <h2>플랫폼 연동</h2><div class="sub">백준과 GitHub 아이디를 연동하면 실제 데이터가 수집돼요</div>
+      <div id="msg2"></div>
+      <div class="field"><label>백준 아이디</label><input id="bj_id" placeholder="mango538"></div>
+      <div class="field"><label>GitHub 아이디</label><input id="gh_id" placeholder="Ohseonghwan538"></div>
+      <button class="btn btn-primary" onclick="linkPlatforms()">연동 & 데이터 수집</button>
+      <button class="btn btn-secondary" style="margin-top:6px" onclick="goStep(3)">나중에 하기</button>
+    </div>
+  </div>
+
+  <div id="s3" class="hidden">
+    <div class="card">
+      <h2>학습 목표 설정</h2><div class="sub">목표를 입력하면 AI가 커리큘럼을 자동으로 만들어줘요</div>
+      <div id="msg3"></div>
+      <div class="field">
+        <label>관심 분야</label>
+        <div class="tag-grid" id="field-tags">
+          <div class="tag" onclick="selTag(this,'field')">백엔드</div>
+          <div class="tag" onclick="selTag(this,'field')">프론트엔드</div>
+          <div class="tag" onclick="selTag(this,'field')">풀스택</div>
+          <div class="tag" onclick="selTag(this,'field')">AI/ML</div>
+          <div class="tag" onclick="selTag(this,'field')">데이터분석</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>목표 직무</label>
+        <div class="tag-grid" id="role-tags">
+          <div class="tag" onclick="selTag(this,'role')">백엔드 개발자</div>
+          <div class="tag" onclick="selTag(this,'role')">프론트엔드 개발자</div>
+          <div class="tag" onclick="selTag(this,'role')">풀스택 개발자</div>
+          <div class="tag" onclick="selTag(this,'role')">AI 엔지니어</div>
+          <div class="tag" onclick="selTag(this,'role')">데이터 엔지니어</div>
+        </div>
+      </div>
+      <div class="field"><label>학습 기간</label>
+        <select id="weeks"><option value="8">8주</option><option value="12">12주</option><option value="16" selected>16주</option></select>
+      </div>
+      <button class="btn btn-primary" onclick="setGoal()">목표 설정 & AI 커리큘럼 생성</button>
+    </div>
+  </div>
+
+  <div id="s4" class="hidden">
+    <div class="card">
+      <h2>취업 매칭</h2><div class="sub">내 스킬을 분석해서 공고와 매칭 점수를 계산해요</div>
+      <div id="msg4"></div>
+      <button class="btn btn-primary" onclick="generateMatches()">매칭 점수 계산하기</button>
+    </div>
+  </div>
+
+  <div id="s5" class="hidden">
+    <div class="card">
+      <h2>설정 완료!</h2><div class="sub" style="margin-bottom:1rem">12개 테이블에 데이터가 저장됐어요</div>
+      <div id="summary-rows"></div>
+      <button class="btn btn-primary" style="margin-top:1rem" onclick="window.open('db_dashboard.html')">DB 대시보드 열기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let tok='',selField='',selRole='';
+const $=id=>document.getElementById(id);
+const getSrv=()=>$('srv').value.replace(/\/$/,'');
+
+function setSt(ok,txt){$('sdot').style.background=ok?'#38a169':'#e53e3e';$('sst').textContent=txt;}
+function showMsg(id,type,txt){const el=$('msg'+id);el.className='msg msg-'+type;el.textContent=txt;}
+function goStep(n){for(let i=0;i<6;i++){$('s'+i)?.classList.add('hidden');$('d'+i).className='step-dot'+(i<n?' done':i===n?' active':'');}$('s'+n)?.classList.remove('hidden');}
+function setLoad(btn,on,txt){btn.disabled=on;btn.innerHTML=on?'<span class="spin"></span>처리 중...':txt;}
+function selTag(el,type){const g=$(type==='field'?'field-tags':'role-tags');g.querySelectorAll('.tag').forEach(t=>t.classList.remove('sel'));el.classList.add('sel');if(type==='field')selField=el.textContent;else selRole=el.textContent;}
+
+async function api(path,method='GET',body=null){
+  const h={'Content-Type':'application/json'};
+  if(tok)h['Authorization']='Bearer '+tok;
+  const opt={method,headers:h};
+  if(body)opt.body=JSON.stringify(body);
+  const r=await fetch(getSrv()+path,opt);
+  const j=await r.json().catch(()=>({}));
+  return{ok:r.ok,status:r.status,data:j};
+}
+
+async function signup(){
+  const btn=event.target;
+  setLoad(btn,true,'');
+  const name=$('name').value.trim(),email=$('email').value.trim(),pw=$('pw').value;
+  if(!name||!email||!pw){showMsg(0,'err','이름, 이메일, 비밀번호를 모두 입력하세요');setLoad(btn,false,'가입하기');return;}
+  const r=await api('/api/accounts/signup/','POST',{email,password:pw,name,role:'student',ai_consent:$('ai_c').checked,privacy_consent:$('pr_c').checked});
+  setLoad(btn,false,'가입하기');
+  if(r.ok){setSt(true,'연결됨');showMsg(0,'ok','가입 성공! 로그인 화면으로 이동합니다.');$('l_email').value=email;$('l_pw').value=pw;setTimeout(()=>goStep(1),700);}
+  else{const err=Object.values(r.data).flat().join(' ');showMsg(0,'err',err||'가입 실패');}
+}
+
+async function login(){
+  const btn=event.target;setLoad(btn,true,'');
+  const r=await api('/api/accounts/login/','POST',{email:$('l_email').value.trim(),password:$('l_pw').value});
+  setLoad(btn,false,'로그인');
+  if(r.ok){tok=r.data.access;setSt(true,'로그인됨');showMsg(1,'ok','로그인 성공!');setTimeout(()=>goStep(2),600);}
+  else showMsg(1,'err','이메일 또는 비밀번호가 틀렸습니다');
+}
+
+async function linkPlatforms(){
+  const btn=event.target;const bj=$('bj_id').value.trim(),gh=$('gh_id').value.trim();
+  if(!bj&&!gh){showMsg(2,'err','아이디를 하나 이상 입력하세요');return;}
+  setLoad(btn,true,'');
+  let ok=0;
+  if(bj){const r=await api('/api/accounts/platform/','POST',{platform:'baekjoon',external_id:bj});if(r.ok)ok++;}
+  if(gh){const r=await api('/api/accounts/platform/','POST',{platform:'github',external_id:gh});if(r.ok)ok++;}
+  if(ok>0){showMsg(2,'info',`${ok}개 연동 완료. 데이터 수집 중... (10~30초 소요)`);await api('/api/accounts/platform/sync/','POST',{});showMsg(2,'ok','데이터 수집 완료!');setTimeout(()=>goStep(3),800);}
+  else showMsg(2,'err','연동 실패. 아이디를 확인해주세요.');
+  setLoad(btn,false,'연동 & 데이터 수집');
+}
+
+async function setGoal(){
+  const btn=event.target;
+  if(!selField||!selRole){showMsg(3,'err','관심 분야와 목표 직무를 선택하세요');return;}
+  setLoad(btn,true,'');
+  const r=await api('/api/core/goals/','POST',{goal_type:'job',field:selField,job_role:selRole,duration_weeks:parseInt($('weeks').value)});
+  setLoad(btn,false,'목표 설정 & AI 커리큘럼 생성');
+  if(r.ok){showMsg(3,'ok',r.data.ai_generated?'AI 커리큘럼 생성 완료!':'기본 커리큘럼으로 저장됨');setTimeout(()=>goStep(4),800);}
+  else showMsg(3,'err',r.data.error||'목표 저장 실패');
+}
+
+async function generateMatches(){
+  const btn=event.target;setLoad(btn,true,'');
+  const r=await api('/api/core/matches/generate/','POST',{});
+  setLoad(btn,false,'매칭 점수 계산하기');
+  if(r.ok){showMsg(4,'ok',r.data.message);setTimeout(()=>showComplete(r.data),800);}
+  else showMsg(4,'err','매칭 실패');
+}
+
+async function showComplete(matchData){
+  goStep(5);
+  const r=await api('/api/core/dashboard/');
+  if(!r.ok)return;
+  const d=r.data;
+  const rows=[
+    ['User','생성됨',true],['PlatformLink',d.platforms?.length>0?d.platforms.length+'개 연동':'미연동',d.platforms?.length>0],
+    ['SolveHistory',d.solve_stats?.total+'건',d.solve_stats?.total>0],['LearningStats',d.top_languages?.length>0?'집계됨':'없음',d.top_languages?.length>0],
+    ['UserGoal',d.goal?d.goal.job_role:'없음',!!d.goal],['Curriculum',d.goal?.has_curriculum?'생성됨':'없음',d.goal?.has_curriculum],
+    ['Portfolio',d.portfolio?'생성됨':'없음',!!d.portfolio],['Match',matchData?.matches?.length+'개',matchData?.matches?.length>0],
+    ['AiLog','기록됨',true],['Company','3개 (기업)',true],['JobPosting','6개 (공고)',true],['Post','5개 (공지)',true],
+  ];
+  $('summary-rows').innerHTML=rows.map(([k,v,ok])=>`<div class="summary-row"><span class="summary-key">${k}</span><span class="badge badge-${ok?'ok':'pend'}">${v}</span></div>`).join('');
+}
+</script>
+</body>
+</html>
