@@ -1,0 +1,1 @@
+- [ELAW DB 셋업 현황](project_db_setup.md) — 마이그레이션 실제 경로(backend/core/migrations/), 모델 파일 구조(4개 파일), 조건부 MySQL 설정, docker-compose MySQL 구성

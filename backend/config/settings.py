@@ -11,16 +11,15 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
+load_dotenv(BASE_DIR / ".env")
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-j34rse@upusiz&ggit2!8!i(m)l$0014ml=_+x-kwufq0ls%g1'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-j34rse@upusiz&ggit2!8!i(m)l$0014ml=_+x-kwufq0ls%g1')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -81,12 +80,29 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# DB_HOST 환경변수가 설정된 경우 MySQL 사용, 그렇지 않으면 SQLite 사용 (개발 기본값)
+if os.getenv("DB_HOST"):
+    DATABASES = {
+        "default": {
+            "ENGINE":   "django.db.backends.mysql",
+            "NAME":     os.getenv("DB_NAME", "elaw_db"),
+            "USER":     os.getenv("DB_USER", "elaw_user"),
+            "PASSWORD": os.getenv("DB_PASSWORD", ""),
+            "HOST":     os.getenv("DB_HOST", "localhost"),
+            "PORT":     os.getenv("DB_PORT", "3306"),
+            "OPTIONS": {
+                "charset": "utf8mb4",
+                "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation
@@ -145,37 +161,7 @@ AUTH_USER_MODEL = 'core.User'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-# ─────────────────────────────────────────
-# config/settings.py 하단에 아래 내용을 추가하세요
-# ─────────────────────────────────────────
-
-import os
-from pathlib import Path
-from dotenv import load_dotenv
-
-load_dotenv(BASE_DIR / ".env")
-
-# GitHub PAT (ETL에서 사용)
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
-
-# (선택) SQLite → MySQL 전환 시 아래 주석 해제
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME':     os.getenv('DB_NAME', 'elaw_db'),
-#         'USER':     os.getenv('DB_USER', 'elaw_user'),
-#         'PASSWORD': os.getenv('DB_PASSWORD', ''),
-#         'HOST':     os.getenv('DB_HOST', 'localhost'),
-#         'PORT':     os.getenv('DB_PORT', '3306'),
-#         'OPTIONS':  {'charset': 'utf8mb4'},
-#     }
-# }
-
-# .env 로드
-import os
-from dotenv import load_dotenv
-load_dotenv(BASE_DIR / ".env")
-
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+# External API keys
 GITHUB_TOKEN   = os.getenv("GITHUB_TOKEN", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 

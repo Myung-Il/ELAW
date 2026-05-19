@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"D:\\\\Project\\\\ELAW\\\\ELAW\" -Force)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx|json\\)$\")",
+      "Bash(python -c \"import django; print\\('Django:', django.__version__\\)\")",
+      "Bash(python manage.py showmigrations core)",
+      "Bash(python manage.py makemigrations --check)",
+      "Bash(python manage.py migrate)",
+      "Bash(python manage.py dbshell -- \".tables\")",
+      "Bash(python -c ' *)",
+      "Bash(python manage.py check)",
+      "Bash(docker-compose up *)"
+    ]
+  }
+}
