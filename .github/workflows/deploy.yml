@@ -1,0 +1,29 @@
+name: Deploy ELAW
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Pull latest code
+        run: |
+          cd /volume/ELAW
+          git pull origin main
+
+      - name: Install dependencies
+        run: |
+          cd /volume/ELAW
+          source .venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Restart Django server
+        run: |
+          cd /volume/ELAW
+          pkill -f "manage.py runserver" || true
+          source .venv/bin/activate
+          nohup python backend/manage.py runserver 0.0.0.0:9000 > /volume/ELAW/backend.log 2>&1 &
