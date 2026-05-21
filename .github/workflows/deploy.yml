@@ -10,22 +10,5 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Pull latest code
-        run: |
-          cd /volume/ELAW
-          git pull origin main
-
-      - name: Install dependencies
-        run: |
-          cd /volume/ELAW
-          /volume/ELAW/.venv/bin/pip install -r requirements.txt
-
-      - name: Restart Django server
-        run: |
-          pkill -f "manage.py runserver" || true
-          sleep 1
-          cd /volume/ELAW
-          nohup /volume/ELAW/.venv/bin/python backend/manage.py runserver 0.0.0.0:9000 > /volume/ELAW/backend.log 2>&1 &
-          disown
-          sleep 3
-          ps -ef | grep manage.py | grep -v grep
+      - name: Run deploy script
+        run: /volume/deploy.sh
