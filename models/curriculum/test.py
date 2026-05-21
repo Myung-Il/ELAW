@@ -4,7 +4,7 @@ from pathlib import Path
 
 # models/ 폴더 기준으로 경로 설정
 BASE_DIR = Path(__file__).resolve().parent
-DB_DIR   = BASE_DIR.parent / "DB"
+DB_DIR   = BASE_DIR.parent.parent / "DB"
 sys.path.insert(0, str(BASE_DIR))
 
 from seedquiz import SeedQuiz
