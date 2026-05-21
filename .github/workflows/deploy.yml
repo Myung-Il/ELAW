@@ -26,3 +26,6 @@ jobs:
           sleep 1
           cd /volume/ELAW
           nohup /volume/ELAW/.venv/bin/python backend/manage.py runserver 0.0.0.0:9000 > /volume/ELAW/backend.log 2>&1 &
+          disown
+          sleep 3
+          ps -ef | grep manage.py | grep -v grep
