@@ -1,5 +1,3 @@
-// 목표 설정 페이지 - 최초 로그인 시에만 진행
-// 희망 직무와 공부 분야를 선택하고 커리큘럼 기반을 잡는 단계
 "use client"
 
 import { useState } from "react"
@@ -9,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { GraduationCap, Sparkles, CheckCircle2, Loader2, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { api } from "@/lib/api-client"
 
 // ─── 희망 직무 목록 ────────────────────────────────────────────────────────
 // [FE 수정 매뉴얼] job_fields 배열은 API로 가져올 수도 있음
@@ -78,26 +77,20 @@ export default function GoalSettingPage() {
     )
   }
 
-  // 목표 설정 완료 제출
-  // [BE 매뉴얼] POST /api/v1/users/goals
-  //   Request: { job_field: string, study_topics: string[] }
-  //   Response: { success: true, curriculum_id: number }
-  // [DB 매뉴얼] UserGoals 테이블: user_id, job_field_id, is_first_setup
-  //             UserStudyTopics 테이블: user_id, topic_id
   const handleComplete = async () => {
     if (!selectedJob) return
+    const jobField = jobFields.find((j) => j.id === selectedJob)
     setIsLoading(true)
     try {
-      // TODO: 실제 API 호출로 교체
-      // await fetch("/api/v1/users/goals", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      //   body: JSON.stringify({ job_field: selectedJob, study_topics: selectedTopics }),
-      // })
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await api.post("/api/core/goals/", {
+        job_role: jobField?.name ?? selectedJob,
+        field: jobField?.description ?? selectedJob,
+        duration_weeks: 8,
+      })
       router.push("/home")
     } catch (err) {
       console.error("목표 설정 실패:", err)
+      alert(err instanceof Error ? err.message : "목표 설정에 실패했습니다.")
     } finally {
       setIsLoading(false)
     }

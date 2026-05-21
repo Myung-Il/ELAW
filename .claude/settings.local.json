@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"D:\\\\Project\\\\ELAW\\\\ELAW\" -Force)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(Get-ChildItem -Path \"D:\\\\Project\\\\ELAW\\\\ELAW\\\\DB\" -Recurse -Force)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Format-List)",
+      "Bash(Get-ChildItem -Path models -Recurse -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(dir \"D:\\\\Project\\\\ELAW\\\\ELAW\\\\frontend\\\\app\")",
+      "Bash(cd /d \"D:\\\\Project\\\\ELAW\\\\ELAW\")",
+      "Bash(ls backend/.env)",
+      "Bash(cd /d \"D:\\\\Project\\\\ELAW\\\\ELAW\\\\backend\")",
+      "Bash(pip show *)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(& \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Python\\\\bin\\\\python.exe\" -m pip show django 2>&1)",
+      "PowerShell(Get-ChildItem \"D:\\\\Project\\\\ELAW\\\\ELAW\" -Name -Force | Where-Object { $_ -match \"venv|env|\\\\.python\" })",
+      "PowerShell(& \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Microsoft\\\\WindowsApps\\\\python.exe\" --version 2>&1)",
+      "PowerShell(head *)",
+      "PowerShell(& \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Python\\\\bin\\\\python.exe\" -m pip list 2>$null | Select-Object -First 30)",
+      "PowerShell(& \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Python\\\\bin\\\\python.exe\" -m pip list 2>$null | Select-Object -Skip 28 | Select-Object -First 30)",
+      "PowerShell(& \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Python\\\\bin\\\\python.exe\" -c \"import secrets; print\\(secrets.token_urlsafe\\(50\\)\\)\")",
+      "PowerShell(& \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Python\\\\bin\\\\pip.exe\" install -r \"D:\\\\Project\\\\ELAW\\\\ELAW\\\\requirements.txt\" 2>&1)",
+      "PowerShell(Get-ChildItem \"D:\\\\Project\\\\ELAW\\\\ELAW\\\\frontend\" -Name -ErrorAction SilentlyContinue | Where-Object { $_ -notmatch \"node_modules|\\\\.next\" })",
+      "Bash(\"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Python\\\\bin\\\\python.exe\" -c \"import django; print\\(django.__version__\\)\")"
+    ]
+  }
+}

@@ -11,7 +11,27 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .serializers import UserSerializer, ProfileSerializer, PlatformLinkSerializer
+
+
+# ─────────────────────────────────────────
+# 커스텀 JWT 로그인 — is_first_login 포함
+# ─────────────────────────────────────────
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        from core.models import UserGoal
+        data["is_first_login"] = not UserGoal.objects.filter(
+            user=self.user, is_active=True
+        ).exists()
+        return data
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 # ─────────────────────────────────────────
@@ -72,6 +92,39 @@ class ProfileView(APIView):
             "message": "입력값이 올바르지 않습니다.",
             "errors": serializer.errors,
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ─────────────────────────────────────────
+# 비밀번호 변경
+# ─────────────────────────────────────────
+
+class PasswordChangeView(APIView):
+    """POST /api/accounts/password/change/"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        current_password = request.data.get("current_password", "")
+        new_password     = request.data.get("new_password", "")
+
+        if not current_password or not new_password:
+            return Response(
+                {"error": "current_password와 new_password가 필요합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if len(new_password) < 8:
+            return Response(
+                {"error": "새 비밀번호는 8자 이상이어야 합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not request.user.check_password(current_password):
+            return Response(
+                {"error": "현재 비밀번호가 올바르지 않습니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        request.user.set_password(new_password)
+        request.user.save()
+        return Response({"message": "비밀번호가 변경되었습니다."})
 
 
 # ─────────────────────────────────────────

@@ -3,10 +3,12 @@ accounts/urls.py
 """
 
 from django.urls import path
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     SignupView,
     ProfileView,
+    PasswordChangeView,
+    CustomTokenObtainPairView,
     PlatformLinkView,
     PlatformSyncView,
     PlatformStatusView,
@@ -14,14 +16,13 @@ from .views import (
 
 urlpatterns = [
     # 인증
-    path("signup/",        SignupView.as_view(),          name="signup"),
-    path("login/",         TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("signup/",        SignupView.as_view(),                name="signup"),
+    path("login/",         CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", TokenRefreshView.as_view(),    name="token_refresh"),
 
     # 프로필
-    # GET   → 내 프로필 조회
-    # PATCH → 내 프로필 수정 (name, phone, ai_consent, privacy_consent)
-    path("profile/",       ProfileView.as_view(),         name="profile"),
+    path("profile/",          ProfileView.as_view(),        name="profile"),
+    path("password/change/",  PasswordChangeView.as_view(), name="password_change"),
 
     # 플랫폼 연동 (기존)
     path("platform/",        PlatformLinkView.as_view(),   name="platform_link"),

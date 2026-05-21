@@ -1,7 +1,3 @@
-// 로그인 페이지
-// 시나리오: 로그인 성공 시
-//   - 최초 로그인이면 → /goal-setting (목표 설정)
-//   - 기존 사용자면 → /home (메인 페이지)
 "use client"
 
 import { useState } from "react"
@@ -13,12 +9,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { GraduationCap, Smartphone, Eye, EyeOff, Loader2 } from "lucide-react"
+import { useAuth } from "@/hooks/use-auth"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { login } = useAuth()
 
-  // ─── 상태 관리 ─────────────────────────────────────────────────────────────
-  // [FE 수정 매뉴얼] 실제 API 연동 시 userId/password를 폼 submit 핸들러에서 사용
   const [userId, setUserId] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -26,11 +22,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
 
-  // ─── 로그인 처리 ────────────────────────────────────────────────────────────
-  // [BE 매뉴얼] POST /api/v1/auth/user/login
-  //   Request Body: { user_id: string, password: string }
-  //   Response: { access_token, refresh_token, is_first_login: boolean, user: { id, name, dept } }
-  // [DB 매뉴얼] Users 테이블에서 user_id 조회 후 bcrypt 비밀번호 비교
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMsg("")
@@ -42,28 +33,25 @@ export default function LoginPage() {
 
     setIsLoading(true)
     try {
-      // TODO: 실제 API 호출로 교체
-      // const res = await fetch("/api/v1/auth/user/login", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ user_id: userId, password }),
-      // })
-      // const data = await res.json()
-      // if (!res.ok) throw new Error(data.message)
-      //
-      // 토큰 저장
-      // localStorage.setItem("access_token", data.access_token)
-      // if (rememberMe) localStorage.setItem("refresh_token", data.refresh_token)
-      //
-      // 최초 로그인 여부 확인
-      // if (data.is_first_login) router.push("/goal-setting")
-      // else router.push("/home")
-
-      // 임시: 바로 목표설정 페이지로 이동 (첫 로그인 시나리오 시뮬레이션)
-      await new Promise((resolve) => setTimeout(resolve, 800))
-      router.push("/goal-setting")
-    } catch (err) {
-      setErrorMsg("로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.")
+      const data = await login({ email: userId, password })
+      if (!rememberMe) {
+        // 브라우저 세션 한정 — 탭 닫으면 만료
+        sessionStorage.setItem("session_only", "1")
+      }
+      // 미들웨어에서 사용할 쿠키 설정 (클라이언트 쪽에서 document.cookie로 설정)
+      document.cookie = "has_token=1; path=/; max-age=3600"
+      if (data.is_first_login) {
+        router.push("/goal-setting")
+      } else {
+        router.push("/home")
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : ""
+      if (msg.includes("401") || msg.includes("No active account")) {
+        setErrorMsg("아이디 또는 비밀번호가 올바르지 않습니다.")
+      } else {
+        setErrorMsg("로그인에 실패했습니다. 잠시 후 다시 시도해주세요.")
+      }
     } finally {
       setIsLoading(false)
     }

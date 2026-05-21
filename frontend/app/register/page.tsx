@@ -1,5 +1,3 @@
-// 회원가입 페이지
-// 가입 완료 후 → /login 으로 이동
 "use client"
 
 import { useState } from "react"
@@ -11,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { GraduationCap, Loader2, CheckCircle2 } from "lucide-react"
+import { api } from "@/lib/api-client"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -20,11 +19,10 @@ export default function RegisterPage() {
   // ─── 회원가입 폼 상태 ────────────────────────────────────────────────────────
   const [userForm, setUserForm] = useState({
     name: "",
+    email: "",
     phone: "",
-    userId: "",
     password: "",
     passwordConfirm: "",
-    email: "",
     agreeTerms: false,
     agreePrivacy: false,
     agreeMarketing: false,
@@ -45,18 +43,14 @@ export default function RegisterPage() {
     }))
   }
 
-  // ─── 회원가입 제출 ────────────────────────────────────────────────────────────
-  // [BE 매뉴얼] POST /api/v1/users/register
-  //   Request: { name, phone, user_id, password, email, agree_marketing }
-  //   Response: { success: true, user_id }
-  // [DB 매뉴얼] Users 테이블: id, user_id(unique), name, phone, email, password_hash, created_at
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     const newErrors: Record<string, string> = {}
 
     if (!userForm.name) newErrors.name = "이름을 입력해주세요"
+    if (!userForm.email) newErrors.email = "이메일을 입력해주세요"
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userForm.email)) newErrors.email = "올바른 이메일 형식이 아닙니다"
     if (!userForm.phone) newErrors.phone = "전화번호를 입력해주세요"
-    if (!userForm.userId) newErrors.userId = "아이디를 입력해주세요"
     if (userForm.password.length < 8) newErrors.password = "비밀번호는 8자 이상이어야 합니다"
     if (userForm.password !== userForm.passwordConfirm) newErrors.passwordConfirm = "비밀번호가 일치하지 않습니다"
     if (!userForm.agreeTerms) newErrors.agreeTerms = "이용약관에 동의해주세요"
@@ -69,24 +63,19 @@ export default function RegisterPage() {
 
     setIsLoading(true)
     try {
-      // TODO: 실제 API 호출로 교체
-      // const res = await fetch("/api/v1/users/register", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     name: userForm.name,
-      //     phone: userForm.phone,
-      //     user_id: userForm.userId,
-      //     password: userForm.password,
-      //     email: userForm.email,
-      //     agree_marketing: userForm.agreeMarketing,
-      //   }),
-      // })
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await api.post("/api/accounts/signup/", {
+        email: userForm.email,
+        password: userForm.password,
+        name: userForm.name,
+        phone: userForm.phone,
+        ai_consent: userForm.agreeMarketing,
+        privacy_consent: userForm.agreePrivacy,
+      })
       setIsSuccess(true)
       setTimeout(() => router.push("/login"), 2000)
-    } catch (err) {
-      setErrors({ submit: "회원가입에 실패했습니다. 다시 시도해주세요." })
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "회원가입에 실패했습니다."
+      setErrors({ submit: msg })
     } finally {
       setIsLoading(false)
     }
@@ -176,15 +165,16 @@ export default function RegisterPage() {
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">계정 정보</h3>
 
                 <div className="space-y-2">
-                  <Label htmlFor="reg-userId">아이디 <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="reg-email">이메일 <span className="text-destructive">*</span></Label>
                   <Input
-                    id="reg-userId"
-                    placeholder="영문, 숫자 조합 6~20자"
-                    value={userForm.userId}
-                    onChange={(e) => setUserForm((p) => ({ ...p, userId: e.target.value }))}
-                    autoComplete="username"
+                    id="reg-email"
+                    type="email"
+                    placeholder="example@email.com"
+                    value={userForm.email}
+                    onChange={(e) => setUserForm((p) => ({ ...p, email: e.target.value }))}
+                    autoComplete="email"
                   />
-                  {errors.userId && <p className="text-xs text-destructive">{errors.userId}</p>}
+                  {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -211,17 +201,6 @@ export default function RegisterPage() {
                     autoComplete="new-password"
                   />
                   {errors.passwordConfirm && <p className="text-xs text-destructive">{errors.passwordConfirm}</p>}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="reg-email">이메일 <span className="text-muted-foreground text-xs">(선택)</span></Label>
-                  <Input
-                    id="reg-email"
-                    type="email"
-                    placeholder="example@email.com"
-                    value={userForm.email}
-                    onChange={(e) => setUserForm((p) => ({ ...p, email: e.target.value }))}
-                  />
                 </div>
               </div>
 

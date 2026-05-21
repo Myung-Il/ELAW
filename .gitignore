@@ -32,6 +32,13 @@ MANIFEST
 *.manifest
 *.spec
 
+# Dependency directories
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt

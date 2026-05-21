@@ -12,6 +12,10 @@ from core.views_db import (
     DBAiLogView, DBSummaryView,
 )
 from core.views_user import GoalView, MatchGenerateView, DashboardView
+from core.views_quiz import (
+    QuizStartView, QuizSubmitView, QuizProgressView,
+    QuizCompleteView, RecommendUpdateView,
+)
 
 # DB 조회 API (대시보드용)
 db_urls = [
@@ -35,6 +39,12 @@ core_urls = [
     path('goals/',            GoalView.as_view()),
     path('matches/generate/', MatchGenerateView.as_view()),
     path('dashboard/',        DashboardView.as_view()),
+    # ML 퀴즈·추천 파이프라인
+    path('quiz/start/',              QuizStartView.as_view()),
+    path('quiz/submit/',             QuizSubmitView.as_view()),
+    path('quiz/progress/',           QuizProgressView.as_view()),
+    path('quiz/complete/',           QuizCompleteView.as_view()),
+    path('quiz/recommend/update/',   RecommendUpdateView.as_view()),
 ]
 
 urlpatterns = [
