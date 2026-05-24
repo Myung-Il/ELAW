@@ -11,7 +11,7 @@ from core.views_db import (
     DBPortfolioView, DBJobPostingView, DBMatchView, DBPostView,
     DBAiLogView, DBSummaryView,
 )
-from core.views_user import GoalView, MatchGenerateView, DashboardView
+from core.views_user import GoalView, MatchGenerateView, DashboardView, JobProblemsView
 from core.views_quiz import (
     QuizStartView, QuizSubmitView, QuizProgressView,
     QuizCompleteView, RecommendUpdateView,
@@ -39,6 +39,7 @@ core_urls = [
     path('goals/',            GoalView.as_view()),
     path('matches/generate/', MatchGenerateView.as_view()),
     path('dashboard/',        DashboardView.as_view()),
+    path('problems/',         JobProblemsView.as_view()),
     # ML 퀴즈·추천 파이프라인
     path('quiz/start/',              QuizStartView.as_view()),
     path('quiz/submit/',             QuizSubmitView.as_view()),

@@ -15,10 +15,13 @@ Django session(DB)으로 퀴즈 상태 유지
 import sys
 import os
 
-# 프로젝트 루트(models/ 형제 디렉터리)를 sys.path에 추가
+# 프로젝트 루트 + models/curriculum 을 sys.path에 추가
+# recommend.py가 'from ml.gkt import GKT' 형태로 임포트하므로 curriculum 디렉터리도 필요
 _PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-if _PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, _PROJECT_ROOT)
+_CURRICULUM_ROOT = os.path.join(_PROJECT_ROOT, "models", "curriculum")
+for _p in (_PROJECT_ROOT, _CURRICULUM_ROOT):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 from collections import deque
 
@@ -29,6 +32,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models_problems import JobProblem, ProblemEdge, LearningPathMeta
 from .models import UserGoal
+from .models_new import ProblemRecommendation
 
 try:
     from models.curriculum.seedquiz import SeedQuiz
@@ -72,8 +76,8 @@ def _build_dependency_graph(job_role: str) -> dict:
     ]
     edges = [
         {
-            "source_id":      e.source_problem.original_question_id,
-            "target_id":      e.target_problem.original_question_id,
+            "Preceding_ID":   e.source_problem.original_question_id,
+            "Target_ID":      e.target_problem.original_question_id,
             "combined_score": e.combined_score,
         }
         for e in ProblemEdge.objects.filter(
@@ -294,6 +298,33 @@ class QuizCompleteView(APIView):
         }
         request.session.modified = True
 
+        # 추천 결과 DB 저장 (기존 pending 레코드 교체)
+        ProblemRecommendation.objects.filter(
+            user=request.user,
+            platform=ProblemRecommendation.Platform.ELAW,
+            posting__isnull=True,
+            status=ProblemRecommendation.Status.PENDING,
+        ).delete()
+        ProblemRecommendation.objects.bulk_create([
+            ProblemRecommendation(
+                user=request.user,
+                platform=ProblemRecommendation.Platform.ELAW,
+                problem_id=str(r["question_id"]),
+                posting=None,
+                title=(r.get("question") or "")[:300],
+                algo_tags=[r.get("category"), r.get("subcategory")],
+                difficulty=r.get("difficulty", ""),
+                relevance_score=r["scores"]["total"],
+                reason=(
+                    f"GKT:{r['scores']['GKT']:.3f} "
+                    f"SAKT:{r['scores']['SAKT']:.3f} "
+                    f"DKT:{r['scores']['DKT']:.3f}"
+                ),
+                status=ProblemRecommendation.Status.PENDING,
+            )
+            for r in recommendations
+        ])
+
         return Response({
             "accuracy": quiz_result["accuracy"],
             "zone": voting.get_zone(),
@@ -358,5 +389,42 @@ class RecommendUpdateView(APIView):
         })
         request.session[RECOMMEND_KEY] = stored
         request.session.modified = True
+
+        # 풀이한 문제 상태 업데이트
+        new_status = (ProblemRecommendation.Status.SOLVED if is_correct
+                      else ProblemRecommendation.Status.SKIPPED)
+        ProblemRecommendation.objects.filter(
+            user=request.user,
+            platform=ProblemRecommendation.Platform.ELAW,
+            problem_id=str(question_id),
+            posting__isnull=True,
+        ).update(status=new_status)
+
+        # 새 추천 목록 저장 (pending 레코드만 교체)
+        ProblemRecommendation.objects.filter(
+            user=request.user,
+            platform=ProblemRecommendation.Platform.ELAW,
+            posting__isnull=True,
+            status=ProblemRecommendation.Status.PENDING,
+        ).delete()
+        ProblemRecommendation.objects.bulk_create([
+            ProblemRecommendation(
+                user=request.user,
+                platform=ProblemRecommendation.Platform.ELAW,
+                problem_id=str(r["question_id"]),
+                posting=None,
+                title=(r.get("question") or "")[:300],
+                algo_tags=[r.get("category"), r.get("subcategory")],
+                difficulty=r.get("difficulty", ""),
+                relevance_score=r["scores"]["total"],
+                reason=(
+                    f"GKT:{r['scores']['GKT']:.3f} "
+                    f"SAKT:{r['scores']['SAKT']:.3f} "
+                    f"DKT:{r['scores']['DKT']:.3f}"
+                ),
+                status=ProblemRecommendation.Status.PENDING,
+            )
+            for r in recommendations
+        ])
 
         return Response({"recommendations": recommendations})

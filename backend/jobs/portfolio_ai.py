@@ -16,10 +16,27 @@ jobs/portfolio_ai.py
 
 import os
 import re
+import shutil
 import logging
 import subprocess
 
 logger = logging.getLogger(__name__)
+
+# ollama 실행 파일 경로 — PATH에 없으면 D:\Ollama 등 고정 경로 탐색
+_OLLAMA_FALLBACK_PATHS = [
+    r"D:\Ollama\ollama.exe",
+    r"C:\Users\Public\ollama\ollama.exe",
+    r"C:\Program Files\Ollama\ollama.exe",
+]
+
+def _find_ollama() -> str:
+    found = shutil.which("ollama")
+    if found:
+        return found
+    for path in _OLLAMA_FALLBACK_PATHS:
+        if os.path.isfile(path):
+            return path
+    raise FileNotFoundError("ollama 실행 파일을 찾을 수 없습니다.")
 
 
 # ─────────────────────────────────────────
@@ -116,8 +133,9 @@ def generate_portfolio(experience: str, jd: str, *,
     env['TERM'] = 'dumb'
 
     try:
+        ollama_cmd = _find_ollama()
         result = subprocess.run(
-            ['ollama', 'run', model_name, prompt],
+            [ollama_cmd, 'run', model_name, prompt],
             capture_output=True,
             text=True,
             encoding='utf-8',
@@ -162,6 +180,7 @@ def generate_portfolio(experience: str, jd: str, *,
             "content": "",
             "prompt": prompt,
             "error": f"AI 응답이 {timeout}초 내에 오지 않았습니다. 잠시 후 다시 시도해주세요.",
+            "error_type": "timeout",
         }
 
     except FileNotFoundError:
@@ -171,6 +190,7 @@ def generate_portfolio(experience: str, jd: str, *,
             "content": "",
             "prompt": prompt,
             "error": "서버에 Ollama가 설치되어 있지 않습니다. 관리자에게 문의해주세요.",
+            "error_type": "unavailable",
         }
 
     except Exception as e:
@@ -180,6 +200,7 @@ def generate_portfolio(experience: str, jd: str, *,
             "content": "",
             "prompt": prompt,
             "error": f"포트폴리오 생성 중 오류가 발생했습니다: {str(e)[:200]}",
+            "error_type": "error",
         }
 
 

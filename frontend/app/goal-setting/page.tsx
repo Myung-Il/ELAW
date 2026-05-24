@@ -80,12 +80,16 @@ export default function GoalSettingPage() {
   const handleComplete = async () => {
     if (!selectedJob) return
     const jobField = jobFields.find((j) => j.id === selectedJob)
+    const topicNames = selectedTopics
+      .map((id) => studyTopics.find((t) => t.id === id)?.name)
+      .filter(Boolean) as string[]
     setIsLoading(true)
     try {
       await api.post("/api/core/goals/", {
         job_role: jobField?.name ?? selectedJob,
         field: jobField?.description ?? selectedJob,
         duration_weeks: 8,
+        topics: topicNames,
       })
       router.push("/home")
     } catch (err) {

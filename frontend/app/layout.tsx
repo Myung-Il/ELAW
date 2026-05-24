@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased" suppressHydrationWarning>
         {children}
         {/* Vercel 웹 분석 - 배포 환경에서 페이지뷰 추적 */}
         <Analytics />

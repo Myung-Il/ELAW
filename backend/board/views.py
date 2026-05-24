@@ -61,10 +61,20 @@ class BoardListView(APIView):
         # 핀 고정 → 최신순
         qs = qs.order_by('-is_pinned', '-created_at')
 
-        serializer = PostListSerializer(qs, many=True)
+        total = qs.count()
+        try:
+            limit  = max(1, min(int(request.query_params.get('limit',  10)), 50))
+            offset = max(0, int(request.query_params.get('offset', 0)))
+        except (ValueError, TypeError):
+            limit, offset = 10, 0
+
+        serializer = PostListSerializer(qs[offset: offset + limit], many=True)
         return Response({
             "message": "게시글 목록 조회 성공",
-            "count": qs.count(),
+            "count": total,
+            "limit": limit,
+            "offset": offset,
+            "has_next": offset + limit < total,
             "data": serializer.data,
         }, status=status.HTTP_200_OK)
 

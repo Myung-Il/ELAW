@@ -16,6 +16,7 @@ from django.db import models
 class ProblemRecommendation(models.Model):
 
     class Platform(models.TextChoices):
+        ELAW        = 'elaw',        'ELAW 자체 문제'
         BAEKJOON    = 'baekjoon',    '백준'
         PROGRAMMERS = 'programmers', '프로그래머스'
         LEETCODE    = 'leetcode',    'LeetCode'
@@ -72,6 +73,11 @@ class ProblemRecommendation(models.Model):
 
 class SkillGap(models.Model):
 
+    class Status(models.TextChoices):
+        PENDING  = 'pending',  '분석 대기'
+        ACTIVE   = 'active',   '학습 중'
+        RESOLVED = 'resolved', '해소됨'
+
     user    = models.ForeignKey(
         'core.User', on_delete=models.CASCADE, related_name='skill_gaps'
     )
@@ -86,6 +92,10 @@ class SkillGap(models.Model):
     current_level   = models.FloatField()
     required_level  = models.FloatField()
     gap_score       = models.FloatField()
+
+    status          = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.PENDING
+    )
 
     recommended_problem_ids = models.JSONField(null=True, blank=True)
 

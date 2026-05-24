@@ -377,12 +377,43 @@ class Command(BaseCommand):
         self.stdout.write("  채용공고 생성 중...")
 
         postings = [
-            ("백엔드 개발자 (Python/Django)", ["Python","Django","MySQL"], ["Redis","Docker"], "백엔드 개발자", "new"),
-            ("프론트엔드 개발자 (React)", ["JavaScript","React","HTML/CSS"], ["TypeScript","Next.js"], "프론트엔드 개발자", "new"),
-            ("AI 엔지니어", ["Python","PyTorch","ML"], ["TensorFlow","Docker"], "AI 엔지니어", "junior"),
-            ("데이터 분석가", ["Python","SQL","Pandas"], ["Tableau","Spark"], "데이터 분석가", "any"),
-            ("풀스택 개발자", ["Python","JavaScript","React","Django"], ["Docker","AWS"], "풀스택 개발자", "junior"),
-            ("서버 개발자 (Java)", ["Java","Spring","MySQL"], ["Redis","Kafka"], "백엔드 개발자", "junior"),
+            # 백엔드
+            ("백엔드 개발자 (Python/Django)", ["Python","Django","MySQL"], ["Redis","Docker"], "Backend Engineer", "new"),
+            ("서버 개발자 (Java/Spring)", ["Java","Spring","MySQL"], ["Redis","Kafka"], "Backend Engineer", "junior"),
+            # 프론트엔드
+            ("프론트엔드 개발자 (React/TypeScript)", ["JavaScript","React","TypeScript"], ["Next.js","Tailwind CSS"], "Frontend Developer", "new"),
+            ("UI 개발자 (Vue.js)", ["JavaScript","Vue.js","HTML/CSS"], ["Nuxt.js","Figma"], "Frontend Developer", "junior"),
+            # 풀스택
+            ("풀스택 개발자 (Node + React)", ["JavaScript","Node.js","React","MongoDB"], ["Docker","AWS"], "Full Stack Engineer", "junior"),
+            ("풀스택 엔지니어 (Python + Next.js)", ["Python","Django","Next.js","PostgreSQL"], ["Redis","CI/CD"], "Full Stack Engineer", "new"),
+            # AI / ML
+            ("AI 엔지니어 (LLM)", ["Python","PyTorch","Transformers","LLM"], ["LangChain","Docker"], "AI Engineer", "junior"),
+            ("머신러닝 엔지니어", ["Python","Scikit-learn","TensorFlow","MLOps"], ["Kubernetes","Spark"], "Machine Learning Researcher", "junior"),
+            # 데이터
+            ("데이터 사이언티스트", ["Python","SQL","Pandas","Statistics"], ["Tableau","Spark"], "Data Scientist", "any"),
+            ("데이터 엔지니어 (ETL)", ["Python","Airflow","Spark","SQL"], ["Kafka","BigQuery"], "Data Engineer", "junior"),
+            ("빅데이터 플랫폼 엔지니어", ["Hadoop","Spark","Kafka","Scala"], ["HBase","Flink"], "Big Data Engineer", "junior"),
+            # DevOps / Cloud / SRE
+            ("DevOps 엔지니어 (Kubernetes)", ["Docker","Kubernetes","CI/CD","Linux"], ["Terraform","Prometheus"], "DevOps Engineer", "junior"),
+            ("클라우드 인프라 엔지니어 (AWS)", ["AWS","Terraform","Linux","Python"], ["GCP","Ansible"], "Cloud Infrastructure Engineer", "junior"),
+            ("SRE (Site Reliability Engineer)", ["Linux","Python","Monitoring","SLO"], ["Prometheus","Grafana","Kubernetes"], "Site Reliability Engineer (SRE)", "junior"),
+            # 보안 / 네트워크
+            ("보안 엔지니어 (취약점 분석)", ["Python","Network","Penetration Testing","Linux"], ["SIEM","IDS/IPS"], "Security Engineer", "junior"),
+            ("네트워크 엔지니어", ["TCP/IP","Routing","Switching","Firewall"], ["SDN","Wireshark"], "Network Engineer", "junior"),
+            # 모바일
+            ("iOS 개발자 (Swift)", ["Swift","SwiftUI","Xcode","iOS"], ["Combine","CoreData"], "Mobile App Developer", "new"),
+            ("Android 개발자 (Kotlin)", ["Kotlin","Android","Jetpack Compose"], ["Retrofit","Room"], "Mobile App Developer", "new"),
+            # 임베디드 / IoT
+            ("임베디드 소프트웨어 엔지니어", ["C","C++","RTOS","Linux Kernel"], ["ARM","CAN Bus"], "Embedded Systems Engineer", "junior"),
+            ("IoT 플랫폼 개발자", ["Python","MQTT","C","Linux"], ["AWS IoT","Raspberry Pi"], "IoT Engineer", "new"),
+            # QA / 게임 / UI/UX
+            ("QA 자동화 엔지니어", ["Python","Selenium","REST API Testing","JMeter"], ["Appium","TestRail"], "Quality Assurance Engineer (QA)", "new"),
+            ("게임 클라이언트 개발자 (Unity)", ["C#","Unity","3D Math","Game Design"], ["Shader","Physics Engine"], "Game Developer", "junior"),
+            ("UI/UX 엔지니어 (Figma)", ["Figma","HTML/CSS","JavaScript","Prototyping"], ["React","Accessibility"], "UI/UX Engineer", "new"),
+            # 아키텍처 / 시스템
+            ("소프트웨어 아키텍트", ["System Design","MSA","DDD","Java"], ["Kafka","Kubernetes"], "Software Architect", "senior"),
+            ("데이터베이스 관리자 (MySQL/PostgreSQL)", ["MySQL","PostgreSQL","Tuning","Backup"], ["MongoDB","Redis"], "Database Administrator", "junior"),
+            ("컴퓨터 비전 엔지니어 (CV)", ["Python","OpenCV","PyTorch","YOLO"], ["CUDA","TensorRT"], "Computer Vision Engineer", "junior"),
         ]
 
         self.posting_objs = []
