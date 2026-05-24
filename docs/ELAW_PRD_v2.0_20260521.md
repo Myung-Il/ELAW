@@ -125,7 +125,7 @@
 | 30개 직군 학습경로 JSON | ✅ 완료 |
 | HuggingFace 데이터 적재 스크립트 | ✅ 완료 |
 | 운영 MySQL 서버 설정 | ❌ 미완료 |
-| 초기 채용공고 더미 데이터 삽입 | ❌ 미완료 |
+| 초기 채용공고 더미 데이터 삽입 | ✅ 완료 (`python manage.py seed_all`) |
 
 #### 백엔드 레이어
 | 항목 | 상태 |
@@ -135,7 +135,7 @@
 | Gemini 커리큘럼 생성 (폴백 포함) | ✅ 완료 |
 | ETL (solved.ac, GitHub) | ✅ 완료 |
 | 서버 배포 | ❌ 미완료 |
-| SECRET_KEY .env 이관 | ❌ 미완료 |
+| SECRET_KEY .env 이관 | ✅ 완료 (`backend/.env` 생성, settings.py는 이미 dotenv 로드) |
 | ML 문제 추천 API 연동 | ❌ 미완료 |
 
 #### 프론트엔드 레이어
@@ -144,8 +144,8 @@
 | 14개 페이지 스캐폴딩 + 반응형 UI | ✅ 완료 |
 | shadcn/ui 컴포넌트 시스템 | ✅ 완료 |
 | 백엔드 API 연동 (전체) | ❌ 미완료 |
-| 인증 플로우 + 라우트 보호 미들웨어 | ❌ 미완료 |
-| AI 포트폴리오 로딩 UX (30~120초) | ❌ 미완료 |
+| 인증 플로우 + 라우트 보호 미들웨어 | ✅ 완료 (`middleware.ts` — `has_token` 쿠키 기반 307 리디렉션) |
+| AI 포트폴리오 로딩 UX (30~120초) | ✅ 완료 (`app/jobs/[id]/apply/page.tsx` — 오버레이 + 130초 AbortController) |
 
 #### ML 레이어
 | 항목 | 상태 |
@@ -425,20 +425,19 @@ GET /api/core/dashboard/ → 통합 현황 확인
 ### 6.3 운영 배포 체크리스트
 
 #### 백엔드 (P0 필수)
-- [ ] `SECRET_KEY` settings.py → `.env` 이관
-- [ ] `DEBUG = False` 설정
-- [ ] `CORS_ALLOW_ALL_ORIGINS = False`, 허용 도메인 명시
-- [ ] `ALLOWED_HOSTS` 운영 도메인 등록
-- [ ] `.env` 변수: `GEMINI_API_KEY`, `GITHUB_TOKEN`, `SECRET_KEY`, DB 접속 정보
+- [x] `SECRET_KEY` settings.py → `.env` 이관 (`backend/.env` 생성 완료)
+- [ ] `DEBUG = False` 설정 (운영 배포 시)
+- [ ] `CORS_ALLOW_ALL_ORIGINS = False`, 허용 도메인 명시 (운영 배포 시)
+- [ ] `ALLOWED_HOSTS` 운영 도메인 등록 (운영 배포 시)
+- [ ] `.env` 변수: `GEMINI_API_KEY`, `GITHUB_TOKEN` 실제 키 입력 (현재 빈값)
 
 #### 데이터베이스 (P0 필수)
-- [ ] MySQL 8.0+ 서버 설치 및 DB/User 생성
-- [ ] `.env` DB 접속 정보 설정
-- [ ] `python manage.py migrate`
-- [ ] `python manage.py seed_all`
+- [ ] MySQL 8.0+ 서버 설치 및 DB/User 생성 (운영 배포 시)
+- [ ] `.env` DB 접속 정보 설정 (운영 배포 시)
+- [x] `python manage.py migrate` (개발 환경 완료)
+- [x] `python manage.py seed_all` (개발 환경 완료 — 공고 8개, 게시글 5개, 유저 16개)
 - [ ] `python manage.py load_problems` (전체 30직군)
 - [ ] `python manage.py load_dataset` (HuggingFace)
-- [ ] 채용공고 더미 데이터 삽입
 
 #### Ollama (P0 필수)
 - [ ] 백엔드 서버에 Ollama 설치
@@ -447,9 +446,9 @@ GET /api/core/dashboard/ → 통합 현황 확인
 - [ ] `ollama list | grep mybot` 확인 (1.6 GB 이상)
 
 #### 프론트엔드 (P0 필수)
-- [ ] 인증 미들웨어(`middleware.ts`) 구현
-- [ ] `useAuth()` 전역 훅 + 토큰 자동 갱신 인터셉터
-- [ ] AI 포트폴리오 로딩 오버레이 (130초 타임아웃)
+- [x] 인증 미들웨어(`middleware.ts`) 구현 (has_token 쿠키 기반 라우트 보호 완료)
+- [ ] `useAuth()` 전역 훅 토큰 자동 갱신 인터셉터 (401 시 refresh 미구현)
+- [x] AI 포트폴리오 로딩 오버레이 (130초 AbortController 타임아웃 완료)
 - [ ] 스터디 모드 409 처리 다이얼로그
 
 ### 6.4 팀 간 인터페이스 규약
