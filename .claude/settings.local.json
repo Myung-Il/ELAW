@@ -82,7 +82,25 @@
       "Bash(xargs grep -l \"feedback\\\\|portfolio\")",
       "Bash(git -C D:/Project/ELAW_20260521/ELAW ls-files backend/.env)",
       "Bash(git *)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(gh pr *)",
+      "PowerShell(gh pr *)",
+      "PowerShell(Get-ChildItem -Path \"D:\\\\Project\\\\ELAW_20260521\\\\ELAW\\\\models\" -Recurse | Where-Object { -not $_.PSIsContainer } | Select-Object -First 30 Name, FullName)",
+      "PowerShell(cd \"D:\\\\Project\\\\ELAW_20260521\\\\ELAW\\\\backend\"; $env:DJANGO_SECRET_KEY=\"test-key\"; $env:DJANGO_DEBUG=\"True\"; python -c \"import django, os; os.environ.setdefault\\('DJANGO_SETTINGS_MODULE','config.settings'\\); django.setup\\(\\); print\\('Django OK'\\)\")",
+      "PowerShell(cd \"D:\\\\Project\\\\ELAW_20260521\\\\ELAW\\\\backend\"; $env:DJANGO_SECRET_KEY=\"test-key\"; $env:DJANGO_DEBUG=\"True\"; python -c \"import django, os; os.environ.setdefault\\('DJANGO_SETTINGS_MODULE','config.settings'\\); django.setup\\(\\); from core.views_user import GoalView; from jobs.views import JobStudyView; print\\('imports OK'\\)\")",
+      "Bash(Get-ChildItem -Path \"D:\\\\Project\\\\ELAW_20260521\\\\ELAW\" -Force)",
+      "Bash(Get-ChildItem *)",
+      "Bash(Remove-Item \"D:\\\\Project\\\\ELAW_20260521\\\\ELAW\\\\backend\\\\core\\\\views.py\" -Force)",
+      "Bash(Remove-Item \"D:\\\\Project\\\\ELAW_20260521\\\\ELAW\\\\backend\\\\core\\\\urls.py\" -Force)",
+      "Bash(Write-Host \"삭제 완료\")",
+      "PowerShell(npm *)",
+      "PowerShell(python -c \"import django; print\\('django ok'\\)\" 2>&1; python -c \"import rest_framework; print\\('drf ok'\\)\" 2>&1; python -c \"import corsheaders; print\\('cors ok'\\)\" 2>&1)",
+      "PowerShell(Start-Sleep -Seconds 3; try { $r = Invoke-WebRequest -Uri \"http://localhost:8000\" -TimeoutSec 5 -UseBasicParsing; \"백엔드 응답: $\\($r.StatusCode\\)\" } catch { \"백엔드 응답: $\\($_.Exception.Message\\)\" })",
+      "PowerShell(Start-Sleep -Seconds 8; try { $r = Invoke-WebRequest -Uri \"http://localhost:3000\" -TimeoutSec 10 -UseBasicParsing; \"프론트엔드 응답: $\\($r.StatusCode\\)\" } catch { \"프론트엔드 응답: $\\($_.Exception.Message\\)\" })",
+      "PowerShell(Start-Sleep -Seconds 15; try { $r = Invoke-WebRequest -Uri \"http://localhost:3000\" -TimeoutSec 15 -UseBasicParsing; \"프론트엔드 응답: $\\($r.StatusCode\\)\" } catch { \"프론트엔드 응답: $\\($_.Exception.Message\\)\" })",
+      "PowerShell(Get-Process *)",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://127.0.0.1:3000\" -TimeoutSec 10 -UseBasicParsing; \"프론트엔드 응답: $\\($r.StatusCode\\)\" } catch { \"프론트엔드 응답: $\\($_.Exception.Message\\)\" })",
+      "PowerShell(curl.exe -s -o $null -w \"%{http_code}\" --max-time 30 http://localhost:3000/ 2>&1)"
     ]
   }
 }
