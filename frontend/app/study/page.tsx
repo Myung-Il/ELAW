@@ -171,6 +171,7 @@ export default function StudyPage() {
   const [quizCompleted, setQuizCompleted] = useState(false)
   const [isCompleting, setIsCompleting] = useState(false)
   const [isStarting, setIsStarting] = useState(false)
+  const [recListOpen, setRecListOpen] = useState(false)
 
   // 학습 통계
   const [statsData, setStatsData] = useState<StatsData | null>(null)
@@ -181,6 +182,18 @@ export default function StudyPage() {
   const [recSubmitting, setRecSubmitting] = useState(false)
   const [recFeedback, setRecFeedback] = useState<
     Record<number, { is_correct: boolean; correct_answer: string; explanation: string }>
+  >({})
+  const [isRerolling, setIsRerolling] = useState(false)
+  const [pendingReroll, setPendingReroll] = useState<
+    Record<number, { rec: MLRec; is_correct: boolean }>
+  >({})
+
+  // 주차별 추천 문제 풀기
+  const [activeWeekProblem, setActiveWeekProblem] = useState<string | null>(null)
+  const [weekChoice, setWeekChoice] = useState<Record<string, string>>({})
+  const [weekSubmitting, setWeekSubmitting] = useState(false)
+  const [weekFeedback, setWeekFeedback] = useState<
+    Record<string, { is_correct: boolean; correct_answer: string; explanation: string }>
   >({})
 
   // ── 통계 로드 ────────────────────────────────────────────────
@@ -254,8 +267,8 @@ export default function StudyPage() {
 
       // 진행 중인 퀴즈 세션 확인
       try {
-        await api.get("/api/core/quiz/progress/")
-        setQuizSection("in_progress")
+        const prog = await api.get<{ has_session?: boolean }>("/api/core/quiz/progress/")
+        setQuizSection(prog?.has_session === false ? "no_quiz" : "in_progress")
       } catch {
         setQuizSection("no_quiz")
       }
@@ -359,6 +372,7 @@ export default function StudyPage() {
       setRecFeedback({})
       setActiveRecIdx(null)
       setQuizSection("has_recommend")
+      setRecListOpen(true)
       setQuizOpen(false)
     } catch {
       /* ignore */
@@ -373,7 +387,6 @@ export default function StudyPage() {
     if (!recChoice || recSubmitting) return
     setRecSubmitting(true)
     try {
-      // 1. 정답 확인
       const check = await api.post<{
         is_correct: boolean
         correct_answer: string
@@ -391,29 +404,83 @@ export default function StudyPage() {
           explanation: check.explanation,
         },
       }))
-
-      // 2. 추천 업데이트
-      const updated = await api.post<{ recommendations: MLRec[] }>(
-        "/api/core/quiz/recommend/update/",
-        {
-          question_id: rec.question_id,
-          is_correct: check.is_correct,
-          category: rec.category,
-          subcategory: rec.subcategory || "",
-          top_n: 5,
-        }
-      )
-
-      setRecData((prev) =>
-        prev ? { ...prev, recommendations: updated.recommendations } : prev
-      )
-      setRecFeedback({})
+      setPendingReroll((prev) => ({ ...prev, [recIdx]: { rec, is_correct: check.is_correct } }))
       setActiveRecIdx(null)
       setRecChoice("")
     } catch {
       /* ignore */
     } finally {
       setRecSubmitting(false)
+    }
+  }
+
+  const rerollProblem = async (recIdx: number) => {
+    const pending = pendingReroll[recIdx]
+    if (!pending || isRerolling) return
+    setIsRerolling(true)
+    try {
+      const updated = await api.post<{ recommendations: MLRec[] }>(
+        "/api/core/quiz/recommend/update/",
+        {
+          question_id: pending.rec.question_id,
+          is_correct:  pending.is_correct,
+          category:    pending.rec.category,
+          subcategory: pending.rec.subcategory || "",
+          top_n: 10,
+        }
+      )
+
+      // 현재 표시 중인 다른 문제 ID 집합 (리롤 대상 제외)
+      const currentRecs = recData?.recommendations ?? []
+      const keptIds = new Set(
+        currentRecs
+          .filter((_, idx) => idx !== recIdx)
+          .map((r) => r.question_id)
+      )
+
+      // 이미 표시 중이지 않은 첫 번째 추천 문제로 교체
+      const replacement = updated.recommendations.find(
+        (r) => !keptIds.has(r.question_id)
+      )
+
+      if (replacement) {
+        setRecData((prev) => {
+          if (!prev) return prev
+          const next = [...prev.recommendations]
+          next[recIdx] = replacement
+          return { ...prev, recommendations: next }
+        })
+      }
+
+      // 해당 인덱스 피드백만 제거, 나머지 유지
+      setRecFeedback((prev) => { const n = { ...prev }; delete n[recIdx]; return n })
+      setPendingReroll((prev) => { const n = { ...prev }; delete n[recIdx]; return n })
+    } catch {
+      /* ignore */
+    } finally {
+      setIsRerolling(false)
+    }
+  }
+
+  const submitWeekAnswer = async (key: string, p: ELAWProblem) => {
+    const choice = weekChoice[key]
+    if (!choice || weekSubmitting) return
+    setWeekSubmitting(true)
+    try {
+      const result = await api.post<{
+        is_correct: boolean
+        correct_answer: string
+        explanation: string
+      }>("/api/core/quiz/answer/", {
+        question_id: p.question_id,
+        answer: choice,
+      })
+      setWeekFeedback((prev) => ({ ...prev, [key]: result }))
+      setActiveWeekProblem(null)
+    } catch {
+      /* ignore */
+    } finally {
+      setWeekSubmitting(false)
     }
   }
 
@@ -638,8 +705,23 @@ export default function StudyPage() {
                   </div>
                 )}
 
+                {/* 추천 문제 토글 버튼 */}
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between rounded-lg border px-3 py-2.5 text-sm hover:bg-muted/50 transition-colors"
+                  onClick={() => setRecListOpen((v) => !v)}
+                >
+                  <span className="font-medium">
+                    추천 문제 {recData.recommendations?.length ?? 0}개
+                  </span>
+                  <ChevronDown className={cn(
+                    "h-4 w-4 text-muted-foreground transition-transform duration-200",
+                    recListOpen && "rotate-180"
+                  )} />
+                </button>
+
                 {/* 추천 문제 목록 */}
-                {recData.recommendations && recData.recommendations.length > 0 ? (
+                {recListOpen && (recData.recommendations && recData.recommendations.length > 0 ? (
                   <div className="space-y-2">
                     {recData.recommendations.map((rec, i) => {
                       const isActive = activeRecIdx === i
@@ -697,16 +779,31 @@ export default function StudyPage() {
                               </Button>
                             )}
                             {feedback && (
-                              <div className={cn(
-                                "flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md flex-shrink-0",
-                                feedback.is_correct
-                                  ? "bg-emerald-100 text-emerald-700"
-                                  : "bg-rose-100 text-rose-700"
-                              )}>
-                                {feedback.is_correct
-                                  ? <><Check className="h-3 w-3" />정답</>
-                                  : <><X className="h-3 w-3" />오답</>
-                                }
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <div className={cn(
+                                  "flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md",
+                                  feedback.is_correct
+                                    ? "bg-emerald-100 text-emerald-700"
+                                    : "bg-rose-100 text-rose-700"
+                                )}>
+                                  {feedback.is_correct
+                                    ? <><Check className="h-3 w-3" />정답</>
+                                    : <><X className="h-3 w-3" />오답</>
+                                  }
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 text-xs gap-1"
+                                  onClick={() => rerollProblem(i)}
+                                  disabled={isRerolling}
+                                >
+                                  {isRerolling
+                                    ? <Loader2 className="h-3 w-3 animate-spin" />
+                                    : <RefreshCw className="h-3 w-3" />
+                                  }
+                                  다른 문제
+                                </Button>
                               </div>
                             )}
                           </div>
@@ -742,14 +839,16 @@ export default function StudyPage() {
                             </div>
                           )}
 
-                          {/* 피드백 (오답인 경우 정답+해설) */}
-                          {feedback && !feedback.is_correct && (
-                            <div className="px-4 pb-3 border-t pt-2.5">
-                              <p className="text-xs text-muted-foreground">
-                                정답: <span className="font-medium text-foreground">{feedback.correct_answer}</span>
-                              </p>
+                          {/* 피드백 — 정답/오답 모두 해설 표시 */}
+                          {feedback && (feedback.explanation || !feedback.is_correct) && (
+                            <div className="px-4 pb-3 border-t pt-2.5 space-y-1">
+                              {!feedback.is_correct && (
+                                <p className="text-xs text-muted-foreground">
+                                  정답: <span className="font-medium text-foreground">{feedback.correct_answer}</span>
+                                </p>
+                              )}
                               {feedback.explanation && (
-                                <p className="text-xs text-muted-foreground mt-1">{feedback.explanation}</p>
+                                <p className="text-xs text-muted-foreground">{feedback.explanation}</p>
                               )}
                             </div>
                           )}
@@ -761,7 +860,7 @@ export default function StudyPage() {
                   <p className="text-sm text-muted-foreground text-center py-4">
                     추천 문제가 없습니다.
                   </p>
-                )}
+                ))}
               </CardContent>
             </Card>
           )}
@@ -858,31 +957,117 @@ export default function StudyPage() {
                         </p>
                       ) : (
                         <div className="space-y-2">
-                          {recommended.map((p) => (
-                            <div
-                              key={`${week.week}-${p.id}`}
-                              className="flex items-start gap-3 rounded-lg border bg-card px-3 py-2.5"
-                            >
-                              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 flex-shrink-0 mt-0.5">
-                                <span className="text-xs font-bold text-primary">Q{p.question_id}</span>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                                  <span className="text-xs font-medium text-muted-foreground">{p.category}</span>
-                                  {p.subcategory && (
-                                    <span className="text-xs text-muted-foreground/60">· {p.subcategory}</span>
+                          {recommended.map((p) => {
+                            const wkey = `${week.week}-${p.id}`
+                            const wActive = activeWeekProblem === wkey
+                            const wFeedback = weekFeedback[wkey]
+                            return (
+                              <div
+                                key={wkey}
+                                className={cn(
+                                  "rounded-lg border transition-all",
+                                  wActive ? "border-primary/40 bg-primary/5" : "bg-card"
+                                )}
+                              >
+                                {/* 문제 헤더 */}
+                                <div className="flex items-start gap-3 px-3 py-2.5">
+                                  <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 flex-shrink-0 mt-0.5">
+                                    <span className="text-xs font-bold text-primary">Q{p.question_id}</span>
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                                      <span className="text-xs font-medium text-muted-foreground">{p.category}</span>
+                                      {p.subcategory && (
+                                        <span className="text-xs text-muted-foreground/60">· {p.subcategory}</span>
+                                      )}
+                                      <span className={cn(
+                                        "rounded px-1.5 py-0 text-xs font-medium",
+                                        DIFF_COLOR[p.difficulty]
+                                      )}>
+                                        {DIFF_LABEL[p.difficulty] ?? p.difficulty}
+                                      </span>
+                                    </div>
+                                    <p className="text-sm line-clamp-2 text-foreground/80">{p.question}</p>
+                                  </div>
+                                  {/* 풀기 / 닫기 / 결과 뱃지 */}
+                                  {!wFeedback ? (
+                                    <Button
+                                      variant={wActive ? "default" : "outline"}
+                                      size="sm"
+                                      className="flex-shrink-0 h-7 text-xs"
+                                      onClick={() => {
+                                        if (wActive) {
+                                          setActiveWeekProblem(null)
+                                        } else {
+                                          setActiveWeekProblem(wkey)
+                                          setWeekChoice((prev) => ({ ...prev, [wkey]: "" }))
+                                        }
+                                      }}
+                                    >
+                                      {wActive ? "닫기" : "풀기"}
+                                    </Button>
+                                  ) : (
+                                    <div className={cn(
+                                      "flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md flex-shrink-0",
+                                      wFeedback.is_correct
+                                        ? "bg-emerald-100 text-emerald-700"
+                                        : "bg-rose-100 text-rose-700"
+                                    )}>
+                                      {wFeedback.is_correct
+                                        ? <><Check className="h-3 w-3" />정답</>
+                                        : <><X className="h-3 w-3" />오답</>
+                                      }
+                                    </div>
                                   )}
-                                  <span className={cn(
-                                    "rounded px-1.5 py-0 text-xs font-medium",
-                                    DIFF_COLOR[p.difficulty]
-                                  )}>
-                                    {DIFF_LABEL[p.difficulty] ?? p.difficulty}
-                                  </span>
                                 </div>
-                                <p className="text-sm line-clamp-2 text-foreground/80">{p.question}</p>
+
+                                {/* 선택지 */}
+                                {wActive && !wFeedback && (
+                                  <div className="px-3 pb-3 border-t pt-3 space-y-2">
+                                    {p.choices.map((choice) => (
+                                      <button
+                                        key={choice}
+                                        type="button"
+                                        onClick={() => setWeekChoice((prev) => ({ ...prev, [wkey]: choice }))}
+                                        className={cn(
+                                          "w-full text-left rounded-lg border px-3 py-2.5 text-sm transition-all",
+                                          weekChoice[wkey] === choice
+                                            ? "border-primary bg-primary/10 font-medium"
+                                            : "border-border bg-card hover:border-primary/40 hover:bg-muted/50"
+                                        )}
+                                      >
+                                        {choice}
+                                      </button>
+                                    ))}
+                                    <Button
+                                      className="w-full mt-1"
+                                      disabled={!weekChoice[wkey] || weekSubmitting}
+                                      onClick={() => submitWeekAnswer(wkey, p)}
+                                    >
+                                      {weekSubmitting
+                                        ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />제출 중...</>
+                                        : "제출"
+                                      }
+                                    </Button>
+                                  </div>
+                                )}
+
+                                {/* 피드백 */}
+                                {wFeedback && (wFeedback.explanation || !wFeedback.is_correct) && (
+                                  <div className="px-3 pb-3 border-t pt-2.5 space-y-1">
+                                    {!wFeedback.is_correct && (
+                                      <p className="text-xs text-muted-foreground">
+                                        정답: <span className="font-medium text-foreground">{wFeedback.correct_answer}</span>
+                                      </p>
+                                    )}
+                                    {wFeedback.explanation && (
+                                      <p className="text-xs text-muted-foreground">{wFeedback.explanation}</p>
+                                    )}
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          ))}
+                            )
+                          })}
                         </div>
                       )}
                     </div>

@@ -122,7 +122,7 @@ class Command(BaseCommand):
              "네이버 서비스 데이터 파이프라인을 설계하고 운영합니다.",
              ["Python","SQL","Linux","Git"], ["Spark","Airflow","Kafka","AWS","Hadoop"],
              "데이터 엔지니어", "new", 35),
-            (2, "라인플러스 2026 신입 서버 개발자 (Java)",
+            (2, "라인플러스 2026 신입 백엔드 개발자 (Java)",
              "LINE 글로벌 서비스의 서버 시스템을 개발합니다.",
              ["Java","Spring","MySQL","REST API","Git"], ["Kotlin","Redis","Kafka","gRPC","Docker"],
              "백엔드 개발자", "new", 20),

@@ -11,10 +11,12 @@ from core.views_db import (
     DBPortfolioView, DBJobPostingView, DBMatchView, DBPostView,
     DBAiLogView, DBSummaryView,
 )
-from core.views_user import GoalView, MatchGenerateView, DashboardView
+from core.views_user import GoalView, MatchGenerateView, DashboardView, CurriculumUpdateView
 from core.views_quiz import (
     QuizStartView, QuizSubmitView, QuizProgressView,
     QuizCompleteView, RecommendUpdateView,
+    ProblemsView, QuizRecommendView, QuizQuestionsView,
+    QuizStatsView, QuizAnswerView,
 )
 
 # DB 조회 API (대시보드용)
@@ -36,15 +38,22 @@ db_urls = [
 
 # 사용자 기능 API
 core_urls = [
-    path('goals/',            GoalView.as_view()),
-    path('matches/generate/', MatchGenerateView.as_view()),
-    path('dashboard/',        DashboardView.as_view()),
+    path('goals/',                    GoalView.as_view()),
+    path('matches/generate/',         MatchGenerateView.as_view()),
+    path('dashboard/',                DashboardView.as_view()),
+    path('curriculum/<int:pk>/',      CurriculumUpdateView.as_view()),
+    # 문제 목록
+    path('problems/',                ProblemsView.as_view()),
     # ML 퀴즈·추천 파이프라인
     path('quiz/start/',              QuizStartView.as_view()),
     path('quiz/submit/',             QuizSubmitView.as_view()),
     path('quiz/progress/',           QuizProgressView.as_view()),
     path('quiz/complete/',           QuizCompleteView.as_view()),
+    path('quiz/recommend/',          QuizRecommendView.as_view()),
     path('quiz/recommend/update/',   RecommendUpdateView.as_view()),
+    path('quiz/questions/',          QuizQuestionsView.as_view()),
+    path('quiz/stats/',              QuizStatsView.as_view()),
+    path('quiz/answer/',             QuizAnswerView.as_view()),
 ]
 
 urlpatterns = [

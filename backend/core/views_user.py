@@ -158,10 +158,12 @@ class GoalView(APIView):
         from datetime import date, timedelta
 
         # ── 입력값 검증 ──────────────────────────
-        goal_type      = request.data.get("goal_type", "job")
-        field          = request.data.get("field", "").strip()
-        job_role       = request.data.get("job_role", "").strip()
-        duration_weeks = int(request.data.get("duration_weeks", 8))
+        goal_type        = request.data.get("goal_type", "job")
+        field            = request.data.get("field", "").strip()
+        job_role         = request.data.get("job_role", "").strip()
+        duration_weeks   = int(request.data.get("duration_weeks", 8))
+        required_skills  = request.data.get("required_skills", [])   # 공고 필수 스킬
+        preferred_skills = request.data.get("preferred_skills", [])  # 공고 우대 스킬
 
         if not field or not job_role:
             return Response(
@@ -194,8 +196,18 @@ class GoalView(APIView):
             user=request.user, stat_type="language"
         ).values_list("stat_key", flat=True))
 
+        # 스킬 기반 기술 심화 목표 및 프롬프트 섹션 구성
+        tech_focus = ', '.join(required_skills) if required_skills else field
+        skills_lines = ""
+        if required_skills:
+            skills_lines += f"\n- 필수 기술 스택: {', '.join(required_skills)}"
+        if preferred_skills:
+            skills_lines += f"\n- 우대 기술 스택: {', '.join(preferred_skills)}"
+        if not skills_lines:
+            skills_lines = f"\n- 기술 스택: {field}"
+
         prompt = f"""당신은 취업 준비 학습 플랫폼 ELAW의 AI 커리큘럼 생성기입니다.
-아래 사용자 정보를 바탕으로 {duration_weeks // 2}주 학습 커리큘럼을 JSON으로 생성해주세요.
+아래 사용자 정보와 직무 요구사항을 바탕으로 {duration_weeks // 2}주 학습 커리큘럼을 JSON으로 생성해주세요.
 
 [사용자 정보]
 - 이름: {request.user.name}
@@ -206,9 +218,12 @@ class GoalView(APIView):
 - 알고리즘 태그: {', '.join(tags) if tags else '없음'}
 - 학습 기간: {duration_weeks}주
 
+[직무 요구사항]{skills_lines}
+
 [요구사항]
 - 총 {duration_weeks // 2}주 커리큘럼
-- 전반부: 알고리즘/자료구조 / 후반부: {field} 기술 심화
+- 전반부: 알고리즘/자료구조 기초 / 후반부: {tech_focus} 기술 심화
+- 필수 스킬({tech_focus})을 직접 다루는 주차를 반드시 포함할 것
 - 각 주차: theme, tasks(3개), recommended_problems(백준 번호), estimated_hours
 
 [JSON만 출력]
@@ -407,3 +422,25 @@ class DashboardView(APIView):
             "portfolio":     {"id": portfolio.id, "slug": portfolio.public_slug} if portfolio else None,
             "platforms":     platforms,
         })
+
+
+# ────────────────────────────────────────
+class CurriculumUpdateView(APIView):
+    """PATCH /api/core/curriculum/<id>/  — 주차 내용 수정"""
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        from core.models import Curriculum
+        try:
+            curriculum = Curriculum.objects.get(pk=pk, user=request.user)
+        except Curriculum.DoesNotExist:
+            return Response({"error": "커리큘럼을 찾을 수 없습니다."}, status=404)
+
+        new_weeks = request.data.get("weeks")
+        if not isinstance(new_weeks, list):
+            return Response({"error": "weeks 필드(배열)가 필요합니다."}, status=400)
+
+        curriculum.content_json = {**curriculum.content_json, "weeks": new_weeks}
+        curriculum.save(update_fields=["content_json"])
+
+        return Response({"id": curriculum.id, "weeks": new_weeks})
