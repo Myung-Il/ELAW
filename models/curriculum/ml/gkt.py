@@ -73,6 +73,9 @@ class GKT:
         Returns:
             float: 미래 취약 가능성 점수 (0~1, 높을수록 취약)
         """
+        if not self._responses:
+            return 0.5  # 데이터 없으면 중립값
+
         qid = problem["question_id"]
         cat = problem["category"]
 
