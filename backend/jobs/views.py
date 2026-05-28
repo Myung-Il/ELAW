@@ -466,7 +466,11 @@ class JobApplyView(APIView):
         jd_text = build_jd_text(posting)
 
         # 4. Ollama 호출 (시간 걸림: 30~120초)
-        ai_result = generate_portfolio(experience=experience, jd=jd_text)
+        ai_result = generate_portfolio(
+            experience=experience,
+            jd=jd_text,
+            applicant_name=(request.user.name or "").strip() or "지원자",
+        )
 
         if not ai_result['success']:
             error_type = ai_result.get('error_type', 'error')

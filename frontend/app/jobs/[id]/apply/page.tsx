@@ -12,12 +12,28 @@ import { api } from "@/lib/api-client"
 
 const PORTFOLIO_TIMEOUT_MS = 130_000
 
-interface PortfolioResponse {
+interface PortfolioObject {
   id: number
-  content_json: string
+  content_json: string | { sections?: Array<{ type: string; content?: string }> } | null
   version: number
+}
+interface PortfolioResponse {
+  id?: number
+  content_json?: PortfolioObject["content_json"]
+  version?: number
   message?: string
-  data?: { id: number; content_json: string; version: number }
+  data?: PortfolioObject
+  portfolio?: PortfolioObject
+}
+
+function extractPortfolioBody(cj: PortfolioObject["content_json"]): string {
+  if (cj == null) return ""
+  if (typeof cj === "string") return cj
+  if (Array.isArray(cj.sections)) {
+    const ai = cj.sections.find((s) => s.type === "ai_generated")
+    if (ai?.content) return ai.content
+  }
+  return JSON.stringify(cj, null, 2)
 }
 
 export default function ApplyPage() {
@@ -30,6 +46,7 @@ export default function ApplyPage() {
   const [experience, setExperience] = useState("")
   const [portfolioId, setPortfolioId] = useState<number | null>(null)
   const [content, setContent] = useState("")
+  const [originalContentJson, setOriginalContentJson] = useState<PortfolioObject["content_json"] | null>(null)
   const [errorMsg, setErrorMsg] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const [saveLabel, setSaveLabel] = useState("저장하기")
@@ -48,11 +65,14 @@ export default function ApplyPage() {
         { experience },
         { signal: controller.signal } as RequestInit,
       )
-      const result = "data" in raw && raw.data ? raw.data : raw
-      setPortfolioId(result.id)
-      setContent(typeof result.content_json === "string"
-        ? result.content_json
-        : JSON.stringify(result.content_json, null, 2))
+      const portfolio: PortfolioObject | undefined =
+        raw.portfolio ?? raw.data ?? (raw.id !== undefined ? (raw as PortfolioObject) : undefined)
+      if (!portfolio || portfolio.id === undefined) {
+        throw new Error("포트폴리오 응답 형식이 올바르지 않습니다.")
+      }
+      setPortfolioId(portfolio.id)
+      setOriginalContentJson(portfolio.content_json)
+      setContent(extractPortfolioBody(portfolio.content_json))
       setPhase("edit")
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : ""
@@ -71,7 +91,20 @@ export default function ApplyPage() {
     if (!portfolioId) return
     setIsSaving(true)
     try {
-      await api.patch(`/api/jobs/portfolios/${portfolioId}/`, { content_json: content })
+      let payload: unknown = content
+      if (
+        originalContentJson &&
+        typeof originalContentJson === "object" &&
+        Array.isArray(originalContentJson.sections)
+      ) {
+        payload = {
+          ...originalContentJson,
+          sections: originalContentJson.sections.map((s) =>
+            s.type === "ai_generated" ? { ...s, content } : s
+          ),
+        }
+      }
+      await api.patch(`/api/jobs/portfolios/${portfolioId}/`, { content_json: payload })
       setSaveLabel("저장 완료!")
       setTimeout(() => setSaveLabel("저장하기"), 3000)
     } catch (err) {
