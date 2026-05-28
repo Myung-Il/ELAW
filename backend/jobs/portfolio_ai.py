@@ -16,28 +16,79 @@ jobs/portfolio_ai.py
 
 import os
 import re
+import shutil
 import logging
 import subprocess
 
 logger = logging.getLogger(__name__)
+
+# ollama 실행 파일 경로 — PATH에 없으면 D:\Ollama 등 고정 경로 탐색
+_OLLAMA_FALLBACK_PATHS = [
+    r"D:\Ollama\ollama.exe",
+    r"C:\Users\Public\ollama\ollama.exe",
+    r"C:\Program Files\Ollama\ollama.exe",
+]
+
+def _find_ollama() -> str:
+    found = shutil.which("ollama")
+    if found:
+        return found
+    for path in _OLLAMA_FALLBACK_PATHS:
+        if os.path.isfile(path):
+            return path
+    raise FileNotFoundError("ollama 실행 파일을 찾을 수 없습니다.")
 
 
 # ─────────────────────────────────────────
 # 프롬프트 템플릿
 # ─────────────────────────────────────────
 
-PORTFOLIO_PROMPT_TEMPLATE = """다음 정보를 바탕으로 면접관이 바로 읽을 수 있는 포트폴리오 본문을 작성해 줘.
+PORTFOLIO_PROMPT_TEMPLATE = """당신은 전문 이력서 작성 어시스턴트입니다. 아래 입력을 바탕으로 한국어 포트폴리오를 작성하세요.
 
-[내가 실제로 다녔던 직장과 과거 경험]
+[지원자 이름]
+{applicant_name}
+
+[지원자 경력 및 경험]
 {experience}
 
-[내가 앞으로 입사하고 싶은 목표 회사의 공고]
+[채용공고]
 {jd}
 
-[엄격한 작성 규칙]
-1. 이력서의 '경력 및 프로젝트' 섹션에는 오직 [내가 실제로 다녔던 직장과 과거 경험]에 적힌 내용만 적는다.
-2. [내가 앞으로 입사하고 싶은 목표 회사의 공고]에 나온 회사명은 이력서의 '지원 동기'나 마지막 '포부'를 말할 때만 사용한다.
-3. 반드시 100% 자연스러운 한국어로만 작성한다.
+[작성 규칙]
+1. '경력 및 프로젝트', '성과 및 활동', '학력', '기타', '특징'은 오직 위 [지원자 경력 및 경험]에 명시된 사실만 사용합니다. 입력에 없는 학교명·회사명·날짜·수치·기술명을 절대 추가하지 마세요. (예: 입력에 학교명이 없으면 "서울대학교" 같은 가짜 학교명을 만들지 마세요.)
+2. [채용공고]의 회사명·직무명은 최상단 제목과 '지원 동기' 단락에서만 사용합니다. '경력 및 프로젝트' narrative에는 절대 채용공고의 기술 스택(예: Python, PyTorch, OpenCV)을 끼워 넣지 마세요.
+3. 입력에 해당 섹션 정보가 없으면 그 섹션 본문에 "* (해당 사항 없음)" 한 줄만 적습니다. 추측이나 보강 금지.
+4. 코드블록이나 메타 설명 없이 본문만 출력합니다.
+5. 아래 양식의 꺽쇠(< … >)로 둘러싸인 부분은 실제 내용으로 교체합니다. 꺽쇠 자체나 안내문은 출력에 남기지 마세요.
+
+[출력 양식]
+
+## {applicant_name}
+
+**지원 직무:** <채용공고의 직무명만>
+
+**경력 및 프로젝트**
+
+<지원자 경력 및 경험을 2~4문단의 자연스러운 한국어 서술로 작성>
+
+**지원 동기**
+
+<채용공고의 회사·직무에 지원하는 동기 2~4문장>
+
+**성과 및 활동**
+
+* **<지원자 경력에 등장한 회사/프로젝트명>:**
+    * <구체적 활동 또는 성과>
+    * <구체적 활동 또는 성과>
+
+**기타**
+
+* <지원자 경력에 명시된 자격증/수상/어학. 명시되지 않았으면 "(해당 사항 없음)">
+
+**특징**
+
+* <지원자 경력에서 드러나는 강점 1>
+* <지원자 경력에서 드러나는 강점 2>
 """
 
 
@@ -69,6 +120,7 @@ def _clean_ansi(text: str) -> str:
 # ─────────────────────────────────────────
 
 def generate_portfolio(experience: str, jd: str, *,
+                       applicant_name: str = "지원자",
                        model_name: str = "mybot",
                        timeout: int = 120) -> dict:
     """
@@ -104,6 +156,7 @@ def generate_portfolio(experience: str, jd: str, *,
         }
 
     prompt = PORTFOLIO_PROMPT_TEMPLATE.format(
+        applicant_name=(applicant_name or "지원자").strip(),
         experience=experience.strip(),
         jd=jd.strip(),
     )
@@ -116,8 +169,9 @@ def generate_portfolio(experience: str, jd: str, *,
     env['TERM'] = 'dumb'
 
     try:
+        ollama_cmd = _find_ollama()
         result = subprocess.run(
-            ['ollama', 'run', model_name, prompt],
+            [ollama_cmd, 'run', model_name, prompt],
             capture_output=True,
             text=True,
             encoding='utf-8',
@@ -162,6 +216,7 @@ def generate_portfolio(experience: str, jd: str, *,
             "content": "",
             "prompt": prompt,
             "error": f"AI 응답이 {timeout}초 내에 오지 않았습니다. 잠시 후 다시 시도해주세요.",
+            "error_type": "timeout",
         }
 
     except FileNotFoundError:
@@ -171,6 +226,7 @@ def generate_portfolio(experience: str, jd: str, *,
             "content": "",
             "prompt": prompt,
             "error": "서버에 Ollama가 설치되어 있지 않습니다. 관리자에게 문의해주세요.",
+            "error_type": "unavailable",
         }
 
     except Exception as e:
@@ -180,6 +236,7 @@ def generate_portfolio(experience: str, jd: str, *,
             "content": "",
             "prompt": prompt,
             "error": f"포트폴리오 생성 중 오류가 발생했습니다: {str(e)[:200]}",
+            "error_type": "error",
         }
 
 

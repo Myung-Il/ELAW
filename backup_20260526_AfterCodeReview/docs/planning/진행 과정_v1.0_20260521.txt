@@ -1,0 +1,21 @@
+##프롬프트 내용
+/init
+
+[./DB, ./backend, ./frontend, ./models] 각 폴더에 해당하는 CLAUDE.md 파일도 생성해 줘. 
+
+[./models, ./models/portfolio]에 README.md 파일을 생성해 줘.
+
+[./DB, ./backend, ./frontend, ./models] 각 폴더에 있는 [CLAUDE.md, README.md]를 기반으로  분석해서 역할별 PRD를 만드려고 해. 5W1H로 구성해주고, 각각[./DB/DB_PRD.md, ./backend/backend_PRD.md, ./frontend/frontend_PRD.md, ./models/models_PRD.md]로 저장해 줘.
+
+추가로 [./models/curriculum, ./models/portfolio]에 CLAUDE.md를 생성해 주고, 각각의[CLAUDE.md, README.md]를 기반으로 분석해서 모델별 PRD를 만드려고 해. 이 모델들이 이 프로젝트의 핵심 요소야. 5W1H로 구성해주고, [./models/curriculum/models_curriculum_PRD.md, ./models/portfolio/models_portfolio_PRD.md]로 저장해 줘.
+
+작성된 [./DB/DB_PRD.md, ./backend/backend_PRD.md, ./frontend/frontend_PRD.md, ./models/models_PRD.md, ./models/curriculum/models_curriculum_PRD.md, ./models/portfolio/models_portfolio_PRD.md]를 기반으로 프로젝트 PRD를 만드려고 해. 5W1H로 구성해주고 ./docs/ELAW_PRD_v2.0_20260521.md로 저장해 줘.
+
+이 ./docs/ELAW_PRD_v2.0_20260521.md를 PRD를 기반으로 목표와 검증 기준을 설정하여 자동 개선 루프를 진행하여 서비스 가능한 형태로 만들어 줘. 
+
+##과정 요약
+- 설정 파일 생성(CLAUDE.md, READMD.md)
+- 계층별 설정 파일 생성([./DB, ./backend, ./frontend, ./models, ./models/curriculum, ./models/portfolio])
+- 설정 파일을 기반한 역할별 PRD 생성([./DB/DB_PRD.md, ./backend/backend_PRD.md, ./frontend/frontend_PRD.md, ./models/models_PRD.md, ./models/curriculum/models_curriculum_PRD.md, ./models/portfolio/models_portfolio_PRD.md])
+- 역할별 PRD를 기반한 프로젝트 PRD 생성(./docs/ELAW_PRD_v2.0_20260521.md)
+- 프로젝트 PRD를 기반한 서비스 가능한 형태로 제작.

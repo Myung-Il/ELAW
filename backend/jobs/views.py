@@ -21,13 +21,18 @@ jobs/views.py
 """
 
 import uuid
+import logging
 from datetime import date, timedelta
 
 from rest_framework import status
+
+logger = logging.getLogger(__name__)
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
+
+from core.views_user import call_gemini, parse_json_from_gemini, default_curriculum
 from django.db.models import Q
 
 from core.models import JobPosting, Match, UserGoal, Portfolio
@@ -95,10 +100,21 @@ class JobListView(APIView):
             sort = '-created_at'
         qs = qs.order_by(sort)
 
-        serializer = JobPostingListSerializer(qs, many=True, context={'request': request})
+        total = qs.count()
+        try:
+            limit  = max(1, min(int(request.query_params.get('limit',  20)), 100))
+            offset = max(0, int(request.query_params.get('offset', 0)))
+        except (ValueError, TypeError):
+            limit, offset = 20, 0
+
+        page_qs = qs[offset: offset + limit]
+        serializer = JobPostingListSerializer(page_qs, many=True, context={'request': request})
         return Response({
             "message": "공고 목록 조회 성공",
-            "count": qs.count(),
+            "count": total,
+            "limit": limit,
+            "offset": offset,
+            "has_next": offset + limit < total,
             "data": serializer.data,
         }, status=status.HTTP_200_OK)
 
@@ -216,10 +232,20 @@ class MyJobsView(APIView):
 
         qs = qs.order_by('-updated_at')
 
-        serializer = MyMatchSerializer(qs, many=True, context={'request': request})
+        total = qs.count()
+        try:
+            limit  = max(1, min(int(request.query_params.get('limit',  20)), 100))
+            offset = max(0, int(request.query_params.get('offset', 0)))
+        except (ValueError, TypeError):
+            limit, offset = 20, 0
+
+        serializer = MyMatchSerializer(qs[offset: offset + limit], many=True, context={'request': request})
         return Response({
             "message": "내 공고 목록 조회 성공",
-            "count": qs.count(),
+            "count": total,
+            "limit": limit,
+            "offset": offset,
+            "has_next": offset + limit < total,
             "data": serializer.data,
         }, status=status.HTTP_200_OK)
 
@@ -304,10 +330,75 @@ class JobStudyView(APIView):
             }
         )
 
+        # ── 공고 맞춤 Gemini 커리큘럼 생성 ──────────
+        from core.models import LearningStats, SolveHistory, Curriculum
+
+        solve_count = SolveHistory.objects.filter(user=request.user).count()
+        langs = list(
+            LearningStats.objects.filter(user=request.user, stat_type="language")
+            .values_list("stat_key", flat=True)
+        )
+
+        req_skills  = posting.required_skills  or []
+        pref_skills = posting.preferred_skills or []
+        req_str     = ', '.join(req_skills)  if req_skills  else '미정'
+        pref_str    = ', '.join(pref_skills) if pref_skills else '없음'
+        langs_str   = ', '.join(langs)       if langs       else '미정'
+
+        job_prompt = f"""당신은 취업 준비 학습 플랫폼 ELAW의 AI 커리큘럼 생성기입니다.
+아래 채용공고를 목표로 {duration_weeks}주 집중 학습 커리큘럼을 JSON으로 생성해주세요.
+
+[목표 채용공고]
+- 회사: {posting.company.name}
+- 포지션: {posting.title}
+- 직무: {posting.job_role}
+- 필수 기술: {req_str}
+- 우대 기술: {pref_str}
+
+[지원자 현황]
+- 보유 언어 경험: {langs_str}
+- 알고리즘 풀이 수: {solve_count}문제 (백준 기준)
+
+[커리큘럼 생성 원칙 — 반드시 준수]
+1. 커리큘럼 전체를 "{posting.job_role}" 직무 합격에 최적화
+2. 필수 기술 [{req_str}]을 모두 커버 — 각 기술마다 최소 1주 배정
+3. 우대 기술 [{pref_str}]은 중반 이후에 배치
+4. 1주차는 {posting.job_role} 코딩테스트 빈출 알고리즘 (백준 문제번호 포함)
+5. 2~{duration_weeks - 2}주차는 필수/우대 기술을 하나씩 집중 학습 (실습 과제 포함)
+6. 마지막 2주는 실전 프로젝트 완성 + 포트폴리오 & 면접 준비
+7. theme에 반드시 구체적인 기술명 포함 (예: "Django ORM & REST API 설계")
+8. tasks는 실제로 수행 가능한 구체적인 실습 과제 3개
+
+[JSON만 출력 — 코드블록·설명 텍스트 없이 순수 JSON]
+{{"total_weeks":{duration_weeks},"field":"{posting.job_role}","job_role":"{posting.job_role}","required_skills":{req_skills},"preferred_skills":{pref_skills},"weeks":[{{"week":1,"theme":"구체적 주제명","tasks":["과제1","과제2","과제3"],"recommended_problems":["문제번호"],"estimated_hours":10}}]}}"""
+
+        raw    = call_gemini(request.user, job_prompt, "curriculum_study")
+        parsed = parse_json_from_gemini(raw)
+        if not parsed:
+            logger.warning(
+                "Gemini 스터디 커리큘럼 생성 실패 — 기본 커리큘럼으로 대체 (user_id=%s, posting_id=%s)",
+                request.user.id, posting_id,
+            )
+        content = parsed or default_curriculum(
+            new_goal,
+            required_skills=req_skills + pref_skills,
+            duration_weeks=duration_weeks,
+        )
+
+        Curriculum.objects.create(
+            user         = request.user,
+            goal         = new_goal,
+            is_active    = True,
+            version      = 1,
+            content_json = content,
+        )
+
+        ai_generated = raw is not None
         return Response({
             "message": f"'{posting.job_role}' 직무로 {duration_weeks}주 공부를 시작합니다! "
-                       f"AI가 곧 맞춤 커리큘럼과 추천 문제를 준비할 예정입니다.",
+                       f"{'AI가 공고 맞춤 커리큘럼을 생성했습니다.' if ai_generated else '기본 커리큘럼으로 시작합니다.'}",
             "goal": UserGoalSerializer(new_goal).data,
+            "ai_generated": ai_generated,
             "target_posting": {
                 "id": posting.id,
                 "title": posting.title,
@@ -375,13 +466,24 @@ class JobApplyView(APIView):
         jd_text = build_jd_text(posting)
 
         # 4. Ollama 호출 (시간 걸림: 30~120초)
-        ai_result = generate_portfolio(experience=experience, jd=jd_text)
+        ai_result = generate_portfolio(
+            experience=experience,
+            jd=jd_text,
+            applicant_name=(request.user.name or "").strip() or "지원자",
+        )
 
         if not ai_result['success']:
+            error_type = ai_result.get('error_type', 'error')
+            if error_type == 'timeout':
+                http_status = status.HTTP_504_GATEWAY_TIMEOUT
+            elif error_type == 'unavailable':
+                http_status = status.HTTP_503_SERVICE_UNAVAILABLE
+            else:
+                http_status = status.HTTP_500_INTERNAL_SERVER_ERROR
             return Response({
                 "message": "포트폴리오 생성에 실패했습니다.",
                 "error": ai_result['error'],
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            }, status=http_status)
 
         generated_content = ai_result['content']
         prompt_used = ai_result['prompt']

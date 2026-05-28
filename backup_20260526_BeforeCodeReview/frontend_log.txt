@@ -1,0 +1,342 @@
+
+> elaw-frontend@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.0 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://172.24.21.37:3000
+✓ Ready in 217ms
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+
+⨯ ./components/ui/badge.tsx:5:1
+Module not found: Can't resolve '@/lib/utils'
+  [90m3 |[0m [36mimport[0m { cva, [36mtype[0m [33mVariantProps[0m } [36mfrom[0m [32m'class-variance-authority'[0m
+  [90m4 |[0m
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { cn } [36mfrom[0m [32m'@/lib/utils'[0m
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m
+  [90m7 |[0m [36mconst[0m badgeVariants = cva(
+  [90m8 |[0m   [32m'inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-mediu...[0m
+
+Import map: aliased to relative './lib/utils' inside of [project]/
+
+
+Import trace:
+  Server Component:
+    ./components/ui/badge.tsx
+    ./app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./components/ui/button.tsx:5:1
+Module not found: Can't resolve '@/lib/utils'
+  [90m3 |[0m [36mimport[0m { cva, [36mtype[0m [33mVariantProps[0m } [36mfrom[0m [32m'class-variance-authority'[0m
+  [90m4 |[0m
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { cn } [36mfrom[0m [32m'@/lib/utils'[0m
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m
+  [90m7 |[0m [36mconst[0m buttonVariants = cva(
+  [90m8 |[0m   [32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-...[0m
+
+Import map: aliased to relative './lib/utils' inside of [project]/
+
+
+Import traces:
+  Server Component:
+    ./components/ui/button.tsx
+    ./app/page.tsx
+
+  Client Component Browser:
+    ./components/ui/button.tsx [Client Component Browser]
+    ./components/layout/public-header.tsx [Client Component Browser]
+    ./components/layout/public-header.tsx [Server Component]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/ui/button.tsx [Client Component SSR]
+    ./components/layout/public-header.tsx [Client Component SSR]
+    ./components/layout/public-header.tsx [Server Component]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./components/ui/card.tsx:3:1
+Module not found: Can't resolve '@/lib/utils'
+  [90m1 |[0m [36mimport[0m * [36mas[0m [33mReact[0m [36mfrom[0m [32m'react'[0m
+  [90m2 |[0m
+[31m[1m>[0m [90m3 |[0m [36mimport[0m { cn } [36mfrom[0m [32m'@/lib/utils'[0m
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m4 |[0m
+  [90m5 |[0m [36mfunction[0m [33mCard[0m({ className, ...props }: [33mReact[0m.[33mComponentProps[0m<[32m'div'[0m>) {
+  [90m6 |[0m   [36mreturn[0m (
+
+Import map: aliased to relative './lib/utils' inside of [project]/
+
+
+Import trace:
+  Server Component:
+    ./components/ui/card.tsx
+    ./app/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+ GET / 500 in 2.7s (next.js: 2.6s, proxy.ts: 37ms, application-code: 66ms)
+✓ Compiled in 38ms
+ GET / 200 in 339ms (next.js: 85ms, proxy.ts: 10ms, application-code: 245ms)
+ GET / 200 in 108ms (next.js: 3ms, proxy.ts: 6ms, application-code: 99ms)
+ GET /register 200 in 413ms (next.js: 383ms, proxy.ts: 10ms, application-code: 20ms)
+ GET /login 200 in 222ms (next.js: 206ms, proxy.ts: 6ms, application-code: 11ms)
+ GET /home 200 in 379ms (next.js: 367ms, proxy.ts: 1913µs, application-code: 10ms)
+ GET /jobs 200 in 245ms (next.js: 229ms, proxy.ts: 4ms, application-code: 13ms)
+ GET /jobs/6 200 in 464ms (next.js: 448ms, proxy.ts: 4ms, application-code: 12ms)
+ GET /curriculum 200 in 360ms (next.js: 341ms, proxy.ts: 3ms, application-code: 16ms)
+ GET /home 200 in 26ms (next.js: 6ms, proxy.ts: 7ms, application-code: 13ms)
+ GET /profile 200 in 458ms (next.js: 430ms, proxy.ts: 8ms, application-code: 19ms)
+ GET /curriculum 200 in 27ms (next.js: 6ms, proxy.ts: 5ms, application-code: 16ms)
+ GET /profile?tab=applications 200 in 29ms (next.js: 6ms, proxy.ts: 5ms, application-code: 18ms)
+ GET /profile?tab=settings 200 in 30ms (next.js: 6ms, proxy.ts: 6ms, application-code: 18ms)
+ GET /home 200 in 28ms (next.js: 7ms, proxy.ts: 5ms, application-code: 16ms)
+ GET /curriculum 200 in 33ms (next.js: 5ms, proxy.ts: 5ms, application-code: 23ms)
+ GET /home 200 in 29ms (next.js: 6ms, proxy.ts: 5ms, application-code: 19ms)
+ GET /curriculum 200 in 27ms (next.js: 7ms, proxy.ts: 4ms, application-code: 16ms)
+ GET /curriculum 200 in 30ms (next.js: 6ms, proxy.ts: 6ms, application-code: 17ms)
+ GET /jobs 200 in 26ms (next.js: 3ms, proxy.ts: 5ms, application-code: 18ms)
+ GET /home 200 in 30ms (next.js: 6ms, proxy.ts: 5ms, application-code: 19ms)
+ GET /jobs 200 in 22ms (next.js: 3ms, proxy.ts: 2ms, application-code: 17ms)
+ GET /curriculum 200 in 28ms (next.js: 3ms, proxy.ts: 5ms, application-code: 21ms)
+ GET /study 200 in 364ms (next.js: 342ms, proxy.ts: 5ms, application-code: 16ms)
+ GET /board 200 in 396ms (next.js: 375ms, proxy.ts: 5ms, application-code: 16ms)
+ GET /curriculum 200 in 32ms (next.js: 6ms, proxy.ts: 5ms, application-code: 21ms)
+ GET /login 200 in 32ms (next.js: 6ms, proxy.ts: 6ms, application-code: 20ms)
+ GET /register 200 in 30ms (next.js: 6ms, proxy.ts: 5ms, application-code: 19ms)
+✓ Compiled in 35ms
+✓ Compiled in 32ms
+✓ Compiled in 17ms
+ GET /login 200 in 211ms (next.js: 62ms, proxy.ts: 6ms, application-code: 143ms)
+ GET / 200 in 85ms (next.js: 4ms, proxy.ts: 5ms, application-code: 77ms)
+ GET /login 200 in 26ms (next.js: 5ms, proxy.ts: 5ms, application-code: 17ms)
+ GET /register 200 in 95ms (next.js: 58ms, proxy.ts: 5ms, application-code: 32ms)
+ GET /home 200 in 83ms (next.js: 52ms, proxy.ts: 3ms, application-code: 28ms)
+ GET /login 200 in 34ms (next.js: 6ms, proxy.ts: 5ms, application-code: 22ms)
+ GET /register 200 in 29ms (next.js: 6ms, proxy.ts: 7ms, application-code: 16ms)
+ GET /login 200 in 32ms (next.js: 4ms, proxy.ts: 1693µs, application-code: 26ms)
+ GET /goal-setting 200 in 329ms (next.js: 312ms, proxy.ts: 3ms, application-code: 15ms)
+[browser] 목표 설정 실패: Error: field(관심 분야)와 job_role(목표 직무)은 필수입니다.
+    at apiRequest (lib/api-client.ts:50:11)
+    at async handleComplete (app/goal-setting/page.tsx:84:7)
+  48 |       .map(([, v]) => (Array.isArray(v) ? String(v[0]) : null))
+  49 |       .find(Boolean)
+> 50 |     throw new Error(body?.detail ?? body?.message ?? body?.error ?? fieldError ?? `HTTP ${...
+     |           ^
+  51 |   }
+  52 |
+  53 |   const text = await res.text() (app/goal-setting/page.tsx:90:15)
+[browser] 목표 설정 실패: Error: field(관심 분야)와 job_role(목표 직무)은 필수입니다.
+    at apiRequest (lib/api-client.ts:50:11)
+    at async handleComplete (app/goal-setting/page.tsx:84:7)
+  48 |       .map(([, v]) => (Array.isArray(v) ? String(v[0]) : null))
+  49 |       .find(Boolean)
+> 50 |     throw new Error(body?.detail ?? body?.message ?? body?.error ?? fieldError ?? `HTTP ${...
+     |           ^
+  51 |   }
+  52 |
+  53 |   const text = await res.text() (app/goal-setting/page.tsx:90:15)
+✓ Compiled in 75ms
+ GET /goal-setting 200 in 177ms (next.js: 67ms, proxy.ts: 5ms, application-code: 105ms)
+ GET /home 200 in 20ms (next.js: 3ms, proxy.ts: 3ms, application-code: 14ms)
+ GET /curriculum 200 in 102ms (next.js: 68ms, proxy.ts: 7ms, application-code: 27ms)
+ GET /home 200 in 27ms (next.js: 4ms, proxy.ts: 4ms, application-code: 19ms)
+ GET /jobs 200 in 96ms (next.js: 62ms, proxy.ts: 6ms, application-code: 28ms)
+ GET /curriculum 200 in 34ms (next.js: 6ms, proxy.ts: 5ms, application-code: 24ms)
+ GET /study 200 in 93ms (next.js: 64ms, proxy.ts: 7ms, application-code: 22ms)
+ GET /board 200 in 92ms (next.js: 62ms, proxy.ts: 5ms, application-code: 24ms)
+ GET /home 200 in 26ms (next.js: 4ms, proxy.ts: 5ms, application-code: 17ms)
+ GET /curriculum 200 in 37ms (next.js: 6ms, proxy.ts: 5ms, application-code: 25ms)
+ GET /login 200 in 34ms (next.js: 5ms, proxy.ts: 5ms, application-code: 24ms)
+ GET /register 200 in 37ms (next.js: 7ms, proxy.ts: 5ms, application-code: 26ms)
+ GET /login 200 in 25ms (next.js: 2ms, proxy.ts: 3ms, application-code: 19ms)
+ GET /goal-setting 200 in 32ms (next.js: 5ms, proxy.ts: 4ms, application-code: 23ms)
+ GET /home 200 in 23ms (next.js: 3ms, proxy.ts: 3ms, application-code: 18ms)
+ GET /curriculum 200 in 28ms (next.js: 5ms, proxy.ts: 4ms, application-code: 18ms)
+ GET /jobs 200 in 28ms (next.js: 7ms, proxy.ts: 5ms, application-code: 16ms)
+ GET /jobs/6 200 in 106ms (next.js: 72ms, proxy.ts: 3ms, application-code: 31ms)
+ GET /jobs/6/apply 200 in 627ms (next.js: 603ms, proxy.ts: 6ms, application-code: 18ms)
+[browser] 스터디 모드 시작 실패: Error: 이미 다른 공부 목표가 활성화되어 있습니다. 기존 목표를 비활성화하고 새 목표로 변경하시겠습니까?
+    at apiRequest (lib/api-client.ts:50:11)
+    at async handleStudy (app/jobs/[id]/page.tsx:76:7)
+  48 |       .map(([, v]) => (Array.isArray(v) ? String(v[0]) : null))
+  49 |       .find(Boolean)
+> 50 |     throw new Error(body?.detail ?? body?.message ?? body?.error ?? fieldError ?? `HTTP ${...
+     |           ^
+  51 |   }
+  52 |
+  53 |   const text = await res.text() (app/jobs/[id]/page.tsx:87:17)
+[browser] 스터디 모드 시작 실패: Error: 이미 다른 공부 목표가 활성화되어 있습니다. 기존 목표를 비활성화하고 새 목표로 변경하시겠습니까?
+    at apiRequest (lib/api-client.ts:50:11)
+    at async handleStudy (app/jobs/[id]/page.tsx:76:7)
+  48 |       .map(([, v]) => (Array.isArray(v) ? String(v[0]) : null))
+  49 |       .find(Boolean)
+> 50 |     throw new Error(body?.detail ?? body?.message ?? body?.error ?? fieldError ?? `HTTP ${...
+     |           ^
+  51 |   }
+  52 |
+  53 |   const text = await res.text() (app/jobs/[id]/page.tsx:87:17)
+ GET /curriculum 200 in 31ms (next.js: 6ms, proxy.ts: 5ms, application-code: 20ms)
+ GET /jobs 200 in 32ms (next.js: 5ms, proxy.ts: 5ms, application-code: 22ms)
+ GET /jobs/6 200 in 39ms (next.js: 14ms, proxy.ts: 4ms, application-code: 20ms)
+ GET /curriculum 200 in 29ms (next.js: 6ms, proxy.ts: 5ms, application-code: 18ms)
+ GET /jobs 200 in 34ms (next.js: 3ms, proxy.ts: 6ms, application-code: 25ms)
+ GET /jobs/6 200 in 37ms (next.js: 14ms, proxy.ts: 5ms, application-code: 18ms)
+[browser] 스터디 모드 시작 실패: Error: 이미 다른 공부 목표가 활성화되어 있습니다. 기존 목표를 비활성화하고 새 목표로 변경하시겠습니까?
+    at apiRequest (lib/api-client.ts:50:11)
+    at async handleStudy (app/jobs/[id]/page.tsx:76:7)
+  48 |       .map(([, v]) => (Array.isArray(v) ? String(v[0]) : null))
+  49 |       .find(Boolean)
+> 50 |     throw new Error(body?.detail ?? body?.message ?? body?.error ?? fieldError ?? `HTTP ${...
+     |           ^
+  51 |   }
+  52 |
+  53 |   const text = await res.text() (app/jobs/[id]/page.tsx:87:17)
+ GET /jobs 200 in 26ms (next.js: 6ms, proxy.ts: 4ms, application-code: 15ms)
+ GET /jobs/6 200 in 46ms (next.js: 21ms, proxy.ts: 5ms, application-code: 20ms)
+ GET /jobs 200 in 31ms (next.js: 6ms, proxy.ts: 6ms, application-code: 19ms)
+ GET /jobs/6 200 in 36ms (next.js: 15ms, proxy.ts: 4ms, application-code: 17ms)
+✓ Compiled in 31ms
+ GET /jobs/6 200 in 252ms (next.js: 75ms, proxy.ts: 4ms, application-code: 173ms)
+ GET /curriculum 200 in 30ms (next.js: 6ms, proxy.ts: 6ms, application-code: 18ms)
+ GET /goal-setting 200 in 29ms (next.js: 7ms, proxy.ts: 5ms, application-code: 18ms)
+ GET /home 200 in 29ms (next.js: 3ms, proxy.ts: 4ms, application-code: 22ms)
+ GET /curriculum 200 in 31ms (next.js: 6ms, proxy.ts: 5ms, application-code: 20ms)
+ GET /jobs 200 in 34ms (next.js: 8ms, proxy.ts: 6ms, application-code: 19ms)
+ GET /curriculum 200 in 31ms (next.js: 6ms, proxy.ts: 5ms, application-code: 21ms)
+ GET /jobs 200 in 33ms (next.js: 3ms, proxy.ts: 6ms, application-code: 24ms)
+ GET /jobs/6 200 in 49ms (next.js: 24ms, proxy.ts: 5ms, application-code: 20ms)
+ GET /curriculum 200 in 28ms (next.js: 3ms, proxy.ts: 4ms, application-code: 21ms)
+ GET /goal-setting 200 in 21ms (next.js: 3ms, proxy.ts: 2ms, application-code: 16ms)
+ GET /curriculum 200 in 26ms (next.js: 6ms, proxy.ts: 5ms, application-code: 16ms)
+✓ Compiled in 33ms
+ GET /curriculum 200 in 78ms (next.js: 3ms, proxy.ts: 3ms, application-code: 73ms)
+ GET /home 200 in 31ms (next.js: 6ms, proxy.ts: 6ms, application-code: 19ms)
+ GET /curriculum 200 in 30ms (next.js: 6ms, proxy.ts: 5ms, application-code: 20ms)
+ GET /goal-setting 200 in 31ms (next.js: 6ms, proxy.ts: 5ms, application-code: 20ms)
+ GET /home 200 in 26ms (next.js: 4ms, proxy.ts: 2ms, application-code: 20ms)
+ GET /curriculum 200 in 32ms (next.js: 7ms, proxy.ts: 5ms, application-code: 20ms)
+ GET /jobs 200 in 33ms (next.js: 6ms, proxy.ts: 5ms, application-code: 21ms)
+ GET /jobs/6 200 in 103ms (next.js: 74ms, proxy.ts: 5ms, application-code: 24ms)
+ GET /curriculum 200 in 42ms (next.js: 3ms, proxy.ts: 7ms, application-code: 32ms)
+ GET /login 200 in 29ms (next.js: 3ms, proxy.ts: 4ms, application-code: 22ms)
+ GET /home 200 in 25ms (next.js: 3ms, proxy.ts: 5ms, application-code: 17ms)
+ GET /curriculum 200 in 19ms (next.js: 3ms, proxy.ts: 2ms, application-code: 14ms)
+ GET /jobs 200 in 26ms (next.js: 5ms, proxy.ts: 5ms, application-code: 17ms)
+ GET /curriculum 200 in 22ms (next.js: 3ms, proxy.ts: 5ms, application-code: 14ms)
+ GET /jobs 200 in 30ms (next.js: 4ms, proxy.ts: 4ms, application-code: 21ms)
+ GET /jobs/4 200 in 33ms (next.js: 12ms, proxy.ts: 6ms, application-code: 16ms)
+ GET /curriculum 200 in 25ms (next.js: 6ms, proxy.ts: 3ms, application-code: 16ms)
+ GET /login 200 in 27ms (next.js: 6ms, proxy.ts: 4ms, application-code: 17ms)
+ GET /login 200 in 60ms (next.js: 3ms, proxy.ts: 4ms, application-code: 53ms)
+ GET /home 200 in 26ms (next.js: 3ms, proxy.ts: 3ms, application-code: 20ms)
+ GET /curriculum 200 in 32ms (next.js: 6ms, proxy.ts: 5ms, application-code: 21ms)
+ GET /jobs 200 in 31ms (next.js: 6ms, proxy.ts: 5ms, application-code: 20ms)
+ GET /jobs/4 200 in 44ms (next.js: 22ms, proxy.ts: 5ms, application-code: 17ms)
+ GET /curriculum 200 in 34ms (next.js: 7ms, proxy.ts: 3ms, application-code: 25ms)
+ GET /jobs 200 in 21ms (next.js: 2ms, proxy.ts: 5ms, application-code: 14ms)
+ GET /jobs/3 200 in 60ms (next.js: 22ms, proxy.ts: 5ms, application-code: 34ms)
+ GET /curriculum 200 in 27ms (next.js: 4ms, proxy.ts: 3ms, application-code: 19ms)
+ GET /profile?tab=applications 200 in 116ms (next.js: 68ms, proxy.ts: 4ms, application-code: 44ms)
+ GET /jobs/4 200 in 40ms (next.js: 17ms, proxy.ts: 3ms, application-code: 19ms)
+ GET /profile?tab=applications 200 in 30ms (next.js: 6ms, proxy.ts: 5ms, application-code: 19ms)
+ GET /jobs 200 in 27ms (next.js: 7ms, proxy.ts: 5ms, application-code: 15ms)
+ GET /jobs/5 200 in 37ms (next.js: 18ms, proxy.ts: 4ms, application-code: 14ms)
+ GET /jobs/5/apply 200 in 50ms (next.js: 20ms, proxy.ts: 7ms, application-code: 23ms)
+ GET /profile?tab=applications 200 in 28ms (next.js: 6ms, proxy.ts: 5ms, application-code: 18ms)
+ GET /jobs 200 in 27ms (next.js: 6ms, proxy.ts: 5ms, application-code: 17ms)
+ GET /jobs/5 200 in 46ms (next.js: 21ms, proxy.ts: 5ms, application-code: 20ms)
+ GET /jobs/5/apply 200 in 43ms (next.js: 19ms, proxy.ts: 4ms, application-code: 20ms)
+[browser] Uncaught TypeError: Cannot read properties of undefined (reading 'length')
+    at ApplyPage (app/jobs/[id]/apply/page.tsx:214:87)
+  212 | ...한 포트폴리오 내용..."
+  213 | ...
+> 214 | ...text-muted-foreground text-right">{content.length}자</p>
+      |                                               ^
+  215 | ...
+  216 | ...
+  217 | ...
+ GET /jobs/6 200 in 55ms (next.js: 18ms, proxy.ts: 5ms, application-code: 33ms)
+ GET /goal-setting 200 in 34ms (next.js: 6ms, proxy.ts: 4ms, application-code: 24ms)
+ GET /curriculum? 200 in 55ms (next.js: 6ms, proxy.ts: 3ms, application-code: 45ms)
+ GET /profile?tab=applications 200 in 31ms (next.js: 8ms, proxy.ts: 5ms, application-code: 18ms)
+ GET /jobs/5 200 in 35ms (next.js: 15ms, proxy.ts: 4ms, application-code: 16ms)
+ GET /curriculum 200 in 32ms (next.js: 6ms, proxy.ts: 5ms, application-code: 21ms)
+ GET /profile 200 in 31ms (next.js: 5ms, proxy.ts: 5ms, application-code: 21ms)
+ GET /curriculum 200 in 24ms (next.js: 3ms, proxy.ts: 5ms, application-code: 16ms)
+ GET /profile 200 in 27ms (next.js: 6ms, proxy.ts: 6ms, application-code: 15ms)
+ GET /jobs/4 200 in 44ms (next.js: 21ms, proxy.ts: 5ms, application-code: 19ms)
+ GET /profile 200 in 30ms (next.js: 6ms, proxy.ts: 5ms, application-code: 19ms)
+ GET /profile 200 in 142ms (next.js: 2ms, proxy.ts: 2ms, application-code: 138ms)
+ GET /home 200 in 14ms (next.js: 1722µs, proxy.ts: 2ms, application-code: 10ms)
+[browser] 대시보드 데이터 로드 실패: TypeError: Failed to fetch
+    at apiRequest (lib/api-client.ts:34:21)
+    at Object.get (lib/api-client.ts:59:5)
+    at fetchData (app/home/page.tsx:57:15)
+    at HomePage.useEffect (app/home/page.tsx:69:5)
+  32 |   if (token) headers["Authorization"] = `Bearer ${token}`
+  33 |
+> 34 |   const res = await fetch(`${BASE_URL}${path}`, { ...options, headers })
+     |                     ^
+  35 |
+  36 |   if (res.status === 401 && retry) {
+  37 |     const newToken = await refreshAccessToken() (app/home/page.tsx:64:17)
+ GET /jobs 200 in 19ms (next.js: 3ms, proxy.ts: 4ms, application-code: 12ms)
+[browser] TypeError: Failed to fetch
+    at apiRequest (lib/api-client.ts:34:21)
+    at Object.get (lib/api-client.ts:59:5)
+    at ProfilePage.useEffect (app/profile/page.tsx:80:9)
+  32 |   if (token) headers["Authorization"] = `Bearer ${token}`
+  33 |
+> 34 |   const res = await fetch(`${BASE_URL}${path}`, { ...options, headers })
+     |                     ^
+  35 |
+  36 |   if (res.status === 401 && retry) {
+  37 |     const newToken = await refreshAccessToken()
+ GET /curriculum 200 in 13ms (next.js: 3ms, proxy.ts: 3ms, application-code: 8ms)
+[browser] 대시보드 데이터 로드 실패: TypeError: Failed to fetch
+    at apiRequest (lib/api-client.ts:34:21)
+    at Object.get (lib/api-client.ts:59:5)
+    at fetchData (app/home/page.tsx:57:15)
+    at HomePage.useEffect (app/home/page.tsx:69:5)
+  32 |   if (token) headers["Authorization"] = `Bearer ${token}`
+  33 |
+> 34 |   const res = await fetch(`${BASE_URL}${path}`, { ...options, headers })
+     |                     ^
+  35 |
+  36 |   if (res.status === 401 && retry) {
+  37 |     const newToken = await refreshAccessToken() (app/home/page.tsx:64:17)
+ GET /study 200 in 18ms (next.js: 2ms, proxy.ts: 5ms, application-code: 11ms)
+[browser] 공고 목록 로드 실패: TypeError: Failed to fetch
+    at apiRequest (lib/api-client.ts:34:21)
+    at Object.get (lib/api-client.ts:59:5)
+    at JobsPage.useCallback[fetchJobs] (app/jobs/page.tsx:49:30)
+  32 |   if (token) headers["Authorization"] = `Bearer ${token}`
+  33 |
+> 34 |   const res = await fetch(`${BASE_URL}${path}`, { ...options, headers })
+     |                     ^
+  35 |
+  36 |   if (res.status === 401 && retry) {
+  37 |     const newToken = await refreshAccessToken() (app/jobs/page.tsx:55:15)
+[browser] 커리큘럼 로드 실패: TypeError: Failed to fetch
+    at apiRequest (lib/api-client.ts:34:21)
+    at Object.get (lib/api-client.ts:59:5)
+    at CurriculumPage.useEffect.load (app/curriculum/page.tsx:53:33)
+    at CurriculumPage.useEffect (app/curriculum/page.tsx:72:5)
+  32 |   if (token) headers["Authorization"] = `Bearer ${token}`
+  33 |
+> 34 |   const res = await fetch(`${BASE_URL}${path}`, { ...options, headers })
+     |                     ^
+  35 |
+  36 |   if (res.status === 401 && retry) {
+  37 |     const newToken = await refreshAccessToken() (app/curriculum/page.tsx:67:17)
