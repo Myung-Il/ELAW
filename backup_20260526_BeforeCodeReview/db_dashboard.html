@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>ELAW DB 대시보드</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+
+  .header { background: linear-gradient(135deg, #1a1f2e, #2d3748); padding: 24px 32px; border-bottom: 1px solid #2d3748; display: flex; align-items: center; gap: 16px; }
+  .header h1 { font-size: 22px; font-weight: 700; color: #63b3ed; }
+  .header .subtitle { font-size: 13px; color: #718096; }
+  .badge { background: #2b6cb0; color: #bee3f8; padding: 3px 10px; border-radius: 12px; font-size: 12px; }
+
+  .toolbar { padding: 16px 32px; background: #1a1f2e; border-bottom: 1px solid #2d3748; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .server-input { background: #2d3748; border: 1px solid #4a5568; color: #e2e8f0; padding: 8px 14px; border-radius: 8px; font-size: 13px; width: 260px; }
+  .btn { padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .2s; }
+  .btn-primary { background: #3182ce; color: white; }
+  .btn-primary:hover { background: #2b6cb0; }
+  .btn-success { background: #38a169; color: white; }
+  .btn-success:hover { background: #2f855a; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .dot-green { background: #48bb78; box-shadow: 0 0 6px #48bb78; }
+  .dot-red { background: #fc8181; }
+  .status-text { font-size: 13px; }
+
+  .layout { display: flex; height: calc(100vh - 130px); }
+
+  /* 사이드바 */
+  .sidebar { width: 220px; background: #1a1f2e; border-right: 1px solid #2d3748; overflow-y: auto; flex-shrink: 0; }
+  .sidebar-title { padding: 14px 16px 8px; font-size: 11px; color: #718096; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .table-item { padding: 9px 16px; cursor: pointer; font-size: 13px; border-left: 3px solid transparent; display: flex; justify-content: space-between; align-items: center; transition: all .15s; }
+  .table-item:hover { background: #2d3748; border-left-color: #4a5568; }
+  .table-item.active { background: #2a4365; border-left-color: #63b3ed; color: #63b3ed; }
+  .row-count { background: #2d3748; color: #a0aec0; padding: 2px 7px; border-radius: 10px; font-size: 11px; }
+  .table-item.active .row-count { background: #2b6cb0; color: #bee3f8; }
+
+  /* 메인 */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .main-header { padding: 16px 24px; background: #1a1f2e; border-bottom: 1px solid #2d3748; display: flex; align-items: center; gap: 12px; }
+  .table-name { font-size: 16px; font-weight: 700; color: #f7fafc; }
+  .col-count { color: #718096; font-size: 13px; }
+
+  .search-bar { margin-left: auto; background: #2d3748; border: 1px solid #4a5568; color: #e2e8f0; padding: 6px 12px; border-radius: 6px; font-size: 13px; width: 220px; }
+
+  .table-wrap { flex: 1; overflow: auto; padding: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { position: sticky; top: 0; background: #2d3748; color: #a0aec0; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid #4a5568; white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid #1e2533; transition: background .1s; }
+  tbody tr:hover { background: #1e2533; }
+  tbody td { padding: 9px 14px; color: #e2e8f0; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  td.null { color: #4a5568; font-style: italic; }
+  td.json-cell { color: #68d391; cursor: pointer; }
+  td.json-cell:hover { text-decoration: underline; }
+
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin: 1px; }
+  .tag-student { background: #2a4365; color: #90cdf4; }
+  .tag-company { background: #22543d; color: #9ae6b4; }
+  .tag-admin   { background: #44337a; color: #d6bcfa; }
+  .tag-solved  { background: #22543d; color: #9ae6b4; }
+  .tag-failed  { background: #742a2a; color: #feb2b2; }
+  .tag-active  { background: #22543d; color: #9ae6b4; }
+  .tag-inactive{ background: #4a5568; color: #a0aec0; }
+
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; color: #4a5568; gap: 12px; }
+  .empty-state .icon { font-size: 48px; }
+
+  .stats-bar { padding: 12px 24px; background: #1a1f2e; border-top: 1px solid #2d3748; display: flex; gap: 24px; }
+  .stat-item { font-size: 12px; color: #718096; }
+  .stat-item span { color: #a0aec0; font-weight: 600; }
+
+  /* JSON 모달 */
+  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 100; align-items: center; justify-content: center; }
+  .modal.show { display: flex; }
+  .modal-box { background: #1a1f2e; border: 1px solid #4a5568; border-radius: 12px; padding: 24px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }
+  .modal-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #63b3ed; }
+  .modal-body { background: #0f1117; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 12px; color: #68d391; white-space: pre-wrap; line-height: 1.6; }
+  .modal-close { float: right; cursor: pointer; color: #718096; font-size: 18px; }
+
+  .loading { display: flex; align-items: center; justify-content: center; height: 200px; color: #718096; gap: 10px; }
+  .spinner { width: 20px; height: 20px; border: 2px solid #4a5568; border-top-color: #63b3ed; border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .token-input { background: #2d3748; border: 1px solid #4a5568; color: #e2e8f0; padding: 8px 14px; border-radius: 8px; font-size: 13px; width: 200px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🗄️ ELAW DB 대시보드</h1>
+    <div class="subtitle">12개 테이블 · 릴레이션 인스턴스 뷰어</div>
+  </div>
+  <span class="badge" id="total-badge">로딩 중...</span>
+</div>
+
+<div class="toolbar">
+  <input class="server-input" id="server-url" value="http://127.0.0.1:8000" placeholder="서버 주소">
+  <input class="token-input" id="auth-token" placeholder="JWT access 토큰 붙여넣기">
+  <button class="btn btn-primary" onclick="connectAndLoad()">🔌 연결 & 불러오기</button>
+  <span class="status-dot dot-red" id="status-dot"></span>
+  <span class="status-text" id="status-text">연결 안 됨</span>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-title">테이블 목록</div>
+    <div id="table-list"></div>
+  </div>
+  <div class="main">
+    <div class="main-header">
+      <div>
+        <span class="table-name" id="current-table">테이블을 선택하세요</span>
+        <span class="col-count" id="col-info"></span>
+      </div>
+      <input class="search-bar" id="search-input" placeholder="🔍 검색..." oninput="filterRows()" style="display:none">
+    </div>
+    <div class="table-wrap" id="table-wrap">
+      <div class="empty-state">
+        <div class="icon">🔌</div>
+        <div>서버에 연결하고 JWT 토큰을 입력하세요</div>
+        <div style="font-size:12px;color:#4a5568">로그인 후 응답의 "access" 값을 붙여넣으세요</div>
+      </div>
+    </div>
+    <div class="stats-bar" id="stats-bar" style="display:none">
+      <div class="stat-item">행 수: <span id="stat-rows">0</span></div>
+      <div class="stat-item">열 수: <span id="stat-cols">0</span></div>
+      <div class="stat-item">표시: <span id="stat-shown">0</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="json-modal" onclick="closeModal(event)">
+  <div class="modal-box">
+    <span class="modal-close" onclick="document.getElementById('json-modal').classList.remove('show')">✕</span>
+    <div class="modal-title" id="modal-title">JSON 내용</div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ─── 테이블 정의 (12개) ───────────────────────────────────────────────
+const TABLES = [
+  { name: 'core_user',          label: 'users',          api: '/api/db/users/' },
+  { name: 'core_company',       label: 'companies',      api: '/api/db/companies/' },
+  { name: 'core_platformlink',  label: 'platform_links', api: '/api/db/platform-links/' },
+  { name: 'core_usergoal',      label: 'user_goals',     api: '/api/db/user-goals/' },
+  { name: 'core_curriculum',    label: 'curricula',      api: '/api/db/curricula/' },
+  { name: 'core_solvehistory',  label: 'solve_history',  api: '/api/db/solve-history/' },
+  { name: 'core_learningstats', label: 'learning_stats', api: '/api/db/learning-stats/' },
+  { name: 'core_portfolio',     label: 'portfolios',     api: '/api/db/portfolios/' },
+  { name: 'core_jobposting',    label: 'job_postings',   api: '/api/db/job-postings/' },
+  { name: 'core_match',         label: 'matches',        api: '/api/db/matches/' },
+  { name: 'core_post',          label: 'posts',          api: '/api/db/posts/' },
+  { name: 'core_ailog',         label: 'ai_logs',        api: '/api/db/ai-logs/' },
+];
+
+let currentData   = [];
+let currentTable  = null;
+let serverUrl     = 'http://127.0.0.1:8000';
+let authToken     = '';
+let tableCounts   = {};
+
+// ─── 연결 & 전체 로드 ─────────────────────────────────────────────────
+async function connectAndLoad() {
+  serverUrl = document.getElementById('server-url').value.replace(/\/$/, '');
+  authToken = document.getElementById('auth-token').value.trim();
+
+  setStatus('연결 중...', false);
+  showLoading();
+
+  // 연결 테스트
+  try {
+    const r = await apiFetch('/api/accounts/platform/status/');
+    if (!r.ok && r.status === 401) {
+      setStatus('토큰 오류 — 다시 로그인해주세요', false);
+      return;
+    }
+    setStatus('연결됨', true);
+  } catch(e) {
+    setStatus('서버에 연결할 수 없습니다', false);
+    showError('서버가 실행 중인지 확인해주세요.\n python manage.py runserver');
+    return;
+  }
+
+  // 사이드바 렌더
+  renderSidebar();
+
+  // 첫 번째 테이블 자동 선택
+  loadTable(TABLES[0]);
+}
+
+function renderSidebar() {
+  const list = document.getElementById('table-list');
+  list.innerHTML = TABLES.map((t,i) => `
+    <div class="table-item" id="tab-${i}" onclick="loadTable(TABLES[${i}], ${i})">
+      <span>${t.label}</span>
+      <span class="row-count" id="cnt-${i}">-</span>
+    </div>
+  `).join('');
+}
+
+async function loadTable(table, idx) {
+  currentTable = table;
+  document.querySelectorAll('.table-item').forEach(el => el.classList.remove('active'));
+  if (idx !== undefined) document.getElementById(`tab-${idx}`)?.classList.add('active');
+
+  document.getElementById('current-table').textContent = table.label;
+  document.getElementById('search-input').style.display = 'block';
+  document.getElementById('stats-bar').style.display    = 'flex';
+  document.getElementById('search-input').value = '';
+  showLoading();
+
+  // 실제 API가 없으면 mock 데이터 사용
+  let data = await fetchTableData(table);
+  currentData = data;
+
+  renderTable(data);
+  updateStats(data, data);
+
+  // 사이드바 카운트 업데이트
+  if (idx !== undefined) {
+    document.getElementById(`cnt-${idx}`).textContent = data.length;
+  }
+  document.getElementById('total-badge').textContent =
+    `총 ${Object.keys(tableCounts).reduce((a,b)=>a + (tableCounts[b]||0), data.length)} rows`;
+}
+
+async function fetchTableData(table) {
+  try {
+    const r = await apiFetch(table.api);
+    if (r.ok) {
+      const json = await r.json();
+      return Array.isArray(json) ? json : (json.results || json.data || [json]);
+    }
+  } catch(e) {}
+  // API 없으면 mock 반환
+  return getMockData(table.label);
+}
+
+function apiFetch(path) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+  return fetch(serverUrl + path, { headers });
+}
+
+// ─── 테이블 렌더 ────────────────────────────────────────────────────────
+function renderTable(data) {
+  const wrap = document.getElementById('table-wrap');
+  if (!data || data.length === 0) {
+    wrap.innerHTML = `<div class="empty-state"><div class="icon">📭</div><div>데이터가 없습니다</div></div>`;
+    return;
+  }
+
+  const cols = Object.keys(data[0]);
+  document.getElementById('col-info').textContent = ` · ${cols.length}개 열`;
+
+  const thead = `<thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>`;
+  const tbody = `<tbody>${data.map(row => `<tr>${cols.map(col => renderCell(col, row[col])).join('')}</tr>`).join('')}</tbody>`;
+  wrap.innerHTML = `<table>${thead}${tbody}</table>`;
+}
+
+function renderCell(col, val) {
+  if (val === null || val === undefined)
+    return `<td class="null">NULL</td>`;
+
+  if (typeof val === 'object')
+    return `<td class="json-cell" onclick="showJson('${col}', this)" data-json='${JSON.stringify(val).replace(/'/g,"&#39;")}'>[JSON 보기]</td>`;
+
+  if (col === 'role')
+    return `<td><span class="tag tag-${val}">${val}</span></td>`;
+  if (col === 'status' && (val === 'solved' || val === 'failed'))
+    return `<td><span class="tag tag-${val}">${val}</span></td>`;
+  if (col === 'is_active' || col === 'is_approved' || col === 'is_public')
+    return `<td><span class="tag ${val ? 'tag-active' : 'tag-inactive'}">${val ? '✓ 활성' : '✗ 비활성'}</span></td>`;
+
+  const str = String(val);
+  return `<td title="${str}">${str.length > 60 ? str.slice(0,60)+'…' : str}</td>`;
+}
+
+// ─── 검색 ───────────────────────────────────────────────────────────────
+function filterRows() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const filtered = q
+    ? currentData.filter(row => JSON.stringify(row).toLowerCase().includes(q))
+    : currentData;
+  renderTable(filtered);
+  updateStats(currentData, filtered);
+}
+
+function updateStats(all, shown) {
+  document.getElementById('stat-rows').textContent  = all.length;
+  document.getElementById('stat-cols').textContent  =
+    all.length ? Object.keys(all[0]).length : 0;
+  document.getElementById('stat-shown').textContent = shown.length;
+}
+
+// ─── JSON 모달 ─────────────────────────────────────────────────────────
+function showJson(col, el) {
+  const raw  = el.getAttribute('data-json');
+  const parsed = JSON.parse(raw);
+  document.getElementById('modal-title').textContent = col + ' (JSON)';
+  document.getElementById('modal-body').textContent  = JSON.stringify(parsed, null, 2);
+  document.getElementById('json-modal').classList.add('show');
+}
+function closeModal(e) {
+  if (e.target.id === 'json-modal')
+    document.getElementById('json-modal').classList.remove('show');
+}
+
+// ─── UI 헬퍼 ─────────────────────────────────────────────────────────────
+function setStatus(msg, ok) {
+  document.getElementById('status-dot').className = `status-dot ${ok ? 'dot-green' : 'dot-red'}`;
+  document.getElementById('status-text').textContent = msg;
+}
+function showLoading() {
+  document.getElementById('table-wrap').innerHTML =
+    `<div class="loading"><div class="spinner"></div>불러오는 중...</div>`;
+}
+function showError(msg) {
+  document.getElementById('table-wrap').innerHTML =
+    `<div class="empty-state"><div class="icon">⚠️</div><div style="color:#fc8181">${msg}</div></div>`;
+}
+
+// ─── Mock 데이터 (API 없을 때) ────────────────────────────────────────────
+function getMockData(label) {
+  const mockMap = {
+    users: [
+      {id:1,email:"minjun.kim@elaw.kr",name:"김민준",role:"student",is_active:true,created_at:"2026-03-01"},
+      {id:2,email:"seoyeon.lee@elaw.kr",name:"이서연",role:"student",is_active:true,created_at:"2026-03-02"},
+      {id:3,email:"jiho.park@elaw.kr",name:"박지호",role:"student",is_active:true,created_at:"2026-03-03"},
+      {id:4,email:"sua.choi@elaw.kr",name:"최수아",role:"student",is_active:true,created_at:"2026-03-04"},
+      {id:5,email:"doyun.jung@elaw.kr",name:"정도윤",role:"student",is_active:true,created_at:"2026-03-05"},
+      {id:6,email:"haeun.kang@elaw.kr",name:"강하은",role:"student",is_active:true,created_at:"2026-03-06"},
+      {id:7,email:"jaewon.yoon@elaw.kr",name:"윤재원",role:"student",is_active:true,created_at:"2026-03-07"},
+      {id:8,email:"soyul.lim@elaw.kr",name:"임소율",role:"student",is_active:true,created_at:"2026-03-08"},
+      {id:9,email:"junseo.han@elaw.kr",name:"한준서",role:"student",is_active:true,created_at:"2026-03-09"},
+      {id:10,email:"seonghwan.oh@elaw.kr",name:"오성환",role:"student",is_active:true,created_at:"2026-03-10"},
+      {id:11,email:"recruit@kakao.elaw.kr",name:"카카오 채용팀",role:"company",is_active:true,created_at:"2026-03-01"},
+      {id:12,email:"hr@naver.elaw.kr",name:"네이버 인사팀",role:"company",is_active:true,created_at:"2026-03-01"},
+      {id:13,email:"recruit@line.elaw.kr",name:"라인 채용팀",role:"company",is_active:true,created_at:"2026-03-01"},
+      {id:14,email:"admin1@elaw.kr",name:"관리자1",role:"admin",is_active:true,created_at:"2026-03-01"},
+      {id:15,email:"admin2@elaw.kr",name:"관리자2",role:"admin",is_active:true,created_at:"2026-03-01"},
+    ],
+    companies: [
+      {id:1,user_id:11,name:"카카오",industry:"IT/플랫폼",is_approved:true,website_url:"https://kakao.com"},
+      {id:2,user_id:12,name:"네이버",industry:"IT/검색",is_approved:true,website_url:"https://naver.com"},
+      {id:3,user_id:13,name:"라인",industry:"IT/글로벌",is_approved:true,website_url:"https://linecorp.com"},
+    ],
+    platform_links: Array.from({length:20},(_,i)=>({
+      id:i+1,user_id:(i<10?i+1:i-9),
+      platform:i<10?"baekjoon":"github",
+      external_id:i<10?`bj_user${i+1}`:`github-user${i-9}`,
+      is_active:true,
+      last_synced:"2026-03-26T12:00:00Z",
+    })),
+    user_goals: Array.from({length:10},(_,i)=>({
+      id:i+1,user_id:i+1,goal_type:"job",
+      field:["백엔드","프론트엔드","AI/ML","데이터분석","풀스택"][i%5],
+      job_role:["백엔드 개발자","프론트엔드 개발자","AI 엔지니어","데이터 분석가","풀스택 개발자"][i%5],
+      duration_weeks:16,is_active:true,
+    })),
+    curricula: Array.from({length:10},(_,i)=>({
+      id:i+1,user_id:i+1,goal_id:i+1,version:1,is_active:true,
+      content_json:{total_weeks:8,field:"백엔드",weeks:[{week:1,theme:"기초 개념"}]},
+      generated_at:"2026-03-10T09:00:00Z",
+    })),
+    solve_history: Array.from({length:30},(_,i)=>({
+      id:i+1,user_id:(i%10)+1,platform:"baekjoon",
+      problem_id:String(1000+i),problem_title:`문제 ${1000+i}`,
+      status:i%7===0?"failed":"solved",
+      language:["Python","Java","C++","JavaScript"][i%4],
+      algo_tags:["구현","DP","그래프","정렬"][i%4],
+      difficulty:["Bronze5","Silver3","Gold4"][i%3],
+      solved_at:`2026-03-${String((i%26)+1).padStart(2,'0')}T10:00:00Z`,
+    })),
+    learning_stats: Array.from({length:20},(_,i)=>({
+      id:i+1,user_id:(i%10)+1,
+      stat_type:i%2===0?"language":"algo_tag",
+      stat_key:i%2===0?["Python","Java","C++"][i%3]:["구현","DP","그래프","정렬"][i%4],
+      total_count:20+i,solved_count:18+Math.floor(i/2),
+      correct_rate:85+i%10,
+    })),
+    portfolios: Array.from({length:10},(_,i)=>({
+      id:i+1,user_id:i+1,
+      title:`${["김민준","이서연","박지호","최수아","정도윤","강하은","윤재원","임소율","한준서","오성환"][i]}의 포트폴리오`,
+      is_public:true,version:1,language:"ko",
+      public_slug:`slug${i+1}`,
+    })),
+    job_postings: [
+      {id:1,company_id:1,title:"백엔드 개발자 (Python/Django)",career_level:"new",is_active:true,required_skills:["Python","Django","MySQL"]},
+      {id:2,company_id:1,title:"프론트엔드 개발자 (React)",career_level:"new",is_active:true,required_skills:["JavaScript","React"]},
+      {id:3,company_id:2,title:"AI 엔지니어",career_level:"junior",is_active:true,required_skills:["Python","PyTorch","ML"]},
+      {id:4,company_id:2,title:"데이터 분석가",career_level:"any",is_active:true,required_skills:["Python","SQL","Pandas"]},
+      {id:5,company_id:3,title:"풀스택 개발자",career_level:"junior",is_active:true,required_skills:["Python","JavaScript","React","Django"]},
+      {id:6,company_id:3,title:"서버 개발자 (Java)",career_level:"junior",is_active:true,required_skills:["Java","Spring","MySQL"]},
+    ],
+    matches: Array.from({length:20},(_,i)=>({
+      id:i+1,user_id:(i%10)+1,posting_id:(i%6)+1,
+      match_score:Math.round(40+Math.random()*55),
+      status:["recommended","viewed","scrapped","applied"][i%4],
+      created_at:`2026-03-${String((i%26)+1).padStart(2,'0')}T09:00:00Z`,
+    })),
+    posts: [
+      {id:1,author_id:14,category:"notice",title:"ELAW 플랫폼 오픈 안내",is_pinned:true,view_count:152},
+      {id:2,author_id:14,category:"contest",title:"2026 상반기 코딩테스트 일정",is_pinned:false,view_count:89},
+      {id:3,author_id:15,category:"notice",title:"시스템 점검 안내 (3/30)",is_pinned:true,view_count:64},
+      {id:4,author_id:14,category:"event",title:"신규 가입 이벤트",is_pinned:false,view_count:201},
+      {id:5,author_id:15,category:"contest",title:"카카오 2026 공채 일정 안내",is_pinned:false,view_count:177},
+    ],
+    ai_logs: Array.from({length:10},(_,i)=>({
+      id:i+1,user_id:(i%5)+1,
+      feature:["curriculum","weakness","recommendation","portfolio","matching"][i%5],
+      prompt_tokens:200+i*50,output_tokens:100+i*30,
+      latency_ms:800+i*200,status:"success",
+    })),
+  };
+  return mockMap[label] || [];
+}
+</script>
+</body>
+</html>

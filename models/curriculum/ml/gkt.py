@@ -19,28 +19,34 @@ class GKT:
             dependency_graph: LearningPath의 dependency_graph
                               {"nodes": [...], "edges": [...]}
         """
-        self._responses         = responses
-        self._dependency_graph  = dependency_graph
-        self._node_mastery      = self._build_node_mastery()
-        self._weak_nodes        = self._build_weak_nodes()
+        self._responses        = responses
+        self._dependency_graph = dependency_graph
+        self._category_stats   = self._build_category_stats()
+        self._node_mastery     = self._build_node_mastery()
+        self._weak_nodes       = self._build_weak_nodes()
+
+    # ─────────────────────────────────────────
+    # 내부: 카테고리별 통계 초기 계산 (증분 업데이트용)
+    # ─────────────────────────────────────────
+    def _build_category_stats(self) -> dict:
+        stats = {}
+        for r in self._responses:
+            cat = r["category"]
+            if cat not in stats:
+                stats[cat] = {"total": 0, "correct": 0}
+            stats[cat]["total"] += 1
+            if r["is_correct"]:
+                stats[cat]["correct"] += 1
+        return stats
 
     # ─────────────────────────────────────────
     # 내부: 노드별 숙련도 계산
     #       정답률 기반으로 각 카테고리 숙련도 0~1
     # ─────────────────────────────────────────
     def _build_node_mastery(self) -> dict:
-        category_stats = {}
-        for r in self._responses:
-            cat = r["category"]
-            if cat not in category_stats:
-                category_stats[cat] = {"total": 0, "correct": 0}
-            category_stats[cat]["total"] += 1
-            if r["is_correct"]:
-                category_stats[cat]["correct"] += 1
-
         return {
             cat: stats["correct"] / stats["total"]
-            for cat, stats in category_stats.items()
+            for cat, stats in self._category_stats.items()
         }
 
     # ─────────────────────────────────────────
@@ -61,6 +67,31 @@ class GKT:
                 weak_nodes.add(edge["Preceding_ID"])
 
         return weak_nodes
+
+    # ─────────────────────────────────────────
+    # 공개: 새 응답 1건 증분 반영 (O(edges))
+    # ─────────────────────────────────────────
+    def update(self, response: dict) -> None:
+        cat = response["category"]
+        qid = response["question_id"]
+
+        # 카테고리 통계 + 숙련도 증분 갱신
+        if cat not in self._category_stats:
+            self._category_stats[cat] = {"total": 0, "correct": 0}
+        self._category_stats[cat]["total"] += 1
+        if response["is_correct"]:
+            self._category_stats[cat]["correct"] += 1
+        self._node_mastery[cat] = (
+            self._category_stats[cat]["correct"]
+            / self._category_stats[cat]["total"]
+        )
+
+        # 오답이면 취약 노드 + 선행 노드 추가
+        if not response["is_correct"]:
+            self._weak_nodes.add(qid)
+            for edge in self._dependency_graph.get("edges", []):
+                if edge["Target_ID"] == qid:
+                    self._weak_nodes.add(edge["Preceding_ID"])
 
     # ─────────────────────────────────────────
     # 공개: 문제별 미래 취약 가능성 점수 반환 (0~1)

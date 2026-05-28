@@ -1,5 +1,3 @@
-// 목표 설정 페이지 - 최초 로그인 시에만 진행
-// 희망 직무와 공부 분야를 선택하고 커리큘럼 기반을 잡는 단계
 "use client"
 
 import { useState } from "react"
@@ -9,40 +7,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { GraduationCap, Sparkles, CheckCircle2, Loader2, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-// ─── 희망 직무 목록 ────────────────────────────────────────────────────────
-// [FE 수정 매뉴얼] job_fields 배열은 API로 가져올 수도 있음
-// [BE 매뉴얼] GET /api/v1/job-fields → [{ id, name, description, icon }]
-// [DB 매뉴얼] JobFields 테이블: id, name, description, icon_emoji
-const jobFields = [
-  { id: "software", name: "소프트웨어 개발", description: "백엔드/프론트엔드/앱 개발", icon: "💻" },
-  { id: "data", name: "데이터 사이언스", description: "ML/AI/데이터 분석", icon: "📊" },
-  { id: "embedded", name: "임베디드 시스템", description: "펌웨어/하드웨어 개발", icon: "⚙️" },
-  { id: "network", name: "네트워크/보안", description: "인프라/클라우드/보안", icon: "🔒" },
-  { id: "semiconductor", name: "반도체/회로", description: "IC 설계/검증", icon: "⚡" },
-  { id: "mechanical", name: "기계/로봇", description: "자동화/로보틱스 설계", icon: "🦾" },
-  { id: "chemical", name: "화학/소재", description: "화학공정/소재 연구", icon: "🧪" },
-  { id: "civil", name: "건설/건축", description: "건축 설계/시공 관리", icon: "🏗️" },
-]
-
-// ─── 공부 분야 목록 ────────────────────────────────────────────────────────
-// [FE 수정 매뉴얼] study_topics는 API로 가져올 수 있음
-// [BE 매뉴얼] GET /api/v1/study-topics → [{ id, name, category, difficulty }]
-// [DB 매뉴얼] StudyTopics 테이블: id, name, category, difficulty, created_at
-const studyTopics = [
-  { id: "algo", name: "알고리즘", category: "CS 기초", difficulty: "중" },
-  { id: "ds", name: "자료구조", category: "CS 기초", difficulty: "중" },
-  { id: "os", name: "운영체제", category: "CS 기초", difficulty: "상" },
-  { id: "db", name: "데이터베이스", category: "CS 기초", difficulty: "중" },
-  { id: "network", name: "컴퓨터 네트워크", category: "CS 기초", difficulty: "중" },
-  { id: "web-fe", name: "웹 프론트엔드", category: "개발", difficulty: "중" },
-  { id: "web-be", name: "웹 백엔드", category: "개발", difficulty: "중" },
-  { id: "ml", name: "머신러닝/딥러닝", category: "AI/데이터", difficulty: "상" },
-  { id: "coding-test", name: "코딩 테스트", category: "취업 준비", difficulty: "중" },
-  { id: "cs-interview", name: "CS 면접 준비", category: "취업 준비", difficulty: "중" },
-  { id: "portfolio", name: "포트폴리오 구성", category: "취업 준비", difficulty: "하" },
-  { id: "docker", name: "Docker/클라우드", category: "인프라", difficulty: "중" },
-]
+import { api } from "@/lib/api-client"
+import { jobFields, studyTopics, jobTopicMap } from "@/lib/study-topics"
 
 // 단계 인디케이터 컴포넌트
 function StepIndicator({ step, currentStep }: { step: number; currentStep: number }) {
@@ -78,33 +44,37 @@ export default function GoalSettingPage() {
     )
   }
 
-  // 목표 설정 완료 제출
-  // [BE 매뉴얼] POST /api/v1/users/goals
-  //   Request: { job_field: string, study_topics: string[] }
-  //   Response: { success: true, curriculum_id: number }
-  // [DB 매뉴얼] UserGoals 테이블: user_id, job_field_id, is_first_setup
-  //             UserStudyTopics 테이블: user_id, topic_id
   const handleComplete = async () => {
     if (!selectedJob) return
+    const jobField = jobFields.find((j) => j.id === selectedJob)
+    const topicNames = (selectedTopics
+      .map((id) => studyTopics.find((t) => t.id === id)?.name)
+      .filter(Boolean)) as string[]
+    const field = topicNames.length > 0
+      ? `${jobField?.description ?? selectedJob} (관심 분야: ${topicNames.join(", ")})`
+      : jobField?.description ?? selectedJob
     setIsLoading(true)
     try {
-      // TODO: 실제 API 호출로 교체
-      // await fetch("/api/v1/users/goals", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      //   body: JSON.stringify({ job_field: selectedJob, study_topics: selectedTopics }),
-      // })
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await api.post("/api/core/goals/", {
+        job_role: jobField?.name ?? selectedJob,
+        field,
+        duration_weeks: 8,
+        topics: topicNames,
+      })
       router.push("/home")
     } catch (err) {
       console.error("목표 설정 실패:", err)
+      alert(err instanceof Error ? err.message : "목표 설정에 실패했습니다.")
     } finally {
       setIsLoading(false)
     }
   }
 
-  // 주제별 그룹핑
-  const topicCategories = [...new Set(studyTopics.map((t) => t.category))]
+  // 선택한 직무에 맞는 공부 분야 필터링
+  const filteredTopics = selectedJob
+    ? studyTopics.filter((t) => jobTopicMap[selectedJob]?.includes(t.id))
+    : studyTopics
+  const topicCategories = [...new Set(filteredTopics.map((t) => t.category))]
 
   return (
     <div className="min-h-screen bg-background">
@@ -180,7 +150,7 @@ export default function GoalSettingPage() {
               <Button
                 size="lg"
                 disabled={!selectedJob}
-                onClick={() => setStep(2)}
+                onClick={() => { setSelectedTopics([]); setStep(2) }}
                 className="gap-2"
               >
                 다음 단계
@@ -200,6 +170,20 @@ export default function GoalSettingPage() {
               </p>
             </div>
 
+            {/* 선택한 직무 표시 */}
+            {selectedJob && (() => {
+              const job = jobFields.find((j) => j.id === selectedJob)
+              return (
+                <div className="flex items-center gap-2 rounded-lg bg-primary/5 border border-primary/20 px-4 py-2.5">
+                  <span className="text-lg">{job?.icon}</span>
+                  <div>
+                    <span className="text-sm font-semibold text-primary">{job?.name}</span>
+                    <span className="text-xs text-muted-foreground ml-2">에 맞는 공부 분야를 보여드립니다</span>
+                  </div>
+                </div>
+              )
+            })()}
+
             {/* 카테고리별 주제 표시 */}
             <div className="space-y-5">
               {topicCategories.map((category) => (
@@ -208,7 +192,7 @@ export default function GoalSettingPage() {
                     {category}
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {studyTopics
+                    {filteredTopics
                       .filter((t) => t.category === category)
                       .map((topic) => {
                         const isSelected = selectedTopics.includes(topic.id)
@@ -251,7 +235,7 @@ export default function GoalSettingPage() {
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedTopics.map((id) => {
-                    const topic = studyTopics.find((t) => t.id === id)
+                    const topic = filteredTopics.find((t) => t.id === id)
                     return (
                       <Badge key={id} variant="secondary" className="text-xs">
                         {topic?.name}
