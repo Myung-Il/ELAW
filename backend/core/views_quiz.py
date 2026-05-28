@@ -15,13 +15,13 @@ Django session(DB)으로 퀴즈 상태 유지
 import sys
 import os
 
-# 프로젝트 루트 + models/curriculum 을 sys.path에 추가
-# recommend.py가 'from ml.gkt import GKT' 형태로 임포트하므로 curriculum 디렉터리도 필요
+# 프로젝트 루트 및 models/curriculum 을 sys.path에 추가
 _PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 _CURRICULUM_ROOT = os.path.join(_PROJECT_ROOT, "models", "curriculum")
-for _p in (_PROJECT_ROOT, _CURRICULUM_ROOT):
-    if _p not in sys.path:
-        sys.path.insert(0, _p)
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+if _CURRICULUM_ROOT not in sys.path:
+    sys.path.insert(0, _CURRICULUM_ROOT)
 
 from collections import deque
 
@@ -30,9 +30,37 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
-from .models_problems import JobProblem, ProblemEdge, LearningPathMeta
+# UserGoal.job_role(한글 포함) → JobProblem.job_role(영문) 정규화 매핑
+_ROLE_MAP = {
+    '백엔드 개발자':       'Backend Engineer',
+    '프론트엔드 개발자':   'Frontend Developer',
+    'AI 엔지니어':         'AI Engineer',
+    '데이터 분석가':       'Data Scientist',
+    '데이터 엔지니어':     'Data Engineer',
+    '풀스택 개발자':       'Full Stack Engineer',
+    '풀 스택 개발자':      'Full Stack Engineer',
+    '데브옵스 엔지니어':   'DevOps Engineer',
+    '안드로이드 개발자':   'Mobile App Developer',
+    'iOS 개발자':          'Mobile App Developer',
+    '보안 엔지니어':       'Security Engineer',
+    '임베디드 개발자':     'Embedded Systems Engineer',
+    '머신러닝 연구원':     'Machine Learning Researcher',
+    '게임 개발자':         'Game Developer',
+    '클라우드 엔지니어':   'Cloud Infrastructure Engineer',
+    # 영문 변형 정규화
+    'Backend Developer':   'Backend Engineer',
+    'Frontend Engineer':   'Frontend Developer',
+}
+
+def _normalize_role(job_role: str) -> str:
+    """한글/변형 job_role → JobProblem DB의 영문 job_role로 변환."""
+    return _ROLE_MAP.get(job_role, job_role)
+
+from .models_problems import (
+    JobProblem, ProblemEdge, LearningPathMeta,
+    QuizSession, RecommendSession,
+)
 from .models import UserGoal
-from .models_new import ProblemRecommendation
 
 try:
     from models.curriculum.seedquiz import SeedQuiz
@@ -76,8 +104,8 @@ def _build_dependency_graph(job_role: str) -> dict:
     ]
     edges = [
         {
-            "Preceding_ID":   e.source_problem.original_question_id,
-            "Target_ID":      e.target_problem.original_question_id,
+            "source_id":      e.source_problem.original_question_id,
+            "target_id":      e.target_problem.original_question_id,
             "combined_score": e.combined_score,
         }
         for e in ProblemEdge.objects.filter(
@@ -127,8 +155,7 @@ def _build_ordered_path(job_role: str) -> list:
     return ordered
 
 
-SESSION_KEY = "quiz_session"
-RECOMMEND_KEY = "recommend_session"
+# request.session 대신 DB 모델 사용 — SESSION_KEY/RECOMMEND_KEY 불필요
 
 
 # ─────────────────────────────────────────
@@ -158,7 +185,7 @@ class QuizStartView(APIView):
                     {"error": "활성 목표가 없습니다. 먼저 목표를 설정해주세요."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            job_role = goal.job_role
+            job_role = _normalize_role(goal.job_role)
 
         problems = _build_problems_dict(job_role)
         if not problems:
@@ -170,11 +197,10 @@ class QuizStartView(APIView):
         ordered_path = _build_ordered_path(job_role)
 
         quiz = SeedQuiz(str(request.user.id), problems, ordered_path)
-        request.session[SESSION_KEY] = {
-            "session": quiz.export_session(),
-            "job_role": job_role,
-        }
-        request.session.modified = True
+        QuizSession.objects.update_or_create(
+            user=request.user,
+            defaults={"job_role": job_role, "session_data": quiz.export_session()},
+        )
 
         return Response({
             "job_role": job_role,
@@ -199,8 +225,8 @@ class QuizSubmitView(APIView):
         if not ML_AVAILABLE:
             return Response({"error": "ML 모듈 사용 불가"}, status=503)
 
-        stored = request.session.get(SESSION_KEY)
-        if not stored:
+        qs_obj = QuizSession.objects.filter(user=request.user).first()
+        if not qs_obj:
             return Response({"error": "퀴즈 세션이 없습니다. /quiz/start/ 를 먼저 호출하세요."}, status=400)
 
         index = request.data.get("index")
@@ -208,18 +234,17 @@ class QuizSubmitView(APIView):
         if index is None:
             return Response({"error": "index 필드가 필요합니다."}, status=400)
 
-        job_role = stored["job_role"]
+        job_role = qs_obj.job_role
         problems = _build_problems_dict(job_role)
         ordered_path = _build_ordered_path(job_role)
 
         quiz = SeedQuiz(str(request.user.id), problems, ordered_path)
-        quiz.import_session(stored["session"])
+        quiz.import_session(qs_obj.session_data)
 
         result = quiz.submit(int(index), answer)
 
-        stored["session"] = quiz.export_session()
-        request.session[SESSION_KEY] = stored
-        request.session.modified = True
+        qs_obj.session_data = quiz.export_session()
+        qs_obj.save(update_fields=["session_data", "updated_at"])
 
         return Response({
             **result,
@@ -236,19 +261,18 @@ class QuizProgressView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        stored = request.session.get(SESSION_KEY)
-        if not stored:
-            return Response({"error": "퀴즈 세션이 없습니다."}, status=400)
+        qs_obj = QuizSession.objects.filter(user=request.user).first()
+        if not qs_obj:
+            return Response({"has_session": False})
 
         if not ML_AVAILABLE:
             return Response({"error": "ML 모듈 사용 불가"}, status=503)
 
-        job_role = stored["job_role"]
-        problems = _build_problems_dict(job_role)
-        ordered_path = _build_ordered_path(job_role)
+        problems     = _build_problems_dict(qs_obj.job_role)
+        ordered_path = _build_ordered_path(qs_obj.job_role)
 
         quiz = SeedQuiz(str(request.user.id), problems, ordered_path)
-        quiz.import_session(stored["session"])
+        quiz.import_session(qs_obj.session_data)
 
         return Response(quiz.get_progress())
 
@@ -268,17 +292,17 @@ class QuizCompleteView(APIView):
         if not ML_AVAILABLE:
             return Response({"error": "ML 모듈 사용 불가"}, status=503)
 
-        stored = request.session.get(SESSION_KEY)
-        if not stored:
+        qs_obj = QuizSession.objects.filter(user=request.user).first()
+        if not qs_obj:
             return Response({"error": "퀴즈 세션이 없습니다."}, status=400)
 
-        job_role = stored["job_role"]
-        problems = _build_problems_dict(job_role)
+        job_role     = qs_obj.job_role
+        problems     = _build_problems_dict(job_role)
         ordered_path = _build_ordered_path(job_role)
-        dep_graph = _build_dependency_graph(job_role)
+        dep_graph    = _build_dependency_graph(job_role)
 
         quiz = SeedQuiz(str(request.user.id), problems, ordered_path)
-        quiz.import_session(stored["session"])
+        quiz.import_session(qs_obj.session_data)
         quiz_result = quiz.get_result()
 
         voting = Voting(quiz_result)
@@ -290,40 +314,17 @@ class QuizCompleteView(APIView):
         )
         recommendations = rec.get_recommendations(top_n=5)
 
-        request.session[RECOMMEND_KEY] = {
-            "job_role": job_role,
-            "responses": quiz_result["responses"],
-            "zone": voting.get_zone(),
-            "weights": voting.get_weights(),
-        }
-        request.session.modified = True
-
-        # 추천 결과 DB 저장 (기존 pending 레코드 교체)
-        ProblemRecommendation.objects.filter(
+        RecommendSession.objects.update_or_create(
             user=request.user,
-            platform=ProblemRecommendation.Platform.ELAW,
-            posting__isnull=True,
-            status=ProblemRecommendation.Status.PENDING,
-        ).delete()
-        ProblemRecommendation.objects.bulk_create([
-            ProblemRecommendation(
-                user=request.user,
-                platform=ProblemRecommendation.Platform.ELAW,
-                problem_id=str(r["question_id"]),
-                posting=None,
-                title=(r.get("question") or "")[:300],
-                algo_tags=[r.get("category"), r.get("subcategory")],
-                difficulty=r.get("difficulty", ""),
-                relevance_score=r["scores"]["total"],
-                reason=(
-                    f"GKT:{r['scores']['GKT']:.3f} "
-                    f"SAKT:{r['scores']['SAKT']:.3f} "
-                    f"DKT:{r['scores']['DKT']:.3f}"
-                ),
-                status=ProblemRecommendation.Status.PENDING,
-            )
-            for r in recommendations
-        ])
+            defaults={
+                "job_role":        job_role,
+                "zone":            voting.get_zone(),
+                "weights":         voting.get_weights(),
+                "weak_categories": voting.get_weak_categories(),
+                "responses":       quiz_result["responses"],
+                "recommendations": recommendations,
+            },
+        )
 
         return Response({
             "accuracy": quiz_result["accuracy"],
@@ -338,6 +339,162 @@ class QuizCompleteView(APIView):
 # 5. 추천 문제 풀이 후 업데이트
 # ─────────────────────────────────────────
 
+class ProblemsView(APIView):
+    """GET /api/core/problems/?limit=200&job_role=..."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        limit    = min(int(request.query_params.get('limit', 50)), 500)
+        job_role = request.query_params.get('job_role', '').strip()
+
+        if not job_role:
+            goal = UserGoal.objects.filter(user=request.user, is_active=True).first()
+            job_role = _normalize_role(goal.job_role) if goal else ''
+
+        qs = JobProblem.objects.all()
+        if job_role:
+            qs = qs.filter(job_role=job_role)
+        qs = qs.order_by('original_question_id')[:limit]
+
+        return Response([
+            {
+                'id':              p.id,
+                'question_id':     p.original_question_id,
+                'job_role':        p.job_role,
+                'category':        p.category,
+                'subcategory':     p.subcategory or '',
+                'difficulty':      p.difficulty,
+                'question_type':   p.question_type or '',
+                'skills_required': p.skills_required or [],
+                'question':        p.question,
+                'choices':         p.choices or [],
+            }
+            for p in qs
+        ])
+
+
+class QuizRecommendView(APIView):
+    """GET /api/core/quiz/recommend/"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        rs_obj = RecommendSession.objects.filter(user=request.user).first()
+        if not rs_obj:
+            return Response({'status': 'no_recommend'})
+        return Response({
+            'status':          'has_recommend',
+            'zone':            rs_obj.zone,
+            'weights':         rs_obj.weights,
+            'weak_categories': rs_obj.weak_categories,
+            'recommendations': rs_obj.recommendations,
+        })
+
+
+class QuizQuestionsView(APIView):
+    """GET /api/core/quiz/questions/"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        qs_obj = QuizSession.objects.filter(user=request.user).first()
+        if not qs_obj:
+            return Response({'error': '퀴즈 세션이 없습니다.'}, status=400)
+
+        if not ML_AVAILABLE:
+            return Response({'error': 'ML 모듈 사용 불가'}, status=503)
+
+        problems     = _build_problems_dict(qs_obj.job_role)
+        ordered_path = _build_ordered_path(qs_obj.job_role)
+
+        quiz = SeedQuiz(str(request.user.id), problems, ordered_path)
+        quiz.import_session(qs_obj.session_data)
+
+        return Response({
+            'questions': quiz.get_all_questions(),
+            'total':     len(quiz.get_all_questions()),
+            'progress':  quiz.get_progress(),
+        })
+
+
+class QuizStatsView(APIView):
+    """GET /api/core/quiz/stats/"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from .models_problems import JobProblemSolveHistory
+        from django.db.models import Count
+
+        qs = JobProblemSolveHistory.objects.filter(user=request.user).select_related('problem')
+        total   = qs.count()
+        correct = qs.filter(status='correct').count()
+        accuracy = round(correct / total * 100, 1) if total else 0
+
+        cats = (
+            qs.values('problem__category')
+              .annotate(attempts=Count('id'))
+              .order_by('-attempts')
+        )
+        categories = []
+        for c in cats:
+            cat        = c['problem__category']
+            cat_correct = qs.filter(problem__category=cat, status='correct').count()
+            categories.append({
+                'category': cat,
+                'attempts': c['attempts'],
+                'correct':  cat_correct,
+                'accuracy': round(cat_correct / c['attempts'] * 100, 1) if c['attempts'] else 0,
+            })
+
+        return Response({
+            'total_attempts': total,
+            'correct_count':  correct,
+            'accuracy':       accuracy,
+            'categories':     categories,
+        })
+
+
+class QuizAnswerView(APIView):
+    """POST /api/core/quiz/answer/ — 추천 문제 단독 정답 확인"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        question_id = request.data.get('question_id')
+        answer      = request.data.get('answer', '')
+
+        # job_role 결정: RecommendSession → QuizSession → 활성 목표 순으로 폴백
+        raw_role = (
+            request.data.get('job_role', '').strip()
+            or getattr(RecommendSession.objects.filter(user=request.user).first(), 'job_role', '')
+            or getattr(QuizSession.objects.filter(user=request.user).first(), 'job_role', '')
+            or getattr(UserGoal.objects.filter(user=request.user, is_active=True).first(), 'job_role', '')
+        )
+        job_role = _normalize_role(raw_role)
+
+        qs = JobProblem.objects.filter(original_question_id=question_id)
+        if job_role:
+            qs = qs.filter(job_role=job_role)
+
+        problem = qs.first()
+        if not problem:
+            return Response({'error': '문제를 찾을 수 없습니다.'}, status=404)
+
+        is_correct = (str(answer).strip() == str(problem.correct_answer).strip())
+
+        # 풀이 이력 저장
+        from .models_problems import JobProblemSolveHistory
+        JobProblemSolveHistory.objects.create(
+            user=request.user,
+            problem=problem,
+            status=JobProblemSolveHistory.Status.CORRECT if is_correct else JobProblemSolveHistory.Status.INCORRECT,
+            selected_answer=str(answer),
+        )
+
+        return Response({
+            'is_correct':     is_correct,
+            'correct_answer': problem.correct_answer,
+            'explanation':    problem.explanation or '',
+        })
+
+
 class RecommendUpdateView(APIView):
     """
     POST /api/core/quiz/recommend/update/
@@ -350,81 +507,47 @@ class RecommendUpdateView(APIView):
         if not ML_AVAILABLE:
             return Response({"error": "ML 모듈 사용 불가"}, status=503)
 
-        stored = request.session.get(RECOMMEND_KEY)
-        if not stored:
+        rs_obj = RecommendSession.objects.filter(user=request.user).first()
+        if not rs_obj:
             return Response({"error": "추천 세션이 없습니다. /quiz/complete/ 를 먼저 호출하세요."}, status=400)
 
-        question_id  = request.data.get("question_id")
-        is_correct   = request.data.get("is_correct", False)
-        category     = request.data.get("category", "")
-        subcategory  = request.data.get("subcategory", "")
-        top_n        = int(request.data.get("top_n", 5))
+        question_id = request.data.get("question_id")
+        is_correct  = request.data.get("is_correct", False)
+        category    = request.data.get("category", "")
+        subcategory = request.data.get("subcategory", "")
+        top_n       = int(request.data.get("top_n", 5))
 
-        job_role = stored["job_role"]
-        problems = _build_problems_dict(job_role)
-        dep_graph = _build_dependency_graph(job_role)
+        problems  = _build_problems_dict(rs_obj.job_role)
+        dep_graph = _build_dependency_graph(rs_obj.job_role)
 
-        # Voting 재초기화
+        responses = rs_obj.responses
+        total     = len(responses)
+        correct   = sum(1 for r in responses if r.get("is_correct", False))
         mock_result = {
-            "accuracy": 0,
-            "responses": stored["responses"],
+            "total":     total,
+            "correct":   correct,
+            "accuracy":  correct / total * 100 if total else 0.0,
+            "responses": responses,
         }
         voting = Voting(mock_result)
-        voting.update(is_correct)
+        voting.update(bool(is_correct))
 
         rec = Recommend(
             status=voting.get_status(),
             problems=problems,
-            responses=stored["responses"],
+            responses=rs_obj.responses,
             dependency_graph=dep_graph,
         )
         rec.update(int(question_id), bool(is_correct), category, subcategory)
         recommendations = rec.get_recommendations(top_n=top_n)
 
-        stored["responses"].append({
+        rs_obj.responses = rs_obj.responses + [{
             "question_id": question_id,
-            "is_correct": is_correct,
-            "category": category,
+            "is_correct":  is_correct,
+            "category":    category,
             "subcategory": subcategory,
-        })
-        request.session[RECOMMEND_KEY] = stored
-        request.session.modified = True
-
-        # 풀이한 문제 상태 업데이트
-        new_status = (ProblemRecommendation.Status.SOLVED if is_correct
-                      else ProblemRecommendation.Status.SKIPPED)
-        ProblemRecommendation.objects.filter(
-            user=request.user,
-            platform=ProblemRecommendation.Platform.ELAW,
-            problem_id=str(question_id),
-            posting__isnull=True,
-        ).update(status=new_status)
-
-        # 새 추천 목록 저장 (pending 레코드만 교체)
-        ProblemRecommendation.objects.filter(
-            user=request.user,
-            platform=ProblemRecommendation.Platform.ELAW,
-            posting__isnull=True,
-            status=ProblemRecommendation.Status.PENDING,
-        ).delete()
-        ProblemRecommendation.objects.bulk_create([
-            ProblemRecommendation(
-                user=request.user,
-                platform=ProblemRecommendation.Platform.ELAW,
-                problem_id=str(r["question_id"]),
-                posting=None,
-                title=(r.get("question") or "")[:300],
-                algo_tags=[r.get("category"), r.get("subcategory")],
-                difficulty=r.get("difficulty", ""),
-                relevance_score=r["scores"]["total"],
-                reason=(
-                    f"GKT:{r['scores']['GKT']:.3f} "
-                    f"SAKT:{r['scores']['SAKT']:.3f} "
-                    f"DKT:{r['scores']['DKT']:.3f}"
-                ),
-                status=ProblemRecommendation.Status.PENDING,
-            )
-            for r in recommendations
-        ])
+        }]
+        rs_obj.recommendations = recommendations
+        rs_obj.save(update_fields=["responses", "recommendations", "updated_at"])
 
         return Response({"recommendations": recommendations})

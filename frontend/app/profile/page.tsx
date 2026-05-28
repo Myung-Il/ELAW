@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -72,6 +72,18 @@ const statusConfig: Record<string, { label: string; className: string; icon: typ
 }
 
 export default function ProfilePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <ProfilePageInner />
+    </Suspense>
+  )
+}
+
+function ProfilePageInner() {
   const searchParams = useSearchParams()
   const { logout } = useAuth()
   const initialTab = searchParams.get("tab") || "overview"

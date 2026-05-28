@@ -371,3 +371,47 @@ class JobProblemSolveHistory(models.Model):
             correct_count    = correct,
             avg_correct_rate = rate,
         )
+
+
+# ══════════════════════════════════════════════
+# 6. AI 진단 퀴즈 세션 (DB 저장 — 쿠키 불필요)
+# ══════════════════════════════════════════════
+
+class QuizSession(models.Model):
+    """진단 퀴즈 진행 상태를 유저별로 DB에 저장."""
+    user = models.OneToOneField(
+        'core.User', on_delete=models.CASCADE,
+        related_name='quiz_session'
+    )
+    job_role     = models.CharField(max_length=100)
+    session_data = models.JSONField()
+    created_at   = models.DateTimeField(auto_now_add=True)
+    updated_at   = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'quiz_sessions'
+
+    def __str__(self):
+        return f"{self.user} | {self.job_role}"
+
+
+class RecommendSession(models.Model):
+    """퀴즈 완료 후 추천 결과를 유저별로 DB에 저장."""
+    user            = models.OneToOneField(
+        'core.User', on_delete=models.CASCADE,
+        related_name='recommend_session'
+    )
+    job_role        = models.CharField(max_length=100)
+    zone            = models.CharField(max_length=20)
+    weights         = models.JSONField()
+    weak_categories = models.JSONField()
+    responses       = models.JSONField()
+    recommendations = models.JSONField()
+    created_at      = models.DateTimeField(auto_now_add=True)
+    updated_at      = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'recommend_sessions'
+
+    def __str__(self):
+        return f"{self.user} | {self.job_role} | zone={self.zone}"

@@ -74,12 +74,16 @@ export default function JobDetailPage() {
     if (!job) return
     setIsStudying(true)
     try {
-      // study 엔드포인트로 스크랩 등록 후, goals 엔드포인트로 Curriculum 생성
       await api.post(`/api/jobs/${id}/study/?force=true`)
       await api.post("/api/core/goals/", {
         job_role: job.job_role || job.title,
-        field: job.required_skills.slice(0, 3).join(", ") || job.company.industry || "개발",
+        // field: 핵심 기술 영역 (필수 스킬 전체, 없으면 산업군)
+        field: job.required_skills?.length > 0
+          ? job.required_skills.join(", ")
+          : (job.company.industry || "개발"),
         duration_weeks: 8,
+        required_skills: job.required_skills ?? [],
+        preferred_skills: job.preferred_skills ?? [],
       })
       router.push("/curriculum")
     } catch (err: unknown) {

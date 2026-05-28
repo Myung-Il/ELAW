@@ -5,13 +5,22 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
 import AppHeader from "@/components/layout/app-header"
 import {
-  GraduationCap, Circle, Sparkles,
-  TrendingUp, Trophy, Edit2, BarChart2, Loader2,
+  GraduationCap, CheckCircle2, Sparkles,
+  TrendingUp, Trophy, Edit2, BarChart2, Loader2, BookOpen, Save,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
+import { getTopicsForJobRole, studyTopics as allTopics } from "@/lib/study-topics"
+import type { StudyTopic } from "@/lib/study-topics"
 
 interface CurriculumWeek {
   week: number
@@ -41,11 +50,25 @@ interface CurriculumRecord {
   }
 }
 
+const DIFFICULTY_COLOR: Record<string, string> = {
+  "하": "bg-emerald-100 text-emerald-700",
+  "중": "bg-amber-100 text-amber-700",
+  "상": "bg-rose-100 text-rose-700",
+}
+
 export default function CurriculumPage() {
-  const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [weeks, setWeeks] = useState<CurriculumWeek[]>([])
   const [goal, setGoal] = useState<Goal | null>(null)
+
+  // 주차 선택 상태
+  const [selectedWeeks, setSelectedWeeks] = useState<Set<number>>(new Set())
+
+  // 수정 다이얼로그
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editTopics, setEditTopics] = useState<string[]>([])
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saved" | "error">("idle")
 
   useEffect(() => {
     const load = async () => {
@@ -74,6 +97,60 @@ export default function CurriculumPage() {
 
   const totalProblems = weeks.reduce((s, w) => s + w.recommended_problems.length, 0)
   const totalHours    = weeks.reduce((s, w) => s + w.estimated_hours, 0)
+
+  const toggleWeek = (weekNum: number) => {
+    setSelectedWeeks((prev) => {
+      const next = new Set(prev)
+      next.has(weekNum) ? next.delete(weekNum) : next.add(weekNum)
+      return next
+    })
+  }
+
+  const openEditDialog = () => {
+    setEditTopics([])
+    setDialogOpen(true)
+  }
+
+  const toggleEditTopic = (id: string) => {
+    setEditTopics((prev) =>
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+    )
+  }
+
+  const applyEdit = async () => {
+    if (editTopics.length === 0 || !goal?.curriculum_id) return
+    const names = editTopics.map((id) => allTopics.find((t) => t.id === id)?.name ?? id)
+    const newTheme = names.length === 1 ? names[0] : `${names[0]} 외 ${names.length - 1}개`
+    const newTasks = names.flatMap((n) => [`${n} 개념 학습`, `${n} 실습`])
+
+    const updatedWeeks = weeks.map((w) =>
+      selectedWeeks.has(w.week) ? { ...w, theme: newTheme, tasks: newTasks } : w
+    )
+
+    setWeeks(updatedWeeks)
+    setSelectedWeeks(new Set())
+    setDialogOpen(false)
+
+    setIsSaving(true)
+    setSaveStatus("idle")
+    try {
+      await api.patch(`/api/core/curriculum/${goal.curriculum_id}/`, { weeks: updatedWeeks })
+      setSaveStatus("saved")
+      setTimeout(() => setSaveStatus("idle"), 3000)
+    } catch (err) {
+      console.error("커리큘럼 저장 실패:", err)
+      setSaveStatus("error")
+      setTimeout(() => setSaveStatus("idle"), 4000)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // 현재 직무에 맞는 토픽 (수정 다이얼로그용)
+  const availableTopics: StudyTopic[] = goal?.job_role
+    ? getTopicsForJobRole(goal.job_role)
+    : allTopics
+  const topicCategories = [...new Set(availableTopics.map((t) => t.category))]
 
   if (isLoading) {
     return (
@@ -120,72 +197,129 @@ export default function CurriculumPage() {
               {goal.job_role} 목표 · {weeks.length}주 AI 맞춤 커리큘럼
             </p>
           </div>
-          <Button
-            variant={isEditing ? "default" : "outline"}
-            className="gap-2"
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            <Edit2 className="h-4 w-4" />
-            {isEditing ? "수정 완료" : "커리큘럼 수정"}
-          </Button>
+
+          <div className="flex items-center gap-3">
+            {/* 저장 상태 표시 */}
+            {isSaving && (
+              <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                저장 중...
+              </span>
+            )}
+            {!isSaving && saveStatus === "saved" && (
+              <span className="flex items-center gap-1.5 text-sm text-emerald-600">
+                <Save className="h-3.5 w-3.5" />
+                저장되었습니다
+              </span>
+            )}
+            {!isSaving && saveStatus === "error" && (
+              <span className="text-sm text-destructive">저장 실패 — 다시 시도해주세요</span>
+            )}
+            {selectedWeeks.size > 0 && saveStatus === "idle" && !isSaving && (
+              <span className="text-sm text-muted-foreground">
+                {selectedWeeks.size}개 주차 선택됨
+              </span>
+            )}
+            <Button
+              variant={selectedWeeks.size > 0 ? "default" : "outline"}
+              className="gap-2"
+              disabled={selectedWeeks.size === 0 || isSaving}
+              onClick={openEditDialog}
+            >
+              <Edit2 className="h-4 w-4" />
+              커리큘럼 수정
+            </Button>
+          </div>
         </div>
+
+        {/* 주차 선택 안내 */}
+        {selectedWeeks.size === 0 && (
+          <div className="mb-5 flex items-center gap-2 rounded-lg border border-dashed border-primary/30 bg-primary/5 px-4 py-2.5 text-sm text-muted-foreground">
+            <BookOpen className="h-4 w-4 text-primary/60 flex-shrink-0" />
+            수정하고 싶은 주차 카드를 클릭해 선택한 후 <span className="font-medium text-foreground">커리큘럼 수정</span> 버튼을 눌러주세요.
+          </div>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-3">
           {/* ── 좌측: 주간 커리큘럼 목록 ────────────────────── */}
-          <div className="lg:col-span-2 space-y-4">
-            {weeks.map((week) => (
-              <Card key={week.week} className="shadow-sm transition-all hover:border-primary/50">
-                <CardContent className="p-5">
-                  <div className="flex items-start gap-4">
-                    <div className="flex flex-col items-center gap-1 flex-shrink-0 w-10">
-                      <Circle className="h-6 w-6 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground font-medium">{week.week}주</span>
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
-                        <h3 className="font-semibold">{week.theme}</h3>
-                        <Badge variant="secondary" className="text-xs">
-                          {week.week}주차
-                        </Badge>
+          <div className="lg:col-span-2 space-y-3">
+            {weeks.map((week) => {
+              const isSelected = selectedWeeks.has(week.week)
+              return (
+                <Card
+                  key={week.week}
+                  onClick={() => toggleWeek(week.week)}
+                  className={cn(
+                    "cursor-pointer shadow-sm transition-all select-none",
+                    isSelected
+                      ? "border-primary bg-primary/5 ring-1 ring-primary shadow-md"
+                      : "hover:border-primary/50 hover:shadow-md"
+                  )}
+                >
+                  <CardContent className="p-5">
+                    <div className="flex items-start gap-4">
+                      {/* 주차 + 체크박스 */}
+                      <div className="flex flex-col items-center gap-1 flex-shrink-0 w-10">
+                        <div
+                          className={cn(
+                            "flex h-7 w-7 items-center justify-center rounded-full border-2 transition-all",
+                            isSelected
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-muted-foreground/30 text-muted-foreground"
+                          )}
+                        >
+                          {isSelected
+                            ? <CheckCircle2 className="h-4 w-4" />
+                            : <span className="text-xs font-semibold">{week.week}</span>
+                          }
+                        </div>
+                        <span className="text-xs text-muted-foreground">주차</span>
                       </div>
 
-                      <div className="flex flex-wrap gap-1.5 mb-3">
-                        {week.tasks.map((task) => (
-                          <span key={task} className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
-                            {task}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                          <h3 className={cn(
+                            "font-semibold transition-colors",
+                            isSelected && "text-primary"
+                          )}>
+                            {week.theme}
+                          </h3>
+                          <Badge variant="secondary" className="text-xs">
+                            {week.week}주차
+                          </Badge>
+                        </div>
+
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          {week.tasks.map((task) => (
+                            <span
+                              key={task}
+                              className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground"
+                            >
+                              {task}
+                            </span>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Trophy className="h-3 w-3" />
+                            {week.recommended_problems.length}문제
                           </span>
-                        ))}
-                      </div>
-
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Trophy className="h-3 w-3" />
-                          {week.recommended_problems.length}문제
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <GraduationCap className="h-3 w-3" />
-                          예상 {week.estimated_hours}시간
-                        </span>
+                          <span className="flex items-center gap-1">
+                            <GraduationCap className="h-3 w-3" />
+                            예상 {week.estimated_hours}시간
+                          </span>
+                        </div>
                       </div>
                     </div>
-
-                    {isEditing && (
-                      <div className="flex-shrink-0">
-                        <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground">
-                          수정
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
 
           {/* ── 우측: 통계 ────────────────────────────────── */}
           <div className="space-y-5">
-            {/* AI 인사이트 카드 */}
             <Card className="bg-primary text-primary-foreground shadow-sm">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-4">
@@ -208,7 +342,6 @@ export default function CurriculumPage() {
               </CardContent>
             </Card>
 
-            {/* 전체 구성 */}
             <Card className="shadow-sm">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2">
@@ -220,12 +353,24 @@ export default function CurriculumPage() {
                 {weeks.map((week) => (
                   <div key={week.week}>
                     <div className="flex justify-between text-xs mb-1">
-                      <span className="text-muted-foreground truncate">{week.week}주 · {week.theme}</span>
+                      <span
+                        className={cn(
+                          "truncate",
+                          selectedWeeks.has(week.week)
+                            ? "text-primary font-medium"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {week.week}주 · {week.theme}
+                      </span>
                       <span className="font-medium text-primary ml-2 flex-shrink-0">{week.estimated_hours}h</span>
                     </div>
                     <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                       <div
-                        className="h-full rounded-full bg-primary/60"
+                        className={cn(
+                          "h-full rounded-full transition-all",
+                          selectedWeeks.has(week.week) ? "bg-primary" : "bg-primary/50"
+                        )}
                         style={{ width: `${Math.min((week.estimated_hours / totalHours) * 100 * weeks.length, 100)}%` }}
                       />
                     </div>
@@ -243,6 +388,108 @@ export default function CurriculumPage() {
           </div>
         </div>
       </main>
+
+      {/* ── 커리큘럼 수정 다이얼로그 ─────────────────────── */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit2 className="h-5 w-5 text-primary" />
+              커리큘럼 수정
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              선택한 {selectedWeeks.size}개 주차({[...selectedWeeks].sort((a,b)=>a-b).join(", ")}주차)에
+              적용할 공부 분야를 선택해주세요.
+            </p>
+          </DialogHeader>
+
+          {/* 직무 배지 */}
+          <div className="flex items-center gap-2 rounded-lg bg-primary/5 border border-primary/20 px-3 py-2">
+            <span className="text-xs text-muted-foreground">현재 직무 목표:</span>
+            <Badge variant="secondary" className="text-xs font-medium">{goal.job_role}</Badge>
+            <span className="text-xs text-muted-foreground ml-auto">관련 분야만 표시됩니다</span>
+          </div>
+
+          {/* 토픽 목록 (스크롤 영역) */}
+          <div className="flex-1 overflow-y-auto space-y-5 pr-1">
+            {topicCategories.map((category) => (
+              <div key={category}>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                  {category}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {availableTopics
+                    .filter((t) => t.category === category)
+                    .map((topic) => {
+                      const isSelected = editTopics.includes(topic.id)
+                      return (
+                        <button
+                          key={topic.id}
+                          type="button"
+                          onClick={() => toggleEditTopic(topic.id)}
+                          className={cn(
+                            "flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all",
+                            isSelected
+                              ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                              : "border-border bg-card hover:border-primary hover:bg-primary/5"
+                          )}
+                        >
+                          {isSelected && <CheckCircle2 className="h-3.5 w-3.5" />}
+                          {topic.name}
+                          <span
+                            className={cn(
+                              "rounded px-1.5 py-0 text-xs",
+                              isSelected
+                                ? "bg-primary-foreground/20 text-primary-foreground"
+                                : DIFFICULTY_COLOR[topic.difficulty]
+                            )}
+                          >
+                            {topic.difficulty}
+                          </span>
+                        </button>
+                      )
+                    })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* 선택 요약 */}
+          {editTopics.length > 0 && (
+            <div className="rounded-lg bg-primary/5 border border-primary/10 px-4 py-3">
+              <p className="text-xs font-medium text-primary mb-1.5">
+                선택된 분야 ({editTopics.length}개)
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {editTopics.map((id) => {
+                  const t = allTopics.find((x) => x.id === id)
+                  return (
+                    <Badge key={id} variant="secondary" className="text-xs">
+                      {t?.name}
+                    </Badge>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              취소
+            </Button>
+            <Button
+              onClick={applyEdit}
+              disabled={editTopics.length === 0 || isSaving}
+              className="gap-2"
+            >
+              {isSaving
+                ? <><Loader2 className="h-4 w-4 animate-spin" />저장 중...</>
+                : <><Sparkles className="h-4 w-4" />선택한 분야로 수정하기</>
+              }
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

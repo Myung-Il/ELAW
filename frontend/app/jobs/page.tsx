@@ -2,24 +2,33 @@
 
 import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import AppHeader from "@/components/layout/app-header"
 import { Search, Briefcase, ChevronRight, SlidersHorizontal, Loader2 } from "lucide-react"
 import { api } from "@/lib/api-client"
 
+interface Company {
+  id: number
+  name: string
+  industry?: string
+  logo_url?: string | null
+}
+
 interface JobPosting {
   id: number
   title: string
-  company_name: string
+  company: Company
   job_role: string
   career_level: string
   deadline: string | null
-  description: string
-  match_score?: number
   is_active: boolean
+  description?: string
+  required_skills?: string[]
+  preferred_skills?: string[]
+  my_match_score?: number
+  is_scrapped?: boolean
 }
 
 interface JobsResponse {
@@ -29,14 +38,43 @@ interface JobsResponse {
   message?: string
 }
 
-const JOB_ROLE_FILTERS = ["전체", "AI Engineer", "Backend", "Frontend", "Data Scientist", "DevOps", "Android", "iOS"]
+// 기업 영문 첫 글자 반환 (영문 포함 시 해당 문자, 한국어 기업명은 매핑 또는 첫 글자)
+function getCompanyInitial(name: string): string {
+  const ascii = name.match(/[A-Za-z]/)
+  if (ascii) return ascii[0].toUpperCase()
+  const koMap: Record<string, string> = {
+    "카카오페이": "K", "카카오뱅크": "K", "카카오게임즈": "K", "카카오": "K",
+    "네이버클라우드": "N", "네이버웹툰": "N", "네이버": "N",
+    "라인플러스": "L", "라인": "L",
+    "쿠팡": "C", "배달의민족": "B", "토스": "T", "당근": "D",
+    "삼성": "S", "현대": "H", "롯데": "R", "신한": "S",
+    "크래프톤": "K", "엔씨소프트": "N", "넷마블": "N",
+    "무신사": "M", "야놀자": "Y", "직방": "Z",
+  }
+  for (const [ko, initial] of Object.entries(koMap)) {
+    if (name.startsWith(ko)) return initial
+  }
+  return name.charAt(0).toUpperCase()
+}
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState<JobPosting[]>([])
   const [total, setTotal] = useState(0)
   const [search, setSearch] = useState("")
   const [selectedRole, setSelectedRole] = useState("전체")
+  const [roleFilters, setRoleFilters] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
+
+  // 전체 직무 목록을 한 번만 로드해서 필터 버튼 생성
+  useEffect(() => {
+    api.get<JobsResponse | JobPosting[]>("/api/jobs/?active_only=true")
+      .then((data: JobsResponse | JobPosting[]) => {
+        const list: JobPosting[] = Array.isArray(data) ? data : ((data as JobsResponse).data ?? (data as JobsResponse).results ?? [])
+        const roles = Array.from(new Set(list.map((j) => j.job_role).filter(Boolean)))
+        setRoleFilters(roles)
+      })
+      .catch(() => {})
+  }, [])
 
   const fetchJobs = useCallback(async () => {
     setIsLoading(true)
@@ -47,8 +85,8 @@ export default function JobsPage() {
       params.set("active_only", "true")
 
       const data = await api.get<JobsResponse | JobPosting[]>(`/api/jobs/?${params}`)
-      const list = Array.isArray(data) ? data : (data.data ?? data.results ?? [])
-      const count = Array.isArray(data) ? data.length : (data.count ?? list.length)
+      const list = Array.isArray(data) ? data : ((data as JobsResponse).data ?? (data as JobsResponse).results ?? [])
+      const count = Array.isArray(data) ? data.length : ((data as JobsResponse).count ?? list.length)
       setJobs(list)
       setTotal(count)
     } catch (err) {
@@ -89,7 +127,18 @@ export default function JobsPage() {
 
           <div className="flex items-center gap-2 flex-wrap">
             <SlidersHorizontal className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            {JOB_ROLE_FILTERS.map((role) => (
+            <button
+              type="button"
+              onClick={() => setSelectedRole("전체")}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                selectedRole === "전체"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card hover:border-primary"
+              }`}
+            >
+              전체
+            </button>
+            {roleFilters.map((role) => (
               <button
                 key={role}
                 type="button"
@@ -127,24 +176,21 @@ export default function JobsPage() {
                 <Card className="h-full cursor-pointer card-hover group">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between mb-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold shadow-sm">
-                        {job.company_name?.charAt(0) ?? "?"}
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-lg shadow-sm">
+                        {getCompanyInitial(job.company?.name ?? "")}
                       </div>
-                      {job.match_score !== undefined && (
+                      {job.my_match_score !== undefined && (
                         <Badge variant="secondary" className="text-xs">
-                          매칭 {Math.round(job.match_score)}%
+                          매칭 {Math.round(job.my_match_score)}%
                         </Badge>
                       )}
                     </div>
-                    <CardTitle className="text-base">{job.company_name}</CardTitle>
-                    <CardDescription className="text-sm font-medium text-foreground/70 line-clamp-1">
-                      {job.title}
-                    </CardDescription>
+                    <CardTitle className="text-base">{job.company?.name}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{job.description}</p>
-                    <div className="flex items-center gap-2">
-                      <Briefcase className="h-3 w-3 text-primary" />
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Briefcase className="h-3 w-3 text-primary flex-shrink-0" />
                       <Badge variant="outline" className="text-xs">{job.job_role}</Badge>
                       <Badge variant="outline" className="text-xs">{job.career_level}</Badge>
                     </div>
