@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -16,11 +16,13 @@ import AppHeader from "@/components/layout/app-header"
 import {
   GraduationCap, CheckCircle2, Sparkles,
   TrendingUp, Trophy, Edit2, BarChart2, Loader2, BookOpen, Save,
+  FileQuestion, Tag, Layers,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
 import { getTopicsForJobRole, studyTopics as allTopics } from "@/lib/study-topics"
 import type { StudyTopic } from "@/lib/study-topics"
+import { mapToBroadCategory, BROAD_CATEGORY_ORDER, BROAD_CATEGORY_COLORS, getWeekBroadCategories } from "@/lib/broad-categories"
 
 interface CurriculumWeek {
   week: number
@@ -50,6 +52,19 @@ interface CurriculumRecord {
   }
 }
 
+interface ELAWProblem {
+  id: number
+  category: string
+  subcategory: string
+}
+
+function getWeekProblemCount(week: CurriculumWeek, problems: ELAWProblem[]): number {
+  const broads = getWeekBroadCategories(week.theme, problems)
+  if (broads.length === 0) return 0
+  const broadSet = new Set(broads)
+  return problems.filter((p) => broadSet.has(mapToBroadCategory(p.category))).length
+}
+
 const DIFFICULTY_COLOR: Record<string, string> = {
   "하": "bg-emerald-100 text-emerald-700",
   "중": "bg-amber-100 text-amber-700",
@@ -60,6 +75,7 @@ export default function CurriculumPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [weeks, setWeeks] = useState<CurriculumWeek[]>([])
   const [goal, setGoal] = useState<Goal | null>(null)
+  const [elawProblems, setElawProblems] = useState<ELAWProblem[]>([])
 
   // 주차 선택 상태
   const [selectedWeeks, setSelectedWeeks] = useState<Set<number>>(new Set())
@@ -86,6 +102,14 @@ export default function CurriculumPage() {
         if (mine?.content_json?.weeks) {
           setWeeks(mine.content_json.weeks)
         }
+
+        // ELAW 문제 로드 (주차별 관련 문제 수 계산용)
+        try {
+          const problems = await api.get<ELAWProblem[]>("/api/core/problems/?limit=2000")
+          setElawProblems(Array.isArray(problems) ? problems : [])
+        } catch {
+          // 문제 로드 실패 시 무시 (카운트만 0으로 표시)
+        }
       } catch (err) {
         console.error("커리큘럼 로드 실패:", err)
       } finally {
@@ -95,8 +119,49 @@ export default function CurriculumPage() {
     load()
   }, [])
 
-  const totalProblems = weeks.reduce((s, w) => s + w.recommended_problems.length, 0)
-  const totalHours    = weeks.reduce((s, w) => s + w.estimated_hours, 0)
+  // 필터된 주차 (실제 문제가 있는 주차만)
+  const displayWeeks = useMemo(
+    () => weeks.filter(
+      (w) => elawProblems.length > 0 && getWeekBroadCategories(w.theme, elawProblems).length > 0
+    ),
+    [weeks, elawProblems]
+  )
+
+  // 커리큘럼 전체 풀 수 있는 문제 수 (중복 제거)
+  const totalCurriculumProblems = useMemo(() => {
+    if (elawProblems.length === 0) return 0
+    const seen = new Set<number>()
+    for (const week of displayWeeks) {
+      const broads = new Set(getWeekBroadCategories(week.theme, elawProblems))
+      elawProblems
+        .filter((p) => broads.has(mapToBroadCategory(p.category)))
+        .forEach((p) => seen.add(p.id))
+    }
+    return seen.size
+  }, [displayWeeks, elawProblems])
+
+  // 커리큘럼이 커버하는 대분류 수
+  const coveredBroads = useMemo(() => {
+    const broads = new Set<string>()
+    for (const week of displayWeeks) {
+      getWeekBroadCategories(week.theme, elawProblems).forEach((b) => broads.add(b))
+    }
+    return broads.size
+  }, [displayWeeks, elawProblems])
+
+  // 주차별 문제 수 (bar chart용)
+  const weekProblemCounts = useMemo(() => {
+    const counts: Record<number, number> = {}
+    for (const week of displayWeeks) {
+      counts[week.week] = getWeekProblemCount(week, elawProblems)
+    }
+    return counts
+  }, [displayWeeks, elawProblems])
+
+  const maxWeekProblems = useMemo(
+    () => Math.max(...Object.values(weekProblemCounts), 1),
+    [weekProblemCounts]
+  )
 
   const toggleWeek = (weekNum: number) => {
     setSelectedWeeks((prev) => {
@@ -194,7 +259,7 @@ export default function CurriculumPage() {
           <div>
             <h1 className="text-2xl font-bold mb-1">커리큘럼 현황</h1>
             <p className="text-sm text-muted-foreground">
-              {goal.job_role} 목표 · {weeks.length}주 AI 맞춤 커리큘럼
+              {goal.job_role} 목표 · {displayWeeks.length}주 AI 맞춤 커리큘럼
             </p>
           </div>
 
@@ -243,8 +308,14 @@ export default function CurriculumPage() {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* ── 좌측: 주간 커리큘럼 목록 ────────────────────── */}
           <div className="lg:col-span-2 space-y-3">
-            {weeks.map((week) => {
+            {weeks
+              .filter((week) => elawProblems.length === 0 || getWeekBroadCategories(week.theme, elawProblems).length > 0)
+              .map((week, displayIdx) => {
+              const displayNum = displayIdx + 1
               const isSelected = selectedWeeks.has(week.week)
+              const weekCats = getWeekBroadCategories(week.theme, elawProblems)
+              const problemCount = getWeekProblemCount(week, elawProblems)
+
               return (
                 <Card
                   key={week.week}
@@ -270,7 +341,7 @@ export default function CurriculumPage() {
                         >
                           {isSelected
                             ? <CheckCircle2 className="h-4 w-4" />
-                            : <span className="text-xs font-semibold">{week.week}</span>
+                            : <span className="text-xs font-semibold">{displayNum}</span>
                           }
                         </div>
                         <span className="text-xs text-muted-foreground">주차</span>
@@ -285,25 +356,32 @@ export default function CurriculumPage() {
                             {week.theme}
                           </h3>
                           <Badge variant="secondary" className="text-xs">
-                            {week.week}주차
+                            {displayNum}주차
                           </Badge>
                         </div>
 
+                        {/* 대분류 카테고리 배지 */}
                         <div className="flex flex-wrap gap-1.5 mb-3">
-                          {week.tasks.map((task) => (
+                          {weekCats.map((cat: string) => (
                             <span
-                              key={task}
-                              className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground"
+                              key={cat}
+                              className={cn(
+                                "rounded-full border px-2 py-0.5 text-xs font-medium",
+                                BROAD_CATEGORY_COLORS[cat] ?? "border-border bg-muted text-muted-foreground"
+                              )}
                             >
-                              {task}
+                              {cat}
                             </span>
                           ))}
                         </div>
 
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
+                          <span className={cn(
+                            "flex items-center gap-1 font-medium",
+                            problemCount > 0 ? "text-primary" : "text-muted-foreground"
+                          )}>
                             <Trophy className="h-3 w-3" />
-                            {week.recommended_problems.length}문제
+                            {problemCount}문제
                           </span>
                           <span className="flex items-center gap-1">
                             <GraduationCap className="h-3 w-3" />
@@ -320,6 +398,7 @@ export default function CurriculumPage() {
 
           {/* ── 우측: 통계 ────────────────────────────────── */}
           <div className="space-y-5">
+            {/* AI 학습 인사이트 */}
             <Card className="bg-primary text-primary-foreground shadow-sm">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-4">
@@ -327,55 +406,128 @@ export default function CurriculumPage() {
                   <h3 className="font-semibold">AI 학습 인사이트</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { label: "전체 주차", value: `${weeks.length}주` },
-                    { label: "목표 직무", value: goal.job_role },
-                    { label: "추천 문제", value: `${totalProblems}문제` },
-                    { label: "예상 시간", value: `${totalHours}시간` },
-                  ].map((stat) => (
-                    <div key={stat.label} className="rounded-lg bg-primary-foreground/10 p-3 text-center">
-                      <p className="text-lg font-bold truncate">{stat.value}</p>
-                      <p className="text-xs text-primary-foreground/70 mt-0.5">{stat.label}</p>
-                    </div>
-                  ))}
+                  <div className="rounded-lg bg-primary-foreground/10 p-3 text-center">
+                    <p className="text-2xl font-bold">{displayWeeks.length}</p>
+                    <p className="text-xs text-primary-foreground/70 mt-0.5">학습 주차</p>
+                  </div>
+                  <div className="rounded-lg bg-primary-foreground/10 p-3 text-center">
+                    <p className="text-lg font-bold truncate">{goal.job_role}</p>
+                    <p className="text-xs text-primary-foreground/70 mt-0.5">목표 직무</p>
+                  </div>
+                  <div className="rounded-lg bg-primary-foreground/10 p-3 text-center">
+                    <p className="text-2xl font-bold">{totalCurriculumProblems.toLocaleString()}</p>
+                    <p className="text-xs text-primary-foreground/70 mt-0.5">총 문제 수</p>
+                  </div>
+                  <div className="rounded-lg bg-primary-foreground/10 p-3 text-center">
+                    <p className="text-2xl font-bold">{coveredBroads}</p>
+                    <p className="text-xs text-primary-foreground/70 mt-0.5">기술 분야 수</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
+            {/* 커리큘럼 구성 */}
             <Card className="shadow-sm">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <BarChart2 className="h-4 w-4 text-primary" />
                   커리큘럼 구성
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {weeks.map((week) => (
-                  <div key={week.week}>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span
-                        className={cn(
-                          "truncate",
-                          selectedWeeks.has(week.week)
-                            ? "text-primary font-medium"
-                            : "text-muted-foreground"
-                        )}
-                      >
-                        {week.week}주 · {week.theme}
-                      </span>
-                      <span className="font-medium text-primary ml-2 flex-shrink-0">{week.estimated_hours}h</span>
+              <CardContent className="space-y-4">
+                {displayWeeks.map((week, chartIdx) => {
+                  const cnt = weekProblemCounts[week.week] ?? 0
+                  const barPct = Math.round((cnt / maxWeekProblems) * 100)
+                  const broads = getWeekBroadCategories(week.theme, elawProblems)
+                  const isSelected = selectedWeeks.has(week.week)
+                  return (
+                    <div key={week.week} className={cn(
+                      "rounded-lg p-2.5 transition-colors",
+                      isSelected ? "bg-primary/5 border border-primary/20" : ""
+                    )}>
+                      {/* 주차 + 문제 수 */}
+                      <div className="flex items-center justify-between text-xs mb-1.5">
+                        <span className={cn(
+                          "font-medium truncate",
+                          isSelected ? "text-primary" : "text-foreground"
+                        )}>
+                          {chartIdx + 1}주 · {week.theme}
+                        </span>
+                        <span className="flex items-center gap-0.5 text-muted-foreground ml-2 flex-shrink-0">
+                          <FileQuestion className="h-3 w-3" />
+                          {cnt}
+                        </span>
+                      </div>
+                      {/* 문제 수 비례 바 */}
+                      <div className="h-1.5 overflow-hidden rounded-full bg-muted mb-1.5">
+                        <div
+                          className={cn(
+                            "h-full rounded-full transition-all duration-500",
+                            isSelected ? "bg-primary" : "bg-primary/50"
+                          )}
+                          style={{ width: `${barPct}%` }}
+                        />
+                      </div>
+                      {/* 관련 대분류 태그 */}
+                      {broads.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {broads.slice(0, 2).map((b) => (
+                            <span
+                              key={b}
+                              className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground leading-none"
+                            >
+                              {b}
+                            </span>
+                          ))}
+                          {broads.length > 2 && (
+                            <span className="text-[10px] text-muted-foreground/60">
+                              +{broads.length - 2}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                      <div
-                        className={cn(
-                          "h-full rounded-full transition-all",
-                          selectedWeeks.has(week.week) ? "bg-primary" : "bg-primary/50"
-                        )}
-                        style={{ width: `${Math.min((week.estimated_hours / totalHours) * 100 * weeks.length, 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
+              </CardContent>
+            </Card>
+
+            {/* 분야 커버리지 */}
+            <Card className="shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-primary" />
+                  학습 분야 요약
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-1.5">
+                  {(() => {
+                    const broadMap: Record<string, number> = {}
+                    for (const week of displayWeeks) {
+                      const broads = getWeekBroadCategories(week.theme, elawProblems)
+                      const broadSet = new Set(broads)
+                      const cnt = elawProblems.filter(
+                        (p) => broadSet.has(mapToBroadCategory(p.category))
+                      ).length
+                      for (const b of broads) {
+                        broadMap[b] = Math.max(broadMap[b] ?? 0, cnt)
+                      }
+                    }
+                    return Object.entries(broadMap)
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([broad, cnt]) => (
+                        <div
+                          key={broad}
+                          className="flex items-center gap-1 rounded-full border bg-muted/50 px-2.5 py-1 text-xs"
+                        >
+                          <Tag className="h-2.5 w-2.5 text-primary/60 flex-shrink-0" />
+                          <span className="font-medium">{broad}</span>
+                          <span className="text-muted-foreground">{cnt.toLocaleString()}개</span>
+                        </div>
+                      ))
+                  })()}
+                </div>
               </CardContent>
             </Card>
 

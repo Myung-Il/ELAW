@@ -400,33 +400,84 @@ class Match(models.Model):
 # ──────────────────────────────────────────────
 
 class Post(models.Model):
-    """게시판 — 관리자만 작성 (공지·대회·이벤트)"""
+    """게시판 — 관리자: 공지·대회·이벤트 / 일반 사용자: Q&A"""
 
     class Category(models.TextChoices):
         NOTICE  = 'notice',  '공지사항'
         CONTEST = 'contest', '대회 정보'
         EVENT   = 'event',   '이벤트'
+        QNA     = 'qna',     'Q&A'
 
-    author     = models.ForeignKey(User, on_delete=models.RESTRICT, related_name='posts',
-                                   help_text='ON DELETE RESTRICT — 관리자 계정 보호')
+    author     = models.ForeignKey(User, on_delete=models.RESTRICT, related_name='posts')
     category   = models.CharField(max_length=10, choices=Category.choices)
     title      = models.CharField(max_length=300)
     content    = models.TextField()
     is_pinned  = models.BooleanField(default=False, help_text='상단 고정')
     view_count = models.PositiveIntegerField(default=0)
+    like_count = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        #db_table = 'posts'
-        #managed    = False      # schema_v1.sql로 관리 — Django가 테이블 생성/삭제 안 함
         indexes = [
             models.Index(fields=['category', '-created_at'], name='idx_posts_category_date'),
-            models.Index(fields=['is_pinned', '-created_at'],name='idx_posts_pinned'),
+            models.Index(fields=['is_pinned', '-like_count', '-created_at'], name='idx_posts_pinned'),
         ]
 
     def __str__(self):
         return f"[{self.category}] {self.title}"
+
+
+ALLOWED_EXTENSIONS = {
+    'jpg', 'jpeg', 'png', 'gif', 'webp',
+    'pdf', 'doc', 'docx', 'txt', 'zip', 'xlsx', 'pptx',
+}
+
+class PostAttachment(models.Model):
+    """게시글 첨부파일"""
+    post          = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='attachments')
+    file          = models.FileField(upload_to='board/%Y/%m/')
+    original_name = models.CharField(max_length=255)
+    file_size     = models.PositiveIntegerField()
+    uploaded_at   = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.original_name
+
+
+class PostView(models.Model):
+    """게시글 조회 이력 — 계정당 1회만 카운트"""
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='view_records')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post_views')
+    viewed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [['post', 'user']]
+
+
+class PostLike(models.Model):
+    """게시글 좋아요 — 계정당 1회"""
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post_likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [['post', 'user']]
+
+
+class Comment(models.Model):
+    """게시글 댓글"""
+    post    = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    author  = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Comment by {self.author} on post {self.post_id}"
 
 
 class AiLog(models.Model):

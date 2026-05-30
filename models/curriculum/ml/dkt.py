@@ -47,12 +47,7 @@ class DKT:
     # 공개: 새 응답 1건 증분 반영 (O(1))
     # ─────────────────────────────────────────
     def update(self, response: dict) -> None:
-        cat = response["category"]
-        if cat not in self._category_stats:
-            self._category_stats[cat] = {"total": 0, "correct": 0}
-        self._category_stats[cat]["total"] += 1
-        if response["is_correct"]:
-            self._category_stats[cat]["correct"] += 1
+        self._responses.append(response)
 
     # ─────────────────────────────────────────
     # 공개: 문제별 예상 정답 확률 반환 (0~1)

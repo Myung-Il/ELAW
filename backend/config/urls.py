@@ -4,6 +4,8 @@ config/urls.py
 
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 from core.views_db import (
     DBUserView, DBCompanyView, DBPlatformLinkView, DBUserGoalView,
@@ -11,7 +13,7 @@ from core.views_db import (
     DBPortfolioView, DBJobPostingView, DBMatchView, DBPostView,
     DBAiLogView, DBSummaryView,
 )
-from core.views_user import GoalView, MatchGenerateView, DashboardView
+from core.views_user import GoalView, MatchGenerateView, DashboardView, CurriculumUpdateView
 from core.views_quiz import (
     QuizStartView, QuizSubmitView, QuizProgressView,
     QuizCompleteView, RecommendUpdateView,
@@ -38,9 +40,10 @@ db_urls = [
 
 # 사용자 기능 API
 core_urls = [
-    path('goals/',            GoalView.as_view()),
-    path('matches/generate/', MatchGenerateView.as_view()),
-    path('dashboard/',        DashboardView.as_view()),
+    path('goals/',                        GoalView.as_view()),
+    path('curriculum/<int:curriculum_id>/', CurriculumUpdateView.as_view()),
+    path('matches/generate/',             MatchGenerateView.as_view()),
+    path('dashboard/',                    DashboardView.as_view()),
     # 문제 목록
     path('problems/',                ProblemsView.as_view()),
     # ML 퀴즈·추천 파이프라인
@@ -59,7 +62,7 @@ urlpatterns = [
     path('admin/',        admin.site.urls),
     path('api/accounts/', include('accounts.urls')),
     path('api/board/',    include('board.urls')),
-    path('api/jobs/',     include('jobs.urls')),       # ⭐ 새로 추가!
+    path('api/jobs/',     include('jobs.urls')),
     path('api/db/',       include((db_urls,   'db'))),
     path('api/core/',     include((core_urls, 'core'))),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
