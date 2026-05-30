@@ -2,10 +2,11 @@
 core/views_user.py
 
 신규 사용자 온보딩 API
-- POST /api/core/goals/            목표 등록 → Gemini 커리큘럼 자동 생성
-- GET  /api/core/goals/            내 목표 조회
-- POST /api/core/matches/generate/ 매칭 점수 계산 및 저장
-- GET  /api/core/dashboard/        내 전체 현황 조회
+- POST /api/core/goals/                목표 등록 → Gemini 커리큘럼 자동 생성
+- GET  /api/core/goals/                내 목표 조회
+- PATCH /api/core/curriculum/<id>/     커리큘럼 주차 수정
+- POST /api/core/matches/generate/     매칭 점수 계산 및 저장
+- GET  /api/core/dashboard/            내 전체 현황 조회
 """
 
 import time
@@ -80,20 +81,37 @@ def parse_json_from_gemini(raw):
         return None
 
 
+# 주차별 기본 백준 추천 문제 (난이도 순 진행)
+_DEFAULT_WEEK_PROBLEMS = [
+    ["10828", "10845", "1927"],   # w1: 스택·큐·힙
+    ["1260",  "2178",  "1463"],   # w2: DFS/BFS·DP
+    ["1920",  "10816", "2805"],   # w3: 이분탐색
+    ["11047", "1931",  "1541"],   # w4: 그리디
+    ["1991",  "11725", "1167"],   # w5: 트리
+    ["9663",  "2580",  "1987"],   # w6: 백트래킹
+    ["1753",  "1916",  "11404"],  # w7: 최단경로
+    ["1197",  "1043",  "2252"],   # w8: MST·위상정렬
+]
+
+
 def default_curriculum(goal, topics=None, required_skills=None, duration_weeks=8):
     """Gemini 실패 시 직무·기술 기반 동적 폴백 커리큘럼"""
     role  = goal.job_role or "개발자"
     field = goal.field    or "개발"
     weeks = []
 
+    def _problems_for_week(w_idx: int):
+        """0-indexed 주차 번호 → 추천 백준 문제 3개"""
+        return _DEFAULT_WEEK_PROBLEMS[w_idx % len(_DEFAULT_WEEK_PROBLEMS)]
+
     # 알고리즘 기초 (1~2주)
     weeks += [
         {"week": 1, "theme": "자료구조 & 알고리즘 기초",
          "tasks": ["스택/큐/힙 구현 연습", f"{role} 코딩테스트 유형 파악", "백준 Silver 3문제 풀이"],
-         "recommended_problems": ["10828", "10845", "1927"], "estimated_hours": 8},
+         "recommended_problems": _problems_for_week(0), "estimated_hours": 8},
         {"week": 2, "theme": "그래프 탐색 & DP",
          "tasks": ["BFS/DFS 패턴 학습", "DP 핵심 유형 정리", f"{role} 빈출 알고리즘 문제"],
-         "recommended_problems": ["1260", "2178", "1463"], "estimated_hours": 10},
+         "recommended_problems": _problems_for_week(1), "estimated_hours": 10},
     ]
 
     # 선택 topics 또는 required_skills 기반 기술 주차 생성
@@ -112,18 +130,18 @@ def default_curriculum(goal, topics=None, required_skills=None, duration_weeks=8
             "week": i,
             "theme": f"{tech} 학습 및 실습",
             "tasks": [f"{tech} 핵심 개념 정리", f"{tech} 실전 예제 구현", "관련 오픈소스 코드 분석"],
-            "recommended_problems": [],
+            "recommended_problems": _problems_for_week(i - 1),
             "estimated_hours": 12,
         })
 
-    # 부족한 주차 채우기 (tech_items가 tech_weeks보다 적을 때)
+    # 부족한 주차 채우기
     filled = len(weeks)
     if filled < duration_weeks - 2:
         weeks.append({
             "week": filled + 1,
             "theme": f"{role} 실전 프로젝트 설계",
             "tasks": [f"{role} 포트폴리오용 프로젝트 기획", "기술 스택 확정 및 환경 구성", "핵심 기능 구현 시작"],
-            "recommended_problems": [],
+            "recommended_problems": _problems_for_week(filled),
             "estimated_hours": 14,
         })
 
@@ -133,18 +151,17 @@ def default_curriculum(goal, topics=None, required_skills=None, duration_weeks=8
         "week": cur_week,
         "theme": "프로젝트 완성 & 코드 리뷰",
         "tasks": ["핵심 기능 마무리", "코드 품질 개선 (리팩토링)", "README 작성 및 배포"],
-        "recommended_problems": [],
+        "recommended_problems": _problems_for_week(cur_week - 1),
         "estimated_hours": 14,
     })
     weeks.append({
         "week": cur_week + 1,
         "theme": "포트폴리오 & 면접 준비",
         "tasks": ["GitHub 프로필 정리", f"{role} 기술 면접 예상 질문 정리", "ELAW AI 포트폴리오 초안 생성"],
-        "recommended_problems": [],
+        "recommended_problems": _problems_for_week(cur_week),
         "estimated_hours": 10,
     })
 
-    # total_weeks 맞추기
     final_weeks = weeks[:duration_weeks]
     return {
         "total_weeks": duration_weeks,
@@ -200,11 +217,12 @@ class GoalView(APIView):
         from datetime import date, timedelta
 
         # ── 입력값 검증 ──────────────────────────
-        goal_type      = request.data.get("goal_type", "job")
-        field          = request.data.get("field", "").strip()
-        job_role       = request.data.get("job_role", "").strip()
-        duration_weeks = int(request.data.get("duration_weeks", 8))
-        topics         = [t.strip() for t in request.data.get("topics", []) if t.strip()]
+        goal_type       = request.data.get("goal_type", "job")
+        field           = request.data.get("field", "").strip()
+        job_role        = request.data.get("job_role", "").strip()
+        duration_weeks  = int(request.data.get("duration_weeks", 8))
+        topics          = [t.strip() for t in request.data.get("topics", []) if t.strip()]
+        required_skills = [str(s).strip() for s in request.data.get("required_skills", []) if s and str(s).strip()]
 
         if not field or not job_role:
             return Response(
@@ -271,7 +289,12 @@ class GoalView(APIView):
         parsed = parse_json_from_gemini(raw)
         if not parsed:
             logger.warning("Gemini 커리큘럼 생성 실패 — 기본 커리큘럼으로 대체 (user_id=%s)", request.user.id)
-        content = parsed or default_curriculum(goal, topics=topics, duration_weeks=duration_weeks)
+        content = parsed or default_curriculum(
+            goal,
+            topics=topics,
+            required_skills=required_skills,  # 기업 공고 필수 스킬을 주차 테마로 활용
+            duration_weeks=duration_weeks,
+        )
 
         curriculum = Curriculum.objects.create(
             user         = request.user,
@@ -594,3 +617,40 @@ class JobProblemsView(APIView):
             "has_next":   offset + limit < total,
             "data":       data,
         })
+
+
+# ────────────────────────────────────────
+# 커리큘럼 주차 수정
+# ────────────────────────────────────────
+
+class CurriculumUpdateView(APIView):
+    """PATCH /api/core/curriculum/<id>/  — 주차 내용(weeks) 업데이트"""
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, curriculum_id):
+        from core.models import Curriculum
+
+        try:
+            curriculum = Curriculum.objects.get(id=curriculum_id, user=request.user)
+        except Curriculum.DoesNotExist:
+            return Response(
+                {"error": "커리큘럼을 찾을 수 없습니다."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        weeks = request.data.get("weeks")
+        if weeks is None:
+            return Response(
+                {"error": "weeks 필드가 필요합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        content = curriculum.content_json or {}
+        content["weeks"] = weeks
+        curriculum.content_json = content
+        curriculum.save(update_fields=["content_json"])
+
+        return Response(
+            {"message": "커리큘럼이 저장되었습니다.", "id": curriculum.id},
+            status=status.HTTP_200_OK,
+        )

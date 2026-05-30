@@ -1,7 +1,0 @@
-django
-djangorestframework
-python-dotenv
-requests
-django-cors-headers
-djangorestframework-simplejwt
-datasets

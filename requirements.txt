@@ -1,7 +1,15 @@
-django
-djangorestframework
-python-dotenv
-requests
-django-cors-headers
-djangorestframework-simplejwt
-datasets
+# ELAW 백엔드 Python 패키지
+# 설치: pip install -r requirements.txt
+
+# ── Django 핵심 ──────────────────────────────
+Django>=6.0,<7.0
+djangorestframework>=3.17
+djangorestframework-simplejwt>=5.5
+django-cors-headers>=4.9
+
+# ── 환경 변수 & HTTP ─────────────────────────
+python-dotenv>=1.0
+requests>=2.31          # Gemini API, ETL HTTP 호출에 사용
+
+# ── MySQL (운영 환경 선택) ────────────────────
+# mysqlclient>=2.2        # MySQL 사용 시 주석 해제 후 설치

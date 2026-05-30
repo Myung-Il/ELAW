@@ -104,8 +104,8 @@ def _build_dependency_graph(job_role: str) -> dict:
     ]
     edges = [
         {
-            "source_id":      e.source_problem.original_question_id,
-            "target_id":      e.target_problem.original_question_id,
+            "Preceding_ID":   e.source_problem.original_question_id,
+            "Target_ID":      e.target_problem.original_question_id,
             "combined_score": e.combined_score,
         }
         for e in ProblemEdge.objects.filter(
@@ -344,7 +344,7 @@ class ProblemsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        limit    = min(int(request.query_params.get('limit', 50)), 500)
+        limit    = min(int(request.query_params.get('limit', 50)), 2000)
         job_role = request.query_params.get('job_role', '').strip()
 
         if not job_role:

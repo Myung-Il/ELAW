@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/dialog"
 import AppHeader from "@/components/layout/app-header"
 import {
-  MessageSquare, Search, Plus, Eye, Bell, Calendar, HelpCircle, Loader2, Pin,
+  MessageSquare, Search, Plus, Eye, Bell, Calendar, HelpCircle, Loader2, Pin, Heart,
+  Paperclip, X as XIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
@@ -26,6 +27,7 @@ interface Post {
   category: string
   author_name: string
   view_count: number
+  like_count: number
   is_pinned: boolean
   created_at: string
 }
@@ -49,6 +51,7 @@ export default function BoardPage() {
   const [search, setSearch] = useState("")
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [newPost, setNewPost] = useState({ title: "", category: "qna", content: "" })
+  const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const fetchPosts = useCallback(async () => {
@@ -79,8 +82,17 @@ export default function BoardPage() {
     try {
       const res = await api.post<{ data: Post } | Post>("/api/board/", newPost)
       const created = "data" in res ? (res as { data: Post }).data : res as Post
+
+      // 파일 업로드 (Next.js API Route → Django 포워딩)
+      if (pendingFiles.length > 0) {
+        const formData = new FormData()
+        pendingFiles.forEach((f) => formData.append("files", f))
+        await api.upload(`/api/board/${created.id}/attachments/`, formData)
+      }
+
       setPosts([created, ...posts])
       setNewPost({ title: "", category: "qna", content: "" })
+      setPendingFiles([])
       setIsCreateOpen(false)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : ""
@@ -92,6 +104,15 @@ export default function BoardPage() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const addFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(e.target.files ?? [])
+    setPendingFiles((prev) => {
+      const combined = [...prev, ...selected]
+      return combined.slice(0, 5)
+    })
+    e.target.value = ""
   }
 
   const pinnedPosts = posts.filter((p) => p.is_pinned)
@@ -166,6 +187,37 @@ export default function BoardPage() {
                       className="min-h-[120px]"
                     />
                   </div>
+
+                  {/* 파일 첨부 */}
+                  <div className="space-y-2">
+                    <Label>첨부파일 <span className="text-xs text-muted-foreground">(최대 5개, 10MB 이하)</span></Label>
+                    <label className="flex items-center gap-2 cursor-pointer rounded-lg border border-dashed border-border px-3 py-2 hover:border-primary hover:bg-primary/5 transition-colors w-fit">
+                      <Paperclip className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">파일 선택</span>
+                      <input
+                        type="file"
+                        multiple
+                        className="hidden"
+                        accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.txt,.zip,.xlsx,.pptx"
+                        onChange={addFiles}
+                      />
+                    </label>
+                    {pendingFiles.length > 0 && (
+                      <div className="space-y-1">
+                        {pendingFiles.map((f, i) => (
+                          <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Paperclip className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate flex-1">{f.name}</span>
+                            <span className="flex-shrink-0">{(f.size / 1024).toFixed(0)}KB</span>
+                            <button type="button" onClick={() => setPendingFiles((p) => p.filter((_, idx) => idx !== i))}>
+                              <XIcon className="h-3 w-3 hover:text-destructive" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <Button
                     className="w-full"
                     onClick={handleCreate}
@@ -264,6 +316,12 @@ function PostRow({ post, pinned = false }: { post: Post; pinned?: boolean }) {
             </p>
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground flex-shrink-0">
+            {post.like_count > 0 && (
+              <span className="flex items-center gap-1 text-rose-500">
+                <Heart className="h-3 w-3 fill-rose-400" />
+                {post.like_count}
+              </span>
+            )}
             <span className="flex items-center gap-1">
               <Eye className="h-3 w-3" />
               {post.view_count?.toLocaleString() ?? 0}

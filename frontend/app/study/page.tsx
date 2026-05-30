@@ -16,10 +16,11 @@ import {
   BookOpen, ChevronRight, ChevronDown, Clock,
   GraduationCap, Loader2, ListChecks, SlidersHorizontal,
   FileQuestion, CheckCircle2, Brain, BarChart3, RefreshCw,
-  Check, X, AlertTriangle,
+  Check, X, AlertTriangle, Search,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
+import { BROAD_CATEGORY_ORDER, mapToBroadCategory, getWeekBroadCategories } from "@/lib/broad-categories"
 
 // ── 타입 ──────────────────────────────────────────────────────
 
@@ -132,9 +133,26 @@ const ZONE_CONFIG: Record<string, { color: string; bg: string; desc: string }> =
   높음:   { color: "text-emerald-700", bg: "bg-emerald-100", desc: "심화 문제로 실력을 더 올려보세요." },
 }
 
-function getRecommended(problems: ELAWProblem[], weekNum: number): ELAWProblem[] {
-  if (problems.length === 0) return []
-  return [0, 1, 2].map((i) => problems[(weekNum * 3 + i) % problems.length])
+
+function pickWeekProblems(
+  week: CurriculumWeek,
+  problems: ELAWProblem[],
+  excludeIds: Set<number>,
+  count = 3,
+): ELAWProblem[] {
+  const broads = getWeekBroadCategories(week.theme, problems)
+  if (broads.length === 0) return []
+  const broadSet = new Set(broads)
+  const pool = problems.filter(
+    (p) => broadSet.has(mapToBroadCategory(p.category)) && !excludeIds.has(p.id)
+  )
+  if (pool.length === 0) return []
+  const result: ELAWProblem[] = []
+  const offset = week.week * count
+  for (let i = 0; i < count; i++) {
+    result.push(pool[(offset + i) % pool.length])
+  }
+  return result
 }
 
 type QuizSection = "checking" | "no_quiz" | "in_progress" | "has_recommend"
@@ -150,12 +168,12 @@ export default function StudyPage() {
 
   // ELAW 문제
   const [elawProblems, setElawProblems] = useState<ELAWProblem[]>([])
-  const [problemsLoading, setProblemsLoading] = useState(false)
 
   // 전체 문제 다이얼로그
   const [dialogOpen, setDialogOpen] = useState(false)
   const [filterCategory, setFilterCategory] = useState("전체")
   const [filterDifficulty, setFilterDifficulty] = useState("전체")
+  const [searchQuery, setSearchQuery] = useState("")
 
   // ── AI 진단 ──
   const [quizSection, setQuizSection] = useState<QuizSection>("checking")
@@ -196,6 +214,16 @@ export default function StudyPage() {
     Record<string, { is_correct: boolean; correct_answer: string; explanation: string }>
   >({})
 
+  // 주차별 추천 문제 목록 (대분류 기반, reroll 지원)
+  const [weekRecs, setWeekRecs] = useState<Record<number, ELAWProblem[]>>({})
+  // 주차별 이미 노출된 문제 ID (reroll 시 중복 방지)
+  const [weekUsedIds, setWeekUsedIds] = useState<Record<number, Set<number>>>({})
+  // 주차 전용 문제 다이얼로그
+  const [weekAllOpen, setWeekAllOpen] = useState(false)
+  const [weekAllData, setWeekAllData] = useState<{ week: CurriculumWeek; displayNum: number; problems: ELAWProblem[] } | null>(null)
+  const [weekAllDiff, setWeekAllDiff] = useState("전체")
+  const [weekAllSearch, setWeekAllSearch] = useState("")
+
   // ── 통계 로드 ────────────────────────────────────────────────
 
   const loadStats = async () => {
@@ -220,13 +248,20 @@ export default function StudyPage() {
 
         setJobRole(active.job_role)
 
-        const curricula = await api.get<CurriculumRecord[]>("/api/db/curricula/")
-        const mine = Array.isArray(curricula)
-          ? curricula.find((c) => c.id === active.curriculum_id)
+        // 커리큘럼과 문제를 병렬로 가져와 isLoading=false 전에 모두 준비
+        const [curriculaData, problemsData] = await Promise.all([
+          api.get<CurriculumRecord[]>("/api/db/curricula/"),
+          api.get<ELAWProblem[]>("/api/core/problems/?limit=2000").catch(() => [] as ELAWProblem[]),
+        ])
+
+        const mine = Array.isArray(curriculaData)
+          ? curriculaData.find((c) => c.id === active.curriculum_id)
           : null
         if (mine?.content_json?.weeks) {
           setWeeks(mine.content_json.weeks)
         }
+
+        setElawProblems(Array.isArray(problemsData) ? problemsData : [])
       } catch (err) {
         console.error("공부 목록 로드 실패:", err)
       } finally {
@@ -236,21 +271,19 @@ export default function StudyPage() {
     load()
   }, [])
 
+  // 주차별 추천 문제 초기화 (문제·주차 둘 다 준비됐을 때)
   useEffect(() => {
-    if (!jobRole) return
-    const fetchProblems = async () => {
-      setProblemsLoading(true)
-      try {
-        const data = await api.get<ELAWProblem[]>("/api/core/problems/?limit=200")
-        setElawProblems(Array.isArray(data) ? data : [])
-      } catch {
-        setElawProblems([])
-      } finally {
-        setProblemsLoading(false)
+    if (elawProblems.length === 0 || weeks.length === 0) return
+    setWeekRecs((prev) => {
+      const next: Record<number, ELAWProblem[]> = { ...prev }
+      for (const week of weeks) {
+        if (!next[week.week]) {
+          next[week.week] = pickWeekProblems(week, elawProblems, new Set(), 3)
+        }
       }
-    }
-    fetchProblems()
-  }, [jobRole])
+      return next
+    })
+  }, [elawProblems, weeks])
 
   // AI 진단 상태 체크
   useEffect(() => {
@@ -446,7 +479,7 @@ export default function StudyPage() {
       if (replacement) {
         setRecData((prev) => {
           if (!prev) return prev
-          const next = [...prev.recommendations]
+          const next = [...(prev.recommendations ?? [])]
           next[recIdx] = replacement
           return { ...prev, recommendations: next }
         })
@@ -487,22 +520,119 @@ export default function StudyPage() {
   // ── 전체 문제 다이얼로그 필터 ────────────────────────────────
 
   const categories = useMemo(() => {
-    const cats = [...new Set(elawProblems.map((p) => p.category))]
-    return ["전체", ...cats.sort()]
+    const broadCats = new Set(elawProblems.map((p) => mapToBroadCategory(p.category)))
+    return ["전체", ...BROAD_CATEGORY_ORDER.filter((c) => broadCats.has(c))]
   }, [elawProblems])
 
   const filteredProblems = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
     return elawProblems.filter((p) => {
-      const catOk = filterCategory === "전체" || p.category === filterCategory
+      const broad = mapToBroadCategory(p.category)
+      const catOk = filterCategory === "전체" || broad === filterCategory
       const diffOk = filterDifficulty === "전체" || p.difficulty === filterDifficulty
-      return catOk && diffOk
+      const searchOk = !q ||
+        p.question.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
+        (p.subcategory?.toLowerCase().includes(q) ?? false) ||
+        p.skills_required?.some((s) => s.toLowerCase().includes(q))
+      return catOk && diffOk && searchOk
     })
-  }, [elawProblems, filterCategory, filterDifficulty])
+  }, [elawProblems, filterCategory, filterDifficulty, searchQuery])
+
+  // 대분류별 문제 수 (카테고리 필터 제외, 검색·난이도만 적용)
+  const categoryStats = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    return elawProblems.reduce((acc, p) => {
+      const diffOk = filterDifficulty === "전체" || p.difficulty === filterDifficulty
+      const searchOk = !q ||
+        p.question.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
+        (p.subcategory?.toLowerCase().includes(q) ?? false) ||
+        p.skills_required?.some((s) => s.toLowerCase().includes(q))
+      if (diffOk && searchOk) {
+        const broad = mapToBroadCategory(p.category)
+        acc[broad] = (acc[broad] ?? 0) + 1
+      }
+      return acc
+    }, {} as Record<string, number>)
+  }, [elawProblems, filterDifficulty, searchQuery])
+
+  // 대분류 → 원본 카테고리 그룹 (filteredProblems 기반)
+  const groupedByCategory = useMemo(() => {
+    if (filterCategory === "전체") {
+      const broadMap: Record<string, Record<string, ELAWProblem[]>> = {}
+      for (const p of filteredProblems) {
+        const broad = mapToBroadCategory(p.category)
+        if (!broadMap[broad]) broadMap[broad] = {}
+        if (!broadMap[broad][p.category]) broadMap[broad][p.category] = []
+        broadMap[broad][p.category].push(p)
+      }
+      return BROAD_CATEGORY_ORDER
+        .filter((broad) => broad in broadMap)
+        .map((broad) => ({
+          category: broad,
+          total: Object.values(broadMap[broad]).flat().length,
+          subGroups: Object.entries(broadMap[broad])
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .map(([sub, problems]) => ({ sub, problems })),
+        }))
+    } else {
+      const origMap: Record<string, ELAWProblem[]> = {}
+      for (const p of filteredProblems) {
+        if (!origMap[p.category]) origMap[p.category] = []
+        origMap[p.category].push(p)
+      }
+      return [{
+        category: filterCategory,
+        total: filteredProblems.length,
+        subGroups: Object.entries(origMap)
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .map(([sub, problems]) => ({ sub, problems })),
+      }]
+    }
+  }, [filteredProblems, filterCategory])
 
   const openDialog = () => {
     setFilterCategory("전체")
     setFilterDifficulty("전체")
+    setSearchQuery("")
     setDialogOpen(true)
+  }
+
+  const openWeekProblemDialog = (week: CurriculumWeek, displayNum: number) => {
+    const broads = getWeekBroadCategories(week.theme, elawProblems)
+    const broadSet = new Set(broads)
+    const weekProblems = elawProblems.filter((p) => broadSet.has(mapToBroadCategory(p.category)))
+    setWeekAllData({ week, displayNum, problems: weekProblems })
+    setWeekAllDiff("전체")
+    setWeekAllSearch("")
+    setWeekAllOpen(true)
+  }
+
+  const rerollWeekProblem = (weekNum: number, problemId: number, week: CurriculumWeek) => {
+    setWeekRecs((prevRecs) => {
+      setWeekUsedIds((prevUsed) => {
+        const used = new Set(prevUsed[weekNum] ?? [])
+        used.add(problemId)
+        const current = prevRecs[weekNum] ?? []
+        const allUsed = new Set([...current.map((p) => p.id), ...used])
+        const replacement = pickWeekProblems(week, elawProblems, allUsed, 1)
+        if (replacement.length === 0) return prevUsed
+        const idx = current.findIndex((p) => p.id === problemId)
+        if (idx === -1) return prevUsed
+        const next = [...current]
+        next[idx] = replacement[0]
+        setWeekRecs({ ...prevRecs, [weekNum]: next })
+        // 피드백·선택·활성 상태 초기화
+        const oldKey = `${weekNum}-${problemId}`
+        const newKey = `${weekNum}-${replacement[0].id}`
+        setWeekFeedback((f) => { const n = { ...f }; delete n[oldKey]; return n })
+        setWeekChoice((c) => { const n = { ...c }; delete n[oldKey]; n[newKey] = ""; return n })
+        setActiveWeekProblem(null)
+        return { ...prevUsed, [weekNum]: used }
+      })
+      return prevRecs
+    })
   }
 
   // ── 로딩 / 빈 상태 ───────────────────────────────────────────
@@ -565,12 +695,8 @@ export default function StudyPage() {
             variant="outline"
             className="gap-2"
             onClick={openDialog}
-            disabled={problemsLoading}
           >
-            {problemsLoading
-              ? <Loader2 className="h-4 w-4 animate-spin" />
-              : <ListChecks className="h-4 w-4" />
-            }
+            <ListChecks className="h-4 w-4" />
             전체 문제 보기
             {elawProblems.length > 0 && (
               <Badge variant="secondary" className="ml-1 text-xs">
@@ -742,10 +868,7 @@ export default function StudyPage() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                                <span className="text-xs font-medium text-muted-foreground">{rec.category}</span>
-                                {rec.subcategory && (
-                                  <span className="text-xs text-muted-foreground/60">· {rec.subcategory}</span>
-                                )}
+                                <span className="text-xs font-medium text-muted-foreground">{mapToBroadCategory(rec.category)}</span>
                                 <span className={cn(
                                   "rounded px-1.5 py-0 text-xs font-medium",
                                   DIFF_COLOR[rec.difficulty]
@@ -868,9 +991,12 @@ export default function StudyPage() {
 
         {/* ── 주차 아코디언 목록 ────────────────────────── */}
         <div className="space-y-3">
-          {weeks.map((week) => {
+          {weeks
+            .filter((week) => elawProblems.length > 0 && getWeekBroadCategories(week.theme, elawProblems).length > 0)
+            .map((week, displayIdx) => {
+            const displayNum = displayIdx + 1
             const isExpanded = expandedWeek === week.week
-            const recommended = getRecommended(elawProblems, week.week - 1)
+            const recommended = weekRecs[week.week] ?? []
 
             return (
               <Card key={week.week} className={cn(
@@ -891,7 +1017,7 @@ export default function StudyPage() {
                         <p className="font-semibold text-sm">{week.theme}</p>
                         <Badge className="bg-primary/10 text-primary border-0 text-xs gap-1">
                           <GraduationCap className="h-2.5 w-2.5" />
-                          {week.week}주차
+                          {displayNum}주차
                         </Badge>
                       </div>
                       <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
@@ -939,19 +1065,14 @@ export default function StudyPage() {
                           variant="ghost"
                           size="sm"
                           className="h-6 text-xs gap-1 text-primary hover:text-primary"
-                          onClick={(e) => { e.stopPropagation(); openDialog() }}
+                          onClick={(e) => { e.stopPropagation(); openWeekProblemDialog(week, displayNum) }}
                         >
                           <ListChecks className="h-3 w-3" />
                           전체 문제 보기
                         </Button>
                       </div>
 
-                      {problemsLoading ? (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                          문제 불러오는 중...
-                        </div>
-                      ) : recommended.length === 0 ? (
+                      {recommended.length === 0 ? (
                         <p className="text-xs text-muted-foreground py-2">
                           문제 데이터가 없습니다.
                         </p>
@@ -989,7 +1110,7 @@ export default function StudyPage() {
                                     </div>
                                     <p className="text-sm line-clamp-2 text-foreground/80">{p.question}</p>
                                   </div>
-                                  {/* 풀기 / 닫기 / 결과 뱃지 */}
+                                  {/* 풀기 / 닫기 / 결과 뱃지 + 리롤 */}
                                   {!wFeedback ? (
                                     <Button
                                       variant={wActive ? "default" : "outline"}
@@ -1007,16 +1128,27 @@ export default function StudyPage() {
                                       {wActive ? "닫기" : "풀기"}
                                     </Button>
                                   ) : (
-                                    <div className={cn(
-                                      "flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md flex-shrink-0",
-                                      wFeedback.is_correct
-                                        ? "bg-emerald-100 text-emerald-700"
-                                        : "bg-rose-100 text-rose-700"
-                                    )}>
-                                      {wFeedback.is_correct
-                                        ? <><Check className="h-3 w-3" />정답</>
-                                        : <><X className="h-3 w-3" />오답</>
-                                      }
+                                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                                      <div className={cn(
+                                        "flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md",
+                                        wFeedback.is_correct
+                                          ? "bg-emerald-100 text-emerald-700"
+                                          : "bg-rose-100 text-rose-700"
+                                      )}>
+                                        {wFeedback.is_correct
+                                          ? <><Check className="h-3 w-3" />정답</>
+                                          : <><X className="h-3 w-3" />오답</>
+                                        }
+                                      </div>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-7 text-xs gap-1"
+                                        onClick={() => rerollWeekProblem(week.week, p.id, week)}
+                                      >
+                                        <RefreshCw className="h-3 w-3" />
+                                        다른 문제
+                                      </Button>
                                     </div>
                                   )}
                                 </div>
@@ -1135,7 +1267,7 @@ export default function StudyPage() {
 
               {/* 카테고리 */}
               <p className="text-xs text-muted-foreground">
-                {currentQ.category}{currentQ.subcategory ? ` · ${currentQ.subcategory}` : ""}
+                {mapToBroadCategory(currentQ.category)}
               </p>
 
               {/* 문제 */}
@@ -1244,43 +1376,34 @@ export default function StudyPage() {
 
       {/* ── 전체 문제 다이얼로그 ─────────────────────────── */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ListChecks className="h-5 w-5 text-primary" />
-              ELAW 전체 문제
-              <Badge variant="secondary" className="ml-1 font-normal">
-                {filteredProblems.length}개
-              </Badge>
-            </DialogTitle>
-            <p className="text-sm text-muted-foreground">{jobRole} 관련 문제 전체 목록</p>
-          </DialogHeader>
+        <DialogContent className="max-w-4xl h-[88vh] flex flex-col p-0 gap-0 overflow-hidden">
 
-          <div className="flex flex-wrap gap-3 pb-2 border-b">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-              <span className="text-xs text-muted-foreground mr-1">카테고리</span>
-              {categories.slice(0, 7).map((cat) => (
+          {/* 헤더 & 필터 */}
+          <div className="px-5 pt-5 pb-3 border-b shrink-0 space-y-2.5 pr-12">
+            <DialogTitle className="sr-only">직무별 문제 목록</DialogTitle>
+
+            {/* 검색 */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+              <input
+                className="w-full h-8 pl-8 pr-3 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+                placeholder="문제 내용, 카테고리, 스킬 검색..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
                 <button
-                  key={cat}
                   type="button"
-                  onClick={() => setFilterCategory(cat)}
-                  className={cn(
-                    "rounded-full border px-2.5 py-0.5 text-xs font-medium transition-all",
-                    filterCategory === cat
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-card hover:border-primary/50"
-                  )}
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {cat}
+                  <X className="h-3.5 w-3.5" />
                 </button>
-              ))}
-              {categories.length > 7 && (
-                <span className="text-xs text-muted-foreground">외 {categories.length - 7}개</span>
               )}
             </div>
 
-            <div className="flex items-center gap-1.5">
+            {/* 난이도 필터 */}
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-xs text-muted-foreground">난이도</span>
               {["전체", ...DIFF_ORDER].map((d) => (
                 <button
@@ -1300,54 +1423,342 @@ export default function StudyPage() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-            {filteredProblems.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
-                <FileQuestion className="h-10 w-10 opacity-30" />
-                <p className="text-sm">해당 조건의 문제가 없습니다.</p>
-              </div>
-            ) : (
-              filteredProblems.map((p) => (
-                <div
-                  key={p.id}
-                  className="flex items-start gap-3 rounded-lg border bg-card px-4 py-3 hover:border-primary/40 transition-colors"
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0 mt-0.5">
-                    <span className="text-xs font-bold text-primary">Q{p.question_id}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                      <span className="text-xs font-semibold">{p.category}</span>
-                      {p.subcategory && (
-                        <span className="text-xs text-muted-foreground">· {p.subcategory}</span>
+          {/* 카테고리 사이드바 + 문제 목록 */}
+          <div className="flex flex-1 min-h-0">
+
+            {/* 카테고리 사이드바 */}
+            <nav className="w-44 border-r shrink-0 overflow-y-auto py-1.5 bg-muted/20">
+              <button
+                type="button"
+                onClick={() => setFilterCategory("전체")}
+                className={cn(
+                  "w-full text-left px-4 py-2.5 text-sm flex items-center justify-between transition-colors",
+                  filterCategory === "전체"
+                    ? "bg-primary/10 text-primary font-semibold border-r-2 border-primary"
+                    : "hover:bg-muted/60 text-foreground"
+                )}
+              >
+                <span>전체</span>
+                <span className={cn(
+                  "text-xs tabular-nums shrink-0",
+                  filterCategory === "전체" ? "text-primary font-semibold" : "text-muted-foreground"
+                )}>
+                  {filteredProblems.length}
+                </span>
+              </button>
+
+              <div className="my-1.5 mx-3 border-t" />
+
+              {categories
+                .filter((c) => c !== "전체")
+                .map((cat) => {
+                  const count = categoryStats[cat] ?? 0
+                  const isActive = filterCategory === cat
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => count > 0 && setFilterCategory(cat)}
+                      className={cn(
+                        "w-full text-left px-4 py-2 text-sm flex items-center justify-between gap-2 transition-colors",
+                        isActive
+                          ? "bg-primary/10 text-primary font-semibold border-r-2 border-primary"
+                          : count === 0
+                          ? "opacity-35 cursor-default"
+                          : "hover:bg-muted/60 text-foreground"
                       )}
+                    >
+                      <span className="truncate leading-snug">{cat}</span>
                       <span className={cn(
-                        "rounded px-1.5 py-0 text-xs font-medium ml-auto",
-                        DIFF_COLOR[p.difficulty]
+                        "text-xs tabular-nums shrink-0 rounded-full px-1.5 py-0.5 min-w-[1.5rem] text-center",
+                        isActive
+                          ? "bg-primary/20 text-primary"
+                          : "bg-muted text-muted-foreground"
                       )}>
-                        {DIFF_LABEL[p.difficulty] ?? p.difficulty}
+                        {count}
                       </span>
-                    </div>
-                    <p className="text-sm line-clamp-2 text-foreground/80 mb-1.5">{p.question}</p>
-                    {p.skills_required?.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {p.skills_required.slice(0, 4).map((s) => (
-                          <span key={s} className="rounded bg-muted px-1.5 py-0 text-xs text-muted-foreground">
-                            {s}
-                          </span>
-                        ))}
-                        {p.skills_required.length > 4 && (
-                          <span className="text-xs text-muted-foreground">+{p.skills_required.length - 4}</span>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                    </button>
+                  )
+                })}
+            </nav>
+
+            {/* 문제 목록 */}
+            <div className="flex-1 overflow-y-auto">
+              {filteredProblems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground">
+                  <FileQuestion className="h-10 w-10 opacity-30" />
+                  <p className="text-sm">해당 조건의 문제가 없습니다.</p>
+                  {(searchQuery || filterDifficulty !== "전체") && (
+                    <button
+                      type="button"
+                      className="text-xs text-primary hover:underline"
+                      onClick={() => { setSearchQuery(""); setFilterDifficulty("전체") }}
+                    >
+                      필터 초기화
+                    </button>
+                  )}
                 </div>
-              ))
-            )}
+              ) : filterCategory === "전체" ? (
+                /* 전체 보기: 카테고리 → 서브카테고리 그룹 */
+                <div className="p-4 space-y-6">
+                  {groupedByCategory.map(({ category, total, subGroups }) => (
+                    <div key={category}>
+                      {/* 카테고리 헤더 */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="h-px flex-1 bg-border" />
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold uppercase tracking-wider text-foreground/70">
+                            {category}
+                          </span>
+                          <Badge variant="outline" className="text-xs font-normal h-4 px-1.5">
+                            {total}개
+                          </Badge>
+                        </div>
+                        <div className="h-px flex-1 bg-border" />
+                      </div>
+
+                      {/* 원본 카테고리별 문제 */}
+                      <div className="space-y-3">
+                        {subGroups.map(({ sub, problems }) => (
+                          <div key={sub}>
+                            <p className="text-xs font-semibold text-muted-foreground mb-1.5 pl-0.5 flex items-center gap-1">
+                              <span className="inline-block w-1 h-1 rounded-full bg-primary/50" />
+                              {sub}
+                              <span className="font-normal text-muted-foreground/60">({problems.length})</span>
+                            </p>
+                            <div className="space-y-1.5">
+                              {problems.map((p) => (
+                                <div
+                                  key={p.id}
+                                  className="flex items-start gap-3 rounded-lg border bg-card px-3 py-2.5 hover:border-primary/40 hover:bg-primary/[0.02] transition-colors"
+                                >
+                                  <div className="flex h-7 w-10 items-center justify-center rounded-md bg-primary/10 flex-shrink-0 mt-0.5">
+                                    <span className="text-xs font-bold text-primary">Q{p.question_id}</span>
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5 mb-0.5">
+                                      <span className={cn(
+                                        "rounded px-1.5 py-0 text-xs font-medium ml-auto shrink-0",
+                                        DIFF_COLOR[p.difficulty]
+                                      )}>
+                                        {DIFF_LABEL[p.difficulty] ?? p.difficulty}
+                                      </span>
+                                    </div>
+                                    <p className="text-sm line-clamp-2 text-foreground/80">{p.question}</p>
+                                    {p.skills_required?.length > 0 && (
+                                      <div className="flex flex-wrap gap-1 mt-1.5">
+                                        {p.skills_required.slice(0, 3).map((s) => (
+                                          <span key={s} className="rounded bg-muted px-1.5 py-0 text-xs text-muted-foreground">
+                                            {s}
+                                          </span>
+                                        ))}
+                                        {p.skills_required.length > 3 && (
+                                          <span className="text-xs text-muted-foreground">
+                                            +{p.skills_required.length - 3}
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* 특정 카테고리: 서브카테고리별 그룹 */
+                <div className="p-4 space-y-4">
+                  {/* 카테고리 제목 */}
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-sm">{filterCategory}</h3>
+                    <Badge variant="secondary" className="font-normal text-xs">
+                      {filteredProblems.length}개
+                    </Badge>
+                  </div>
+
+                  {groupedByCategory[0]?.subGroups.map(({ sub, problems }) => (
+                    <div key={sub}>
+                      {/* 원본 카테고리 헤더 */}
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-semibold text-muted-foreground">
+                          {sub}
+                        </span>
+                        <span className="text-xs text-muted-foreground/60">
+                          {problems.length}개
+                        </span>
+                        <div className="h-px flex-1 bg-border/60" />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        {problems.map((p) => (
+                          <div
+                            key={p.id}
+                            className="flex items-start gap-3 rounded-lg border bg-card px-3 py-2.5 hover:border-primary/40 hover:bg-primary/[0.02] transition-colors"
+                          >
+                            <div className="flex h-7 w-10 items-center justify-center rounded-md bg-primary/10 flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">Q{p.question_id}</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center mb-0.5">
+                                <span className={cn(
+                                  "rounded px-1.5 py-0 text-xs font-medium ml-auto shrink-0",
+                                  DIFF_COLOR[p.difficulty]
+                                )}>
+                                  {DIFF_LABEL[p.difficulty] ?? p.difficulty}
+                                </span>
+                              </div>
+                              <p className="text-sm line-clamp-2 text-foreground/80">{p.question}</p>
+                              {p.skills_required?.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1.5">
+                                  {p.skills_required.slice(0, 3).map((s) => (
+                                    <span key={s} className="rounded bg-muted px-1.5 py-0 text-xs text-muted-foreground">
+                                      {s}
+                                    </span>
+                                  ))}
+                                  {p.skills_required.length > 3 && (
+                                    <span className="text-xs text-muted-foreground">
+                                      +{p.skills_required.length - 3}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ── 주차별 전체 문제 다이얼로그 ───────────────────── */}
+      {weekAllData && (() => {
+        const { week, displayNum: wDisplayNum, problems } = weekAllData
+        const q = weekAllSearch.trim().toLowerCase()
+        const filtered = problems.filter((p) => {
+          const diffOk = weekAllDiff === "전체" || p.difficulty === weekAllDiff
+          const searchOk = !q ||
+            p.question.toLowerCase().includes(q) ||
+            p.category.toLowerCase().includes(q) ||
+            p.skills_required?.some((s) => s.toLowerCase().includes(q))
+          return diffOk && searchOk
+        })
+        const grouped = Object.entries(
+          filtered.reduce<Record<string, ELAWProblem[]>>((acc, p) => {
+            if (!acc[p.category]) acc[p.category] = []
+            acc[p.category].push(p)
+            return acc
+          }, {})
+        ).sort((a, b) => a[0].localeCompare(b[0]))
+
+        return (
+          <Dialog open={weekAllOpen} onOpenChange={setWeekAllOpen}>
+            <DialogContent className="max-w-2xl h-[88vh] flex flex-col p-0 gap-0 overflow-hidden">
+              {/* 헤더 */}
+              <div className="px-5 pt-5 pb-3 border-b shrink-0 space-y-3 pr-12">
+                <div>
+                  <DialogTitle className="text-base font-bold flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-primary" />
+                    {wDisplayNum}주차 관련 문제
+                  </DialogTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">{week.theme} · 총 {problems.length}개</p>
+                </div>
+
+                {/* 검색 */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                  <input
+                    className="w-full h-8 pl-8 pr-3 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+                    placeholder="문제 내용, 카테고리, 스킬 검색..."
+                    value={weekAllSearch}
+                    onChange={(e) => setWeekAllSearch(e.target.value)}
+                  />
+                  {weekAllSearch && (
+                    <button type="button" onClick={() => setWeekAllSearch("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* 난이도 */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-xs text-muted-foreground">난이도</span>
+                  {["전체", ...DIFF_ORDER].map((d) => (
+                    <button key={d} type="button" onClick={() => setWeekAllDiff(d)}
+                      className={cn(
+                        "rounded-full border px-2.5 py-0.5 text-xs font-medium transition-all",
+                        weekAllDiff === d
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-card hover:border-primary/50"
+                      )}>
+                      {d === "전체" ? "전체" : DIFF_LABEL[d]}
+                    </button>
+                  ))}
+                  <span className="ml-auto text-xs text-muted-foreground tabular-nums">{filtered.length}개</span>
+                </div>
+              </div>
+
+              {/* 문제 목록 */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-5">
+                {filtered.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground">
+                    <FileQuestion className="h-10 w-10 opacity-30" />
+                    <p className="text-sm">해당 조건의 문제가 없습니다.</p>
+                  </div>
+                ) : grouped.map(([cat, catProblems]) => (
+                  <div key={cat}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs font-semibold text-muted-foreground">{cat}</span>
+                      <span className="text-xs text-muted-foreground/60">{catProblems.length}개</span>
+                      <div className="h-px flex-1 bg-border/60" />
+                    </div>
+                    <div className="space-y-1.5">
+                      {catProblems.map((p) => (
+                        <div key={p.id}
+                          className="flex items-start gap-3 rounded-lg border bg-card px-3 py-2.5 hover:border-primary/40 hover:bg-primary/[0.02] transition-colors">
+                          <div className="flex h-7 w-10 items-center justify-center rounded-md bg-primary/10 flex-shrink-0 mt-0.5">
+                            <span className="text-xs font-bold text-primary">Q{p.question_id}</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <span className={cn(
+                                "rounded px-1.5 py-0 text-xs font-medium ml-auto shrink-0",
+                                DIFF_COLOR[p.difficulty]
+                              )}>
+                                {DIFF_LABEL[p.difficulty] ?? p.difficulty}
+                              </span>
+                            </div>
+                            <p className="text-sm line-clamp-2 text-foreground/80">{p.question}</p>
+                            {p.skills_required?.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1.5">
+                                {p.skills_required.slice(0, 3).map((s) => (
+                                  <span key={s} className="rounded bg-muted px-1.5 py-0 text-xs text-muted-foreground">{s}</span>
+                                ))}
+                                {p.skills_required.length > 3 && (
+                                  <span className="text-xs text-muted-foreground">+{p.skills_required.length - 3}</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+        )
+      })()}
     </div>
   )
 }
