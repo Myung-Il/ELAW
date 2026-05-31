@@ -77,7 +77,49 @@ python manage.py seed_all
 
 > 완료 후 `[완료] 시드 데이터 생성 완료!` 메시지가 출력되면 정상입니다.
 
-### 2-5. 백엔드 서버 시작
+### 2-5. 문제 데이터 적재 (최초 1회)
+
+`seed_all`은 사용자·공고·학습 이력만 생성하며, **실제 문제 데이터(직군별 문제·학습 경로)는 포함하지 않습니다.**
+이 단계를 건너뛰면 "공부 목록 → 전체 문제 보기"와 AI 진단 퀴즈에 문제가 표시되지 않습니다.
+
+```bash
+python manage.py load_problems --problems_dir ../DB/JobProblems --paths_dir ../DB/LearningPaths
+```
+
+> - 반드시 `backend/` 디렉터리에서 실행합니다 (경로 `../DB/...`가 프로젝트 루트의 `DB` 폴더를 가리킵니다).
+> - **수 분이 소요됩니다.** 6,000문제 + 학습 경로 30개를 적재하므로 중간에 멈추지 말고 기다리세요.
+> - 적재 중 `[경고] 문제 없음: ... Q...→Q...` 메시지가 일부 출력되는 것은 정상입니다 (학습 경로 그래프의 일부 참조가 누락된 것으로, 기능에 영향 없음).
+> - 완료 후 아래와 같은 요약이 출력되면 정상입니다.
+>   ```
+>   [완료] 적재 완료
+>      JobProblem        : 6000개
+>      JobProblemCluster : 5000개 이상
+>      ProblemEdge       : 15000개 이상
+>      LearningPathMeta  : 30개
+>   ```
+
+### 2-6. 기업공고 데이터 적재 (선택 — 실제 채용 데이터 노출)
+
+`seed_all`은 카카오·네이버·라인 형태의 샘플 공고 26건만 생성합니다.
+HuggingFace 데이터셋(`recuse/synthetic_resume_jd_raw_dataset`)의 **실제 직무·회사명**을 기업공고 화면에 노출하려면 아래를 실행합니다.
+
+```bash
+python manage.py load_dataset --postings
+```
+
+> - 데이터셋을 다운로드해 `DatasetEntry`로 적재한 뒤, 직무·경력·회사명을 파싱해 **기업공고(JobPosting)** 로 변환합니다.
+> - 생성 결과: 11개 기업(Google·Meta·Amazon·Apple·Tesla·OpenAI 등) × 30개 직무 × 4개 경력 = **약 1,320건 공고**.
+> - **수 분이 소요됩니다** (전체 2,640행 적재). 처음 한 번만 받으면 이후 캐시되어 빠릅니다.
+> - 인터넷 연결이 필요합니다. HF 토큰 관련 경고(`unauthenticated requests`)는 무시해도 됩니다.
+> - 다시 실행해 깨끗이 갈아끼우려면: `python manage.py load_dataset --skip-load --postings --reset-postings`
+>   (`--skip-load`는 다운로드를 건너뛰고 기존 적재분으로 공고만 재생성합니다.)
+
+> **중요 — 모든 데이터 적재는 서버를 켜기 전에 하세요.**
+> SQLite는 동시 쓰기를 허용하지 않습니다. 백엔드 서버(`runserver`)가 실행 중인 상태에서 `seed_all`·`load_problems`·`load_dataset`을 실행하면
+> `database is locked` 오류가 발생합니다. **migrate → seed_all → load_problems → load_dataset 을 모두 끝낸 뒤 2-7 단계에서 서버를 시작하세요.**
+> (이미 서버를 켠 상태라면 서버를 종료한 후 적재하고, 적재 완료 후 다시 시작하면 됩니다.)
+
+### 2-7. 백엔드 서버 시작
 
 ```bash
 python manage.py runserver
@@ -161,7 +203,11 @@ ollama run mybot   # 첫 실행 시 모델 다운로드 (수 분 소요)
 | `No module named 'rest_framework'` | 의존성 미설치 | `pip install -r requirements.txt` 재실행 |
 | `Error: Cannot find module 'next'` | npm 패키지 미설치 | `frontend/` 에서 `npm install` 실행 |
 | 포트 충돌 (`port already in use`) | 이미 실행 중인 서버 | 기존 프로세스 종료 후 재시작 |
-| 백엔드 API 연결 안 됨 (CORS) | 백엔드 서버 미기동 | 2단계 2-5 확인 |
+| 백엔드 API 연결 안 됨 (CORS) | 백엔드 서버 미기동 | 2단계 2-7 확인 |
+| `database is locked` | 서버 실행 중 데이터 적재 시도 (SQLite 잠금) | 서버 종료 후 `seed_all`·`load_problems`·`load_dataset` 실행, 완료 후 서버 재시작 |
+| 문제 목록·진단 퀴즈가 비어 있음 | 문제 데이터 미적재 | 2단계 2-5 `load_problems` 실행 |
+| 기업공고가 샘플(카카오/네이버/라인)만 보임 | 데이터셋 미적재 | 2단계 2-6 `load_dataset --postings` 실행 |
+| `UnicodeEncodeError: 'cp949' codec...` | 한국어 콘솔에서 이모지 출력 (구버전) | 최신 코드로 갱신 (`load_dataset`이 출력 인코딩을 UTF-8로 자동 설정) |
 
 ---
 
@@ -174,7 +220,9 @@ ollama run mybot   # 첫 실행 시 모델 다운로드 (수 분 소요)
 [ ] pip install -r requirements.txt (루트에서)
 [ ] python manage.py migrate (backend/ 에서)
 [ ] python manage.py seed_all (backend/ 에서)
-[ ] python manage.py runserver → http://localhost:8000 확인
+[ ] python manage.py load_problems --problems_dir ../DB/JobProblems --paths_dir ../DB/LearningPaths (backend/ 에서, 수 분 소요)
+[ ] python manage.py load_dataset --postings (backend/ 에서, 선택 — 실제 채용 데이터, 수 분 소요)
+[ ] (적재 완료 후) python manage.py runserver → http://localhost:8000 확인
 [ ] npm install (frontend/ 에서)
 [ ] npm run dev → http://localhost:3000 확인
 [ ] 브라우저에서 로그인 테스트
