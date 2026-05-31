@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -31,6 +31,92 @@ interface JobDetail {
   is_applied: boolean
   my_match_score: number | null
   my_match_status: string | null
+}
+
+// ─────────────────────────────────────────
+// 직무 소개 렌더러
+// 데이터셋 JD 원문은 **볼드**·"- 불릿"·"---" 구분선·빈 줄 단락이 섞인
+// 마크다운 형태다. 그대로 <p>에 넣으면 줄바꿈이 사라져 한 덩어리로 보이므로,
+// 줄 단위로 파싱해 헤더/불릿/단락으로 구조화해 렌더링한다.
+// ─────────────────────────────────────────
+
+// 인라인 **볼드** → <strong>
+function renderInline(text: string, keyPrefix: string): ReactNode[] {
+  return text.split(/(\*\*[^*]+\*\*)/g).filter(Boolean).map((part, i) => {
+    const m = part.match(/^\*\*([^*]+)\*\*$/)
+    return m
+      ? <strong key={`${keyPrefix}-${i}`} className="font-semibold text-foreground">{m[1]}</strong>
+      : <span key={`${keyPrefix}-${i}`}>{part}</span>
+  })
+}
+
+function JobDescription({ text }: { text: string }) {
+  if (!text?.trim()) {
+    return <p className="text-sm text-muted-foreground">등록된 직무 소개가 없습니다.</p>
+  }
+
+  const lines = text.replace(/\r\n/g, "\n").split("\n")
+  const blocks: ReactNode[] = []
+  let bullets: string[] = []
+
+  const flushBullets = () => {
+    if (bullets.length === 0) return
+    const items = [...bullets]
+    bullets = []
+    blocks.push(
+      <ul key={`ul-${blocks.length}`} className="mb-4 space-y-1.5">
+        {items.map((it, i) => (
+          <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground leading-relaxed">
+            <span className="mt-[7px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary/60" />
+            <span>{renderInline(it, `li-${blocks.length}-${i}`)}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  lines.forEach((raw, idx) => {
+    const line = raw.trim()
+    if (!line) { flushBullets(); return }
+    if (/^-{3,}$/.test(line)) { flushBullets(); return }   // 구분선 → 무시
+
+    const bullet = line.match(/^[-*•]\s+(.+)$/)
+    if (bullet) { bullets.push(bullet[1]); return }
+    flushBullets()
+
+    // "**라벨:** 값"  (헤더 + 값이 같은 줄)
+    const labeled = line.match(/^\*\*(.+?):\*\*\s*(.+)$/)
+    if (labeled) {
+      blocks.push(
+        <p key={idx} className="mb-2 text-sm leading-relaxed">
+          <span className="font-semibold text-foreground">{labeled[1]}</span>
+          <span className="text-muted-foreground">{` ${labeled[2]}`}</span>
+        </p>
+      )
+      return
+    }
+
+    // "**...**" 한 줄 전체 → 섹션 헤더
+    const heading = line.match(/^\*\*(.+?)\*\*$/)
+    if (heading) {
+      blocks.push(
+        <h4 key={idx} className="mt-5 mb-2 text-sm font-semibold text-foreground first:mt-0">
+          {heading[1].replace(/:$/, "")}
+        </h4>
+      )
+      return
+    }
+
+    // 일반 단락
+    blocks.push(
+      <p key={idx} className="mb-3 text-sm text-muted-foreground leading-relaxed">
+        {renderInline(line, `p-${idx}`)}
+      </p>
+    )
+  })
+  flushBullets()
+
+  return <div>{blocks}</div>
 }
 
 export default function JobDetailPage() {
@@ -191,7 +277,9 @@ export default function JobDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{job.description}</p>
+                <div className="mb-4">
+                  <JobDescription text={job.description} />
+                </div>
 
                 {job.required_skills?.length > 0 && (
                   <div className="mb-4">

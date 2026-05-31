@@ -53,6 +53,19 @@ interface Goal {
   job_role: string
 }
 
+// 마크다운 마커(**, -, ---)를 제거한 평문 미리보기 (카드 2줄 요약용)
+function toPlainPreview(md?: string): string {
+  if (!md) return ""
+  return md
+    .replace(/\r\n/g, "\n")
+    .replace(/\*\*/g, "")
+    .replace(/^\s*[-*•]\s+/gm, "")
+    .replace(/^\s*-{3,}\s*$/gm, "")
+    .replace(/\s*\n\s*/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim()
+}
+
 // 기업명 → 이니셜
 function getCompanyInitial(name: string): string {
   const ascii = name.match(/[A-Za-z]/)
@@ -113,15 +126,12 @@ export default function JobsPage() {
       .catch(() => {})
   }, [])
 
-  // 전체 직무 목록 로드
+  // 전체 직무 목록 로드 (roles_only: 페이지네이션과 무관하게 전체 직무 반환)
   useEffect(() => {
-    api.get<JobsResponse | JobPosting[]>("/api/jobs/?active_only=true")
-      .then((data: JobsResponse | JobPosting[]) => {
-        const list: JobPosting[] = Array.isArray(data)
-          ? data
-          : ((data as JobsResponse).data ?? (data as JobsResponse).results ?? [])
-        const roles = Array.from(new Set(list.map((j) => j.job_role).filter(Boolean)))
-        setRoleFilters(roles)
+    api.get<{ data?: string[] } | string[]>("/api/jobs/?active_only=true&roles_only=true")
+      .then((data) => {
+        const roles: string[] = Array.isArray(data) ? data : (data?.data ?? [])
+        setRoleFilters(Array.from(new Set(roles.filter(Boolean))))
       })
       .catch(() => {})
   }, [])
@@ -155,6 +165,7 @@ export default function JobsPage() {
       if (search) params.set("q", search)
       if (selectedRole !== "전체") params.set("job_role", selectedRole)
       params.set("active_only", "true")
+      params.set("limit", "100")   // 데이터셋 공고가 많아 한 번에 더 노출
 
       const data = await api.get<JobsResponse | JobPosting[]>(`/api/jobs/?${params}`)
       const list = Array.isArray(data)
@@ -330,7 +341,7 @@ export default function JobsPage() {
                     <CardTitle className="text-base">{job.company?.name}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{job.description}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{toPlainPreview(job.description)}</p>
                     <div className="flex items-center gap-2 flex-wrap">
                       <Briefcase className="h-3 w-3 text-primary flex-shrink-0" />
                       <Badge variant="outline" className="text-xs">{job.job_role}</Badge>

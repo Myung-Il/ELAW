@@ -72,6 +72,16 @@ class JobListView(APIView):
         if active_only != 'false':
             qs = qs.filter(is_active=True)
 
+        # 직무 필터 UI 전용: 페이지네이션과 무관하게 전체 직무 목록을 반환
+        if request.query_params.get('roles_only', '').lower() == 'true':
+            roles = (qs.exclude(job_role__isnull=True).exclude(job_role='')
+                       .values_list('job_role', flat=True).distinct().order_by('job_role'))
+            return Response({
+                "message": "직무 목록 조회 성공",
+                "count": len(roles),
+                "data": list(roles),
+            }, status=status.HTTP_200_OK)
+
         q = request.query_params.get('q', '').strip()
         if q:
             qs = qs.filter(
