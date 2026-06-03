@@ -19,6 +19,22 @@ if errorlevel 1 (
 )
 for /f "tokens=*" %%i in ('node --version') do echo [OK] Node %%i
 
+:: Check Ollama and register mybot model
+ollama --version >nul 2>&1
+if errorlevel 1 (
+    echo [WARNING] Ollama not found. Portfolio AI will be unavailable.
+) else (
+    ollama list 2>nul | findstr /i "mybot" >nul
+    if errorlevel 1 (
+        echo [INFO] Registering mybot model with Ollama...
+        ollama pull gemma2:2b
+        ollama create mybot -f models\portfolio\Modelfile
+        echo [OK] mybot model registered
+    ) else (
+        echo [OK] mybot model already registered
+    )
+)
+
 if not exist "backend\.env" (
     echo [INFO] Creating .env...
     copy "backend\.env.example" "backend\.env" >nul
@@ -38,13 +54,14 @@ if errorlevel 1 (
     echo [INFO] Installing packages...
     pip install -r requirements.txt
 )
+pip install datasets -q
 echo [OK] Packages ready
 
 cd backend
 python manage.py migrate -v 0 >nul 2>&1
 echo [OK] DB migrated
 
-:: Step 1 - load_problems (skip if already loaded)
+:: Step 1 - load_problems
 python manage.py shell -c "from core.models_problems import JobProblem; exit(0 if JobProblem.objects.exists() else 1)" >nul 2>&1
 if errorlevel 1 (
     echo [INFO] Loading problem data...
@@ -54,7 +71,7 @@ if errorlevel 1 (
     echo [OK] Problems already loaded. Skipping.
 )
 
-:: Step 2 - load_dataset (skip if already loaded)
+:: Step 2 - load_dataset
 python manage.py shell -c "from core.models_dataset import DatasetEntry; exit(0 if DatasetEntry.objects.exists() else 1)" >nul 2>&1
 if errorlevel 1 (
     echo [INFO] Loading HuggingFace dataset...
@@ -64,7 +81,7 @@ if errorlevel 1 (
     echo [OK] Dataset already loaded. Skipping.
 )
 
-:: Step 3 - seed_all (skip if already seeded)
+:: Step 3 - seed_all
 python manage.py shell -c "from core.models import JobPosting; exit(0 if JobPosting.objects.exists() else 1)" >nul 2>&1
 if errorlevel 1 (
     echo [INFO] Seeding initial data...
