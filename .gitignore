@@ -87,3 +87,11 @@ backup_*/
 /frontend_err.txt
 /frontend_log.txt
 /test.txt
+
+# AI 모델 관련 (대용량)
+models/portfolio/llama.cpp/
+models/portfolio/portfolio_lora_v2/
+models/portfolio/portfolio_merged.gguf
+models/portfolio/*.gguf
+*.safetensors
+merge_model.py
