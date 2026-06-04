@@ -468,8 +468,13 @@ function ProfilePageInner() {
                       const cfg = STATUS_CFG[app.status]
                       const Icon = cfg?.icon || Clock
                       const date = new Date(app.applied_at || app.updated_at).toLocaleDateString("ko-KR")
+                      // 지원 완료 → 작성한 포트폴리오 화면, 그 외(스크랩 등) → 공고 상세
+                      const href =
+                        app.status === "applied"
+                          ? `/jobs/${app.posting.id}/apply`
+                          : `/jobs/${app.posting.id}`
                       return (
-                        <Link href={`/jobs/${app.posting.id}`} key={app.id}>
+                        <Link href={href} key={app.id}>
                           <div className="flex items-center gap-4 rounded-xl border p-4 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group">
                             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-sm flex-shrink-0">
                               {app.posting.company.name.charAt(0)}

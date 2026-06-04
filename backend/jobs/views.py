@@ -534,8 +534,28 @@ class JobApplyView(APIView):
         }
 
     202 응답 즉시 반환 — 실제 생성은 2~4분 (CPU 추론)
+
+    GET /api/jobs/<id>/apply/
+        이 공고를 대상으로 작성한 내 최신 포트폴리오 반환 (없으면 404).
+        프로필 > 지원 현황에서 '지원 완료' 항목 클릭 시 사용.
     """
     permission_classes = [IsAuthenticated]
+
+    def get(self, request, posting_id):
+        # content_json metadata 의 target_posting_id 로 매칭 (사용자당 포트폴리오
+        # 수가 적어 Python 순회로 충분 — JSONField 중첩 배열 쿼리는 DB별 차이가 큼)
+        for portfolio in Portfolio.objects.filter(user=request.user).order_by('-version'):
+            cj = portfolio.content_json or {}
+            sections = cj.get('sections', []) if isinstance(cj, dict) else []
+            meta = next((s for s in sections if isinstance(s, dict) and s.get('type') == 'metadata'), None)
+            if meta and meta.get('target_posting_id') == posting_id:
+                return Response({
+                    "message": "이 공고에 작성한 포트폴리오를 찾았습니다.",
+                    "portfolio": PortfolioDetailSerializer(portfolio).data,
+                }, status=status.HTTP_200_OK)
+        return Response({
+            "message": "이 공고에 작성한 포트폴리오가 없습니다.",
+        }, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, posting_id):
         # 1. 공고 조회

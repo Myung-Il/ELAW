@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -48,15 +48,53 @@ export default function ApplyPage() {
   const router = useRouter()
   const jobId = params.id as string
 
-  type Phase = "input" | "generating" | "edit" | "error"
-  const [phase, setPhase] = useState<Phase>("input")
+  type Phase = "loading" | "input" | "generating" | "edit" | "error"
+  const [phase, setPhase] = useState<Phase>("loading")
   const [experience, setExperience] = useState("")
   const [portfolioId, setPortfolioId] = useState<number | null>(null)
   const [content, setContent] = useState("")
   const [originalContentJson, setOriginalContentJson] = useState<PortfolioObject["content_json"] | null>(null)
+  const [loadedExisting, setLoadedExisting] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const [saveLabel, setSaveLabel] = useState("저장하기")
+
+  // 진입 시 이 공고에 이미 작성한 포트폴리오가 있으면 바로 편집 화면으로
+  // (프로필 > 지원 현황의 '지원 완료' 항목 클릭 흐름)
+  useEffect(() => {
+    let cancelled = false
+    api
+      .get<PortfolioResponse>(`/api/jobs/${jobId}/apply/`)
+      .then((raw) => {
+        if (cancelled) return
+        const portfolio = raw.portfolio ?? raw.data
+        const cj = portfolio?.content_json
+        const genStatus = cj != null && typeof cj === "object" ? cj.status : undefined
+        // 생성 완료된 본문이 있을 때만 편집 화면으로 (generating/error placeholder는 무시)
+        if (portfolio?.id !== undefined && genStatus !== "generating" && extractPortfolioBody(cj ?? null)) {
+          setPortfolioId(portfolio.id)
+          setOriginalContentJson(cj ?? null)
+          setContent(extractPortfolioBody(cj ?? null))
+          // '다시 생성' 대비 — 당시 입력했던 경력도 복원
+          if (cj != null && typeof cj === "object" && Array.isArray(cj.sections)) {
+            const meta = cj.sections.find((s) => s.type === "metadata") as
+              | { user_input_experience?: string }
+              | undefined
+            if (meta?.user_input_experience) setExperience(meta.user_input_experience)
+          }
+          setLoadedExisting(true)
+          setPhase("edit")
+        } else {
+          setPhase("input")
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setPhase("input") // 404(미작성) 포함 — 생성 화면으로
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [jobId])
 
   const handleGenerate = async () => {
     if (!experience.trim()) return
@@ -208,6 +246,13 @@ export default function ApplyPage() {
           </Card>
         )}
 
+        {/* 기존 포트폴리오 확인 중 */}
+        {phase === "loading" && (
+          <div className="flex justify-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        )}
+
         {/* 단계 1: 경력 입력 */}
         {(phase === "input" || phase === "error") && (
           <Card className="shadow-sm">
@@ -233,7 +278,7 @@ export default function ApplyPage() {
                 className="w-full gap-2 font-semibold"
                 size="lg"
                 onClick={handleGenerate}
-                disabled={!experience.trim() || phase === "generating"}
+                disabled={!experience.trim()}
               >
                 <Sparkles className="h-4 w-4" />
                 AI 포트폴리오 생성 (2~4분 소요)
@@ -250,9 +295,11 @@ export default function ApplyPage() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-primary" />
-                    AI 생성 포트폴리오 초안
+                    {loadedExisting ? "작성한 포트폴리오" : "AI 생성 포트폴리오 초안"}
                   </CardTitle>
-                  <Badge variant="outline" className="text-xs">내용을 자유롭게 수정하세요</Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {loadedExisting ? "이 공고에 제출한 포트폴리오입니다 — 수정 후 다시 저장할 수 있어요" : "내용을 자유롭게 수정하세요"}
+                  </Badge>
                 </div>
               </CardHeader>
               <CardContent>
