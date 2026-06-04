@@ -23,9 +23,12 @@
 Frontend   Next.js 16 · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui
 Backend    Django 6 · Django REST Framework · JWT 인증
 ML Models  GKT · SAKT · DKT (순수 Python, Django 의존 없음)
-Database   SQLite (개발) / MySQL (운영)
+Database   Supabase Postgres (운영) / SQLite (로컬 폴백)
 AI         Gemini 2.0 Flash (커리큘럼) · Ollama mybot (포트폴리오)
+Deploy     Vercel (프론트, main push 자동 배포) + Cloudflare Tunnel (백엔드 공개)
 ```
+
+> 🚀 **시연·배포·DB 관리 절차는 [docs/OPERATIONS.md](docs/OPERATIONS.md) 참고** — 세션이 바뀌어도 이 문서대로 따라하면 전체 시스템을 재기동할 수 있다.
 
 ---
 
