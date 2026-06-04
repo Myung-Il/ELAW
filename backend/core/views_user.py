@@ -2,7 +2,7 @@
 core/views_user.py
 
 신규 사용자 온보딩 API
-- POST /api/core/goals/                목표 등록 → Gemini 커리큘럼 자동 생성
+- POST /api/core/goals/                목표 등록 → 기업공고 기반 커리큘럼 자동 생성 (use_ai=true 시 Gemini)
 - GET  /api/core/goals/                내 목표 조회
 - PATCH /api/core/curriculum/<id>/     커리큘럼 주차 수정
 - POST /api/core/matches/generate/     매칭 점수 계산 및 저장
@@ -172,12 +172,110 @@ def default_curriculum(goal, topics=None, required_skills=None, duration_weeks=8
 
 
 # ────────────────────────────────────────
+# 기업공고 기반 커리큘럼 생성 (기본 경로 — Gemini 미사용)
+# ────────────────────────────────────────
+
+# 온보딩 한글 직무명 → JobPosting DB 직무명 매핑
+_POSTING_ROLE_MAP = {
+    "백엔드 개발자":            "Backend Engineer",
+    "프론트엔드 개발자":        "Frontend Developer",
+    "풀스택 개발자":            "Full Stack Engineer",
+    "데이터 사이언티스트":      "Data Scientist",
+    "데이터 사이언스":          "Data Scientist",
+    "데이터 과학자":            "Data Scientist",
+    "AI/ML 엔지니어":           "AI Engineer",
+    "AI 엔지니어":              "AI Engineer",
+    "ML 엔지니어":              "Machine Learning Researcher",
+    "머신러닝":                 "Machine Learning Researcher",
+    "DevOps/클라우드 엔지니어": "DevOps Engineer",
+    "DevOps":                   "DevOps Engineer",
+    "클라우드 인프라":          "Cloud Infrastructure Engineer",
+    "모바일 개발자":            "Mobile App Developer",
+    "보안 엔지니어":            "Security Engineer",
+    "네트워크/보안":            "Security Engineer",
+    "소프트웨어 개발":          "Software Engineer",
+    "게임 개발자":              "Game Developer",
+    "임베디드 시스템":          "Embedded Systems Engineer",
+    "컴퓨터 비전":              "Computer Vision Engineer",
+    "QA 엔지니어":              "Quality Assurance Engineer (QA)",
+    "SRE":                      "Site Reliability Engineer (SRE)",
+}
+
+
+def resolve_posting_job_role(job_role: str):
+    """한글 목표 직무명 → JobPosting.job_role 해석 (매칭 실패 시 None)"""
+    from core.models import JobPosting
+
+    if not job_role:
+        return None
+    # 1. 정확히 일치
+    if JobPosting.objects.filter(job_role=job_role, is_active=True).exists():
+        return job_role
+    # 2. 딕셔너리 매핑
+    mapped = _POSTING_ROLE_MAP.get(job_role)
+    if mapped and JobPosting.objects.filter(job_role=mapped, is_active=True).exists():
+        return mapped
+    # 3. 부분 문자열 대소문자 무시 매칭
+    roles = (
+        JobPosting.objects.filter(is_active=True)
+        .exclude(job_role__isnull=True)
+        .values_list("job_role", flat=True)
+        .distinct()
+    )
+    low = job_role.lower()
+    for role in roles:
+        if low in role.lower() or role.lower() in low:
+            return role
+    return None
+
+
+def posting_based_curriculum(goal, topics=None, required_skills=None, duration_weeks=8):
+    """
+    기업공고(JobPosting) 기반 커리큘럼 생성 — JobStudyView의 공고 맞춤 로직을 모방.
+
+    사용자가 온보딩에서 선택한 분야(field)·직무(job_role)에 해당하는 활성 공고들의
+    필수/우대 기술을 빈도순으로 집계해 주차 테마로 사용한다.
+    배치 원칙은 JobStudyView와 동일: 필수 기술 먼저, 우대 기술은 중반 이후.
+    """
+    from collections import Counter
+    from core.models import JobPosting
+
+    resolved_role = resolve_posting_job_role(goal.job_role)
+
+    req_counter, pref_counter = Counter(), Counter()
+    if resolved_role:
+        postings = JobPosting.objects.filter(job_role=resolved_role, is_active=True)
+        for req, pref in postings.values_list("required_skills", "preferred_skills"):
+            req_counter.update(s for s in (req or []) if s)
+            pref_counter.update(s for s in (pref or []) if s)
+
+    # 요청에서 직접 넘어온 필수 스킬 → 공고 필수 기술(빈도순) → 공고 우대 기술(빈도순)
+    skills = list(required_skills or [])
+    skills += [s for s, _ in req_counter.most_common() if s not in skills]
+    skills += [s for s, _ in pref_counter.most_common() if s not in skills]
+
+    content = default_curriculum(
+        goal,
+        topics=topics,              # 사용자가 선택한 집중 학습 주제를 최우선 배치
+        required_skills=skills,
+        duration_weeks=duration_weeks,
+    )
+    content["source"] = "job_postings" if resolved_role else "default"
+    content["source_job_role"] = resolved_role
+    return content
+
+
+# ────────────────────────────────────────
 # 목표 등록 → 커리큘럼 자동 생성
 # ────────────────────────────────────────
 class GoalView(APIView):
     """
     GET  /api/core/goals/  → 내 목표 조회
-    POST /api/core/goals/  → 목표 등록 + Gemini 커리큘럼 자동 생성
+    POST /api/core/goals/  → 목표 등록 + 커리큘럼 자동 생성
+
+    커리큘럼은 기본적으로 사용자가 선택한 분야·직무에 해당하는
+    기업공고(JobPosting)의 필수/우대 기술을 집계해 생성한다 (Gemini 미사용).
+    "use_ai": true 를 함께 보내면 Gemini 생성을 시도하고, 실패 시 공고 기반으로 폴백한다.
 
     요청 예시:
     {
@@ -213,7 +311,7 @@ class GoalView(APIView):
         return Response(goals)
 
     def post(self, request):
-        from core.models import UserGoal, Curriculum, LearningStats, SolveHistory
+        from core.models import UserGoal, Curriculum
         from datetime import date, timedelta
 
         # ── 입력값 검증 ──────────────────────────
@@ -246,11 +344,61 @@ class GoalView(APIView):
             is_active      = True,
         )
 
-        # ── Gemini로 커리큘럼 생성 ────────────────
-        solve_count = SolveHistory.objects.filter(user=request.user).count()
+        # ── 커리큘럼 생성 ────────────────────────
+        # 기본: 기업공고(JobPosting) 기반 생성 — Gemini 미사용.
+        # 요청에 use_ai=true 를 명시한 경우에만 Gemini를 시도하고,
+        # 실패하면 동일하게 공고 기반으로 폴백한다.
+        use_ai = str(request.data.get("use_ai", "")).lower() in ("1", "true", "yes")
+
+        raw, parsed = None, None
+        if use_ai:
+            raw, parsed = self._generate_with_gemini(
+                request.user, field, job_role, topics, duration_weeks
+            )
+            if not parsed:
+                logger.warning(
+                    "Gemini 커리큘럼 생성 실패 — 공고 기반 커리큘럼으로 대체 (user_id=%s)",
+                    request.user.id,
+                )
+
+        content = parsed or posting_based_curriculum(
+            goal,
+            topics=topics,
+            required_skills=required_skills,
+            duration_weeks=duration_weeks,
+        )
+
+        curriculum = Curriculum.objects.create(
+            user         = request.user,
+            goal         = goal,
+            is_active    = True,
+            version      = 1,
+            content_json = content,
+        )
+
+        return Response(
+            {
+                "message":       "목표가 등록되고 커리큘럼이 생성되었습니다.",
+                "goal_id":       goal.id,
+                "curriculum_id": curriculum.id,
+                "field":         field,
+                "job_role":      job_role,
+                "duration_weeks": duration_weeks,
+                "curriculum_weeks": content.get("total_weeks"),
+                "curriculum_source": content.get("source", "gemini" if parsed else None),
+                "ai_generated":  parsed is not None,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    def _generate_with_gemini(self, user, field, job_role, topics, duration_weeks):
+        """use_ai=true 요청 시에만 호출되는 Gemini 커리큘럼 생성 (선택 기능)"""
+        from core.models import LearningStats, SolveHistory
+
+        solve_count = SolveHistory.objects.filter(user=user).count()
         _stats = list(
             LearningStats.objects.filter(
-                user=request.user, stat_type__in=["algo_tag", "language"]
+                user=user, stat_type__in=["algo_tag", "language"]
             ).values_list("stat_type", "stat_key")
         )
         tags  = [k for t, k in _stats if t == "algo_tag"]
@@ -285,38 +433,9 @@ class GoalView(APIView):
 [JSON만 출력 — 코드블록·설명 텍스트 없이 순수 JSON]
 {{"total_weeks":{duration_weeks},"field":"{field}","job_role":"{job_role}","weeks":[{{"week":1,"theme":"구체적 주제명","tasks":["과제1","과제2","과제3"],"recommended_problems":["문제번호"],"estimated_hours":10}}]}}"""
 
-        raw    = call_gemini(request.user, prompt, "curriculum")
+        raw    = call_gemini(user, prompt, "curriculum")
         parsed = parse_json_from_gemini(raw)
-        if not parsed:
-            logger.warning("Gemini 커리큘럼 생성 실패 — 기본 커리큘럼으로 대체 (user_id=%s)", request.user.id)
-        content = parsed or default_curriculum(
-            goal,
-            topics=topics,
-            required_skills=required_skills,  # 기업 공고 필수 스킬을 주차 테마로 활용
-            duration_weeks=duration_weeks,
-        )
-
-        curriculum = Curriculum.objects.create(
-            user         = request.user,
-            goal         = goal,
-            is_active    = True,
-            version      = 1,
-            content_json = content,
-        )
-
-        return Response(
-            {
-                "message":       "목표가 등록되고 커리큘럼이 생성되었습니다.",
-                "goal_id":       goal.id,
-                "curriculum_id": curriculum.id,
-                "field":         field,
-                "job_role":      job_role,
-                "duration_weeks": duration_weeks,
-                "curriculum_weeks": content.get("total_weeks"),
-                "ai_generated":  raw is not None,
-            },
-            status=status.HTTP_201_CREATED,
-        )
+        return raw, parsed
 
 
 # ────────────────────────────────────────

@@ -100,7 +100,29 @@
       "PowerShell(Start-Sleep -Seconds 15; try { $r = Invoke-WebRequest -Uri \"http://localhost:3000\" -TimeoutSec 15 -UseBasicParsing; \"프론트엔드 응답: $\\($r.StatusCode\\)\" } catch { \"프론트엔드 응답: $\\($_.Exception.Message\\)\" })",
       "PowerShell(Get-Process *)",
       "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://127.0.0.1:3000\" -TimeoutSec 10 -UseBasicParsing; \"프론트엔드 응답: $\\($r.StatusCode\\)\" } catch { \"프론트엔드 응답: $\\($_.Exception.Message\\)\" })",
-      "PowerShell(curl.exe -s -o $null -w \"%{http_code}\" --max-time 30 http://localhost:3000/ 2>&1)"
+      "PowerShell(curl.exe -s -o $null -w \"%{http_code}\" --max-time 30 http://localhost:3000/ 2>&1)",
+      "PowerShell($key = python -c \"import secrets; print\\(secrets.token_hex\\(32\\)\\)\"; \"DJANGO_SECRET_KEY=$key\")",
+      "PowerShell(pip install *)",
+      "PowerShell(python backend\\\\manage.py migrate)",
+      "PowerShell(python backend\\\\manage.py seed_all)",
+      "PowerShell(python backend\\\\manage.py load_problems --problems_dir DB\\\\JobProblems --paths_dir DB\\\\LearningPaths)",
+      "PowerShell(python backend\\\\manage.py load_dataset --postings)",
+      "PowerShell(python backend\\\\manage.py runserver)",
+      "PowerShell($be = Invoke-WebRequest -Uri \"http://localhost:8000/api/jobs/\" -UseBasicParsing -TimeoutSec 15; \"Backend /api/jobs/ -> $\\($be.StatusCode\\)\"; $fe = Invoke-WebRequest -Uri \"http://localhost:3000\" -UseBasicParsing -TimeoutSec 30; \"Frontend / -> $\\($fe.StatusCode\\)\")",
+      "PowerShell($body = '{\"email\":\"test@elaw.kr\",\"password\":\"test1234\"}'; $r = Invoke-WebRequest -Uri \"http://localhost:8000/api/accounts/login/\" -Method POST -ContentType \"application/json\" -Body $body -UseBasicParsing -TimeoutSec 15; \"Login -> $\\($r.StatusCode\\)\"; \\($r.Content | ConvertFrom-Json\\).PSObject.Properties.Name)",
+      "PowerShell($body = '{\"email\":\"seonghwan.oh@elaw.kr\",\"password\":\"elaw1234!\"}'; $r = Invoke-WebRequest -Uri \"http://localhost:8000/api/accounts/login/\" -Method POST -ContentType \"application/json\" -Body $body -UseBasicParsing -TimeoutSec 15; \"Login -> $\\($r.StatusCode\\)\"; \\($r.Content | ConvertFrom-Json\\).PSObject.Properties.Name)",
+      "PowerShell(ollama list *)",
+      "PowerShell(python backend\\\\manage.py shell -c \"from core.models import JobPosting; import collections; roles = collections.Counter\\(JobPosting.objects.values_list\\('job_role', flat=True\\)\\); print\\(len\\(roles\\)\\); [print\\(r, c\\) for r, c in sorted\\(roles.items\\(\\)\\)[:40]]\")",
+      "PowerShell(python -c \"import ast; ast.parse\\(open\\(r'backend\\\\core\\\\views_user.py', encoding='utf-8'\\).read\\(\\)\\); print\\('syntax OK'\\)\")",
+      "PowerShell(ConvertTo-Json *)",
+      "PowerShell(python backend\\\\manage.py check 2>$null; $be = Invoke-WebRequest -Uri \"http://localhost:8000/api/jobs/\" -UseBasicParsing -TimeoutSec 15; \"Backend -> $\\($be.StatusCode\\)\")",
+      "PowerShell($login = Invoke-RestMethod -Uri \"http://localhost:8000/api/accounts/login/\" -Method POST -ContentType \"application/json\" -Body '{\"email\":\"jiho.park@elaw.kr\",\"password\":\"elaw1234!\"}'; $h = @{ Authorization = \"Bearer $\\($login.access\\)\" }; $jobs = Invoke-RestMethod -Uri \"http://localhost:8000/api/jobs/?q=Backend&active_only=true\" -Headers $h; $p = $jobs.results | Where-Object { $_.job_role -eq 'Backend Engineer' } | Select-Object -First 1; if \\(-not $p\\) { $p = $jobs[0] }; \"posting: $\\($p.id\\) / $\\($p.job_role\\)\"; $detail = Invoke-RestMethod -Uri \"http://localhost:8000/api/jobs/$\\($p.id\\)/\" -Headers $h; \"required: $\\($detail.required_skills -join ', '\\)\"; \"preferred: $\\($detail.preferred_skills -join ', '\\)\")",
+      "PowerShell($login = Invoke-RestMethod -Uri \"http://localhost:8000/api/accounts/login/\" -Method POST -ContentType \"application/json\" -Body '{\"email\":\"jiho.park@elaw.kr\",\"password\":\"elaw1234!\"}'; $h = @{ Authorization = \"Bearer $\\($login.access\\)\" }; $null = Invoke-RestMethod -Uri \"http://localhost:8000/api/jobs/1/study/?force=true\" -Method POST -Headers $h -ContentType \"application/json\" -Body '{}'; $gb = '{\"job_role\":\"Backend Engineer\",\"field\":\"Python, Django, MySQL\",\"duration_weeks\":8,\"required_skills\":[\"Python\",\"Django\",\"MySQL\"],\"preferred_skills\":[\"Redis\",\"Docker\"]}'; $g = Invoke-RestMethod -Uri \"http://localhost:8000/api/core/goals/\" -Method POST -ContentType \"application/json; charset=utf-8\" -Headers $h -Body \\([System.Text.Encoding]::UTF8.GetBytes\\($gb\\)\\); \"curriculum_id: $\\($g.curriculum_id\\) / weeks: $\\($g.curriculum_weeks\\) / source: $\\($g.curriculum_source\\)\")",
+      "PowerShell(Out-File *)",
+      "PowerShell(Set-Location frontend; npx tsc --noEmit 2>$null | Select-String -Pattern \"curriculum|broad-categories\"; \"tsc exit: $LASTEXITCODE\"; Set-Location ..)",
+      "PowerShell(git *)",
+      "PowerShell(Set-Location frontend; npx tsc lib\\\\broad-categories.ts --outDir ..\\\\_tmp_bc --module commonjs --target es2020 --skipLibCheck; Set-Location ..; \"compiled: $\\(Test-Path _tmp_bc\\\\broad-categories.js\\)\")",
+      "PowerShell(Remove-Item *)"
     ]
   }
 }

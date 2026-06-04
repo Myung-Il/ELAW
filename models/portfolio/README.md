@@ -9,8 +9,8 @@
 | 파일 | 설명 |
 |------|------|
 | `portfolio_maker.py` | CLI 인터페이스 — 경험·JD 입력 → Ollama 호출 → 결과 출력 |
-| `Modelfile` | Ollama 모델 정의 — gemma2:2b 기반, temperature 0.2 |
-| `my_portfolio_adapter.gguf` | LoRA 파인튜닝 가중치 |
+| `Modelfile` | Ollama 모델 정의 — `portfolio_merged.gguf` 기반, temperature 0.2 |
+| `portfolio_merged.gguf` | 베이스 모델 + LoRA 병합 완료된 단독 가중치 (자체 완결형) |
 
 ---
 
@@ -36,11 +36,8 @@ ollama create mybot -f Modelfile
 ollama list | grep mybot
 ```
 
-### 3. 기반 모델 사전 다운로드 (최초 1회)
-
-```bash
-ollama pull gemma2:2b
-```
+> `portfolio_merged.gguf`는 베이스 모델과 LoRA 가중치가 이미 병합된 단독 모델이므로
+> `ollama pull gemma2:2b` 같은 별도 베이스 모델 다운로드가 필요 없다.
 
 ---
 
@@ -109,7 +106,7 @@ portfolio_text = result.stdout
 ### Modelfile
 
 ```
-FROM gemma2:2b
+FROM ./portfolio_merged.gguf
 
 PARAMETER temperature 0.2
 PARAMETER top_p 0.9
@@ -120,8 +117,7 @@ SYSTEM """
 """
 ```
 
-- **기반 모델**: `gemma2:2b` (Google Gemma 2, 2B 파라미터)
-- **파인튜닝**: `my_portfolio_adapter.gguf` (LoRA 어댑터)
+- **기반 모델**: `portfolio_merged.gguf` (gemma2:2b + LoRA 병합 완료된 단독 GGUF)
 - **temperature 0.2**: 창의적 허구 생성을 억제하고 입력 데이터에 충실한 출력 유도
 - **top_p 0.9**: 자연스러운 한국어 어휘 다양성 유지
 

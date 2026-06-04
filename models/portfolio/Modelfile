@@ -1,6 +1,6 @@
-FROM gemma2:2b
+FROM ./portfolio_merged.gguf
 
-PARAMETER temperature 0.2 
+PARAMETER temperature 0.2
 PARAMETER top_p 0.9
 
 SYSTEM """

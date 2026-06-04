@@ -101,7 +101,7 @@ DB의 `LearningPaths/` JSON을 **사전 생성**하는 스크립트. 런타임�
 portfolio/
 ├── portfolio_maker.py        # Ollama 호출 래퍼
 ├── Modelfile                 # Ollama 모델 정의
-└── my_portfolio_adapter.gguf # LoRA 파인튜닝 가중치
+└── portfolio_merged.gguf     # 베이스+LoRA 병합 완료된 단독 가중치
 ```
 
 ### 실행 방식
