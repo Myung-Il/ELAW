@@ -10,7 +10,14 @@ import AppHeader from "@/components/layout/app-header"
 import { ArrowLeft, Sparkles, Save, Loader2, AlertCircle, RefreshCw } from "lucide-react"
 import { api } from "@/lib/api-client"
 
-const PORTFOLIO_TIMEOUT_MS = 130_000
+// CPU 추론 실측: 워밍업 시 ~125초, 콜드 스타트(모델 로드 포함) ~155초.
+// next.config.mjs proxyTimeout(300초)과 맞춰 여유를 둔다.
+const PORTFOLIO_TIMEOUT_MS = 300_000
+
+// Vercel 배포 환경의 rewrites 프록시는 ~75초에 응답을 끊으므로(실측 500),
+// 장시간 생성 요청만 백엔드 공개 URL(Cloudflare 터널)로 직접 호출한다.
+// 미설정(로컬 dev)이면 빈 문자열 → 기존 same-origin 프록시 경로 사용.
+const DIRECT_API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "")
 
 interface PortfolioObject {
   id: number
@@ -61,9 +68,9 @@ export default function ApplyPage() {
 
     try {
       const raw = await api.post<PortfolioResponse>(
-        `/api/jobs/${jobId}/apply/`,
+        `${DIRECT_API_BASE}/api/jobs/${jobId}/apply/`,
         { experience },
-        { signal: controller.signal } as RequestInit,
+        { signal: controller.signal },
       )
       const portfolio: PortfolioObject | undefined =
         raw.portfolio ?? raw.data ?? (raw.id !== undefined ? (raw as PortfolioObject) : undefined)
@@ -77,7 +84,7 @@ export default function ApplyPage() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : ""
       if (msg.includes("abort") || msg.includes("AbortError")) {
-        setErrorMsg("응답 시간이 초과되었습니다 (120초). Ollama 서버 상태를 확인하거나 잠시 후 다시 시도해주세요.")
+        setErrorMsg("응답 시간이 초과되었습니다 (300초). Ollama 서버 상태를 확인하거나 잠시 후 다시 시도해주세요.")
       } else {
         setErrorMsg(msg || "포트폴리오 생성에 실패했습니다. 잠시 후 다시 시도해주세요.")
       }
@@ -132,7 +139,7 @@ export default function ApplyPage() {
             <p className="text-sm text-muted-foreground">
               입력하신 경력을 분석하여 맞춤 포트폴리오를 작성하고 있습니다.
               <br />
-              약 30~120초가 소요됩니다.
+              약 2~3분이 소요됩니다.
             </p>
             <div className="flex justify-center gap-1.5 pt-2">
               {[0, 1, 2].map((i) => (
@@ -218,7 +225,7 @@ export default function ApplyPage() {
                 disabled={!experience.trim() || phase === "generating"}
               >
                 <Sparkles className="h-4 w-4" />
-                AI 포트폴리오 생성 (30~120초 소요)
+                AI 포트폴리오 생성 (2~3분 소요)
               </Button>
             </CardContent>
           </Card>
