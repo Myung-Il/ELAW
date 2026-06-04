@@ -49,7 +49,8 @@ python manage.py sync_platforms
 | GET | `/my/` | ✅ | 내 스크랩·지원 목록 (`status=scrapped/applied/all`) |
 | POST/DELETE | `/<id>/scrap/` | ✅ | 스크랩 추가·제거 |
 | POST | `/<id>/study/` | ✅ | 스터디 목표 생성 (이미 있으면 409, `?force=true`로 재생성) |
-| POST | `/<id>/apply/` | ✅ | **AI 포트폴리오 생성** (Ollama, 30~120초) |
+| GET | `/<id>/apply/` | ✅ | 이 공고 대상 내 최신 포트폴리오 (없으면 404) |
+| POST | `/<id>/apply/` | ✅ | **AI 포트폴리오 생성 시작** — 즉시 202 + placeholder, 백그라운드 스레드가 추론(2~4분) 후 content_json.status를 done/error로 갱신. 프론트는 portfolios/<id>/ 폴링 |
 | GET | `/portfolios/` | ✅ | 내 포트폴리오 목록 |
 | GET/PATCH/DELETE | `/portfolios/<id>/` | ✅ | 포트폴리오 상세·수정·삭제 |
 
@@ -88,12 +89,15 @@ User (core.User — email 기반, AbstractBaseUser)
 
 ## AI 통합 포인트
 
-### Ollama — 포트폴리오 생성 (`jobs/portfolio_ai.py`)
+### Ollama — 포트폴리오 생성 (`jobs/portfolio_ai.py`, 비동기)
 ```python
-# POST /api/jobs/<id>/apply/ 호출 시
-subprocess.run(['ollama', 'run', 'mybot', prompt])
-# 전제: Ollama 설치 + mybot 모델 존재 (ollama list | grep mybot)
-# 응답: 30~120초, ANSI 제어문자 제거 후 content_json에 저장
+# POST /api/jobs/<id>/apply/ → placeholder Portfolio 생성 + 즉시 202 반환
+# views.py::_run_portfolio_generation (백그라운드 스레드):
+#   Ollama HTTP API(127.0.0.1:11434) mybot 호출 → 2~4분 CPU 추론
+#   완료 시 content_json.status: generating → done | error (+사유)
+# 전제: D:\Ollama\ollama.exe serve 실행 + mybot 모델 존재
+#   (없으면: ollama cp mybot-2b-backup:latest mybot)
+# 동기로 되돌리지 말 것 — Vercel 프록시 ~75초/Cloudflare 엣지 ~100초에 연결 끊김 (실측)
 ```
 
 ### 커리큘럼 생성 (`core/views_user.py`, `jobs/views.py`)
@@ -127,7 +131,8 @@ total      = min(req_score + pref_score + algo_bonus, 100)
 - `AUTH_USER_MODEL = 'core.User'`
 - `CORS_ALLOW_ALL_ORIGINS = True` (운영 시 제한 필요)
 - JWT: access 60분, refresh 14일
-- DB: SQLite (개발), MySQL 설정 주석 처리됨
+- DB: **Supabase Postgres (운영, .env의 DB_ENGINE=postgresql)** / SQLite (DB_ENGINE 주석 시 폴백) / MySQL 분기도 존재
+- ⚠️ migrate 후 `python ../scripts/apply_supabase_rls.py` 필수 (새 테이블 anon 노출 방지)
 
 `.env` 필수 변수:
 ```

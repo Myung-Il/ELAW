@@ -6,6 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ELAW is a job-linked learning platform (취업 연계 학습 플랫폼) — a capstone project for Mokpo National University's Convergence Software Department. It matches job postings to personalized learning paths and generates AI-powered portfolios.
 
+**Deployment topology**: frontend auto-deploys to Vercel on `main` push; Django runs on the local PC (Ollama dependency) exposed via Cloudflare quick tunnel; **Supabase Postgres is the production DB**. Full runbook: `docs/OPERATIONS.md`.
+
+## Environment Gotchas (read first)
+
+- **Always set `PYTHONUTF8=1`** before running Python/manage.py commands — Windows cp949 encoding breaks Korean output and `dumpdata` otherwise. PowerShell: `$env:PYTHONUTF8 = "1"`.
+- The DB is **remote Supabase Postgres** (`backend/.env` → `DB_ENGINE=postgresql`, Session pooler). Commenting out `DB_ENGINE` falls back to local SQLite. Don't assume SQLite.
+- **After any `migrate` against Supabase, run `python scripts/apply_supabase_rls.py`** — new tables are otherwise exposed to the public anon key via PostgREST.
+- **Never use `manage.py loaddata` against Supabase** (row-by-row over WAN ≈ 90 min). Use `python scripts/fast_loaddata.py backend/backup_sqlite.json` (bulk_create, ~6 s). Dumps for it must be made **without** `--natural-foreign`.
+- Ollama lives at `D:\Ollama\ollama.exe` (not on PATH). The backend calls model `mybot`; if missing: `ollama cp mybot-2b-backup:latest mybot`.
+- Seed account for API testing: `minjun.kim@elaw.kr` / `elaw1234!`.
+
 ## Commands
 
 ### Backend (Django)
@@ -16,8 +27,8 @@ cd backend
 # Install dependencies
 pip install -r requirements.txt
 
-# Apply migrations and start server
-python manage.py migrate
+# Apply migrations and start server (remember PYTHONUTF8=1)
+python manage.py migrate            # then: python ../scripts/apply_supabase_rls.py
 python manage.py runserver          # port 8000 locally
 # Docker runs on port 9000 per project convention
 
@@ -29,6 +40,16 @@ python manage.py sync_platforms     # sync external platform data
 
 # Run tests (currently empty stubs — run after writing tests)
 python manage.py test
+```
+
+### Supabase ops scripts (repo root)
+
+```bash
+python scripts/supabase_reset.py          # dry-run: list tables to drop
+python scripts/supabase_reset.py --yes    # drop all public tables (then migrate + reload)
+python scripts/fast_loaddata.py backend/backup_sqlite.json   # bulk reload (~30k objects, ~6 s)
+python scripts/apply_supabase_rls.py      # (re)apply RLS — required after every migrate
+./scripts/start_tunnel.ps1                # Cloudflare quick tunnel for the local backend
 ```
 
 ### Frontend (Next.js)
@@ -63,11 +84,16 @@ docker-compose up  # runs backend on port 9000
 ## Architecture
 
 ```
+[GitHub push: main] → Vercel auto-deploy (frontend/, rewrites /api/* → NEXT_PUBLIC_API_URL)
+                            ↓
+              Cloudflare quick tunnel (URL changes per run)
+                            ↓
 Frontend (Next.js 16 / React 19 / TypeScript)
     ↓ REST/HTTP (native fetch, no axios)
-Backend (Django 6 + DRF)  ←→  SQLite (dev) / MySQL (prod)
-    ├── Ollama mybot          (AI portfolio generation, 30–120s blocking subprocess)
+Backend (Django 6 + DRF, local PC)  ←→  Supabase Postgres (prod) / SQLite (local fallback)
+    ├── Ollama mybot          (AI portfolio generation — async thread, 2–4 min CPU inference)
     └── ML models             (problem recommendation)
+Landing page also reads Supabase directly via supabase-js (anon key, RLS read-only policies)
 
 models/ (standalone, not Django apps — pure Python, no ORM)
     ├── curriculum/           (GKT, SAKT, DKT knowledge-tracing ensemble)
@@ -104,7 +130,7 @@ UI stack: **Tailwind CSS v4 + shadcn/ui (Radix primitives)**, forms via **React 
 ### ML Models (`models/`)
 
 - **Curriculum**: SeedQuiz (10-question diagnostic) → zone classification → soft-voting ensemble of GKT + SAKT + DKT → next problem recommendation. Sessions are serializable via `export_session()` / `import_session()` for resumability.
-- **Portfolio**: Calls local Ollama `mybot` model via **blocking subprocess**; accepts job description + user skills, returns generated portfolio text (30–120s). Used by `backend/jobs/portfolio_ai.py`.
+- **Portfolio**: Calls local Ollama `mybot` model (HTTP API at 127.0.0.1:11434); accepts job description + user skills, returns generated portfolio text (2–4 min CPU inference). Used by `backend/jobs/portfolio_ai.py`, invoked from a background thread (see Non-Obvious Behaviors).
 
 Curriculum zone/weight mapping (controls ensemble behavior):
 
@@ -118,12 +144,15 @@ Curriculum zone/weight mapping (controls ensemble behavior):
 
 - **`backend/config/settings.py`**: `AUTH_USER_MODEL = 'core.User'` (email-based login), `CORS_ALLOW_ALL_ORIGINS = True` (dev only), reads `.env` via python-dotenv.
 - **`frontend/next.config.ts`**: `typescript.ignoreBuildErrors = true` — TypeScript errors do **not** fail builds; use `npx tsc --noEmit` to catch them.
-- **`.env` variables** (backend): `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `GEMINI_API_KEY` (curriculum fallback), `GITHUB_TOKEN` (ETL), `DB_ENGINE`/`DB_NAME`/`DB_USER`/`DB_PASSWORD`/`DB_HOST`/`DB_PORT` (MySQL, optional — defaults to SQLite).
+- **`.env` variables** (backend): `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS` (must include `.trycloudflare.com` for tunnel access), `GEMINI_API_KEY` (curriculum fallback), `GITHUB_TOKEN` (ETL), `DB_ENGINE=postgresql` + `DB_NAME`/`DB_USER`/`DB_PASSWORD`/`DB_HOST`/`DB_PORT` (Supabase Session pooler; comment out `DB_ENGINE` → SQLite fallback; `mysql` branch also exists).
+- **Vercel env vars** (set in dashboard, require Redeploy to take effect): `NEXT_PUBLIC_API_URL` (current tunnel URL), `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 - **`Dockerfile`**: Python 3.13-slim, entrypoint `python manage.py runserver 0.0.0.0:9000`.
 
 ## Non-Obvious Behaviors
 
-- **Portfolio generation requires Ollama**: `jobs/portfolio_ai.py` calls a local `mybot` Ollama model via subprocess. If Ollama isn't running, portfolio endpoints will fail/hang.
+- **Portfolio generation is async** (`jobs/views.py::JobApplyView` + `_run_portfolio_generation`): `POST /api/jobs/<id>/apply/` returns **202 in <1 s** with a placeholder `Portfolio`; a background thread runs Ollama inference (2–4 min) and updates `content_json.status`: `generating → done | error`. The frontend polls `GET /api/jobs/portfolios/<id>/` every 5 s. **Do not make this synchronous** — Vercel's rewrite proxy kills responses at ~75 s and Cloudflare's edge at ~100 s (both measured).
+- **Portfolio generation requires Ollama**: `jobs/portfolio_ai.py` calls the local `mybot` model via the Ollama HTTP API (127.0.0.1:11434). If Ollama isn't running, generation fails with status `error` (503 cause logged as `[Portfolio AI]`).
+- **`GET /api/jobs/<id>/apply/`** returns the user's latest portfolio targeting that posting (matched via `content_json` metadata `target_posting_id`); the profile page's "지원 완료" items link to `/jobs/<id>/apply`, which auto-loads it into the editor.
 - **Study mode conflict**: Creating a study goal when one is already active returns 409. Pass `?force=true` to recreate.
 - **Curriculum generation is posting-based by default**: `POST /api/core/goals/` aggregates required/preferred skills from `JobPosting` rows matching the user's selected job role (Korean role names resolved via `_POSTING_ROLE_MAP` in `core/views_user.py`); `POST /api/jobs/<id>/study/` uses that posting's own skills — neither makes an AI call. Pass `"use_ai": true` to attempt Gemini instead; on failure both fall back to the skill-based path.
 - **Match status is immutable**: Job match status transitions are one-way (`scrapped → applied`).
@@ -143,6 +172,8 @@ Many frontend pages currently use hardcoded mock data pending full API integrati
 
 - Backend REST API: complete (see `backend/README.md` for full endpoint reference)
 - Frontend scaffolding: complete, partial API wiring
-- AI features: implemented (Ollama portfolio, ML recommendation)
-- Production DB migration (SQLite → MySQL): pending
+- AI features: implemented (Ollama portfolio — async + polling, ML recommendation)
+- Production DB: **migrated to Supabase Postgres** (all data loaded; RLS applied — public read on 7 landing tables only)
+- Deployment: Vercel auto-deploy (frontend) + Cloudflare tunnel (backend) — see `docs/OPERATIONS.md`
 - Backend test suites: empty stubs (no tests written yet)
+- Known constraints: tunnel URL changes per run (update Vercel env + Redeploy); board attachments still on local `backend/media/`
