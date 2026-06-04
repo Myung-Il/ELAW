@@ -1,4 +1,4 @@
-# ELAW 백엔드 Cloudflare Quick Tunnel 실행 스크립트
+﻿# ELAW 백엔드 Cloudflare Quick Tunnel 실행 스크립트
 #
 # 로컬 Django(기본 8000포트)를 공개 URL(https://xxx.trycloudflare.com)로 노출한다.
 # 배포된 Vercel 프론트엔드가 이 URL로 API를 프록시한다.

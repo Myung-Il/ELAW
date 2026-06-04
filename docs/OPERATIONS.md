@@ -73,28 +73,34 @@ D:\Ollama\ollama.exe cp mybot-2b-backup:latest mybot
 
 ## 3. 시연 절차 (매번)
 
-**터미널 3개**를 띄운다. 순서 중요: Ollama → Django → 터널.
-
-### ① Ollama (터미널 1)
+### 🚀 자동 (권장) — 명령 2개
 ```powershell
-D:\Ollama\ollama.exe serve
+.\scripts\start_all.ps1            # ① Ollama + Django + 터널을 독립 창으로 일괄 기동
+.\scripts\update_vercel_env.ps1    # ② 새 터널 URL을 Vercel에 반영 + 재배포 (READY까지 대기)
 ```
-> 빠뜨리면 포트폴리오 생성이 503으로 실패한다 (가장 흔한 실수).
+- `start_all.ps1`: 이미 떠 있는 구성요소는 건너뜀(중복 안전). 터널 URL을 출력하고 `$env:TEMP\elaw_tunnel_url.txt`에 저장.
+- `update_vercel_env.ps1`: `backend/.env`의 `VERCEL_TOKEN` 필요 (vercel.com/account/settings/tokens 에서 1회 발급).
+- ⚠️ **Vercel CLI는 이 PC에서 사용 불가** — Windows 계정명이 한글이라 `vercel login`이 크래시함(UA 헤더 버그). 반드시 위 REST API 스크립트 사용.
+- Claude Code에게 시킬 때: "URL로 접속할 수 있게 환경설정 해 줘" → `/go-live` 스킬이 위 절차 전체를 수행.
 
-### ② Django (터미널 2)
+### 수동 절차 (스크립트가 안 될 때)
+
+**터미널 3개**를 띄운다. 순서: Ollama → Django → 터널.
+
 ```powershell
+# ① 터미널 1
+D:\Ollama\ollama.exe serve          # 빠뜨리면 포트폴리오 생성 503 (가장 흔한 실수)
+
+# ② 터미널 2
 cd backend
-$env:PYTHONUTF8 = "1"        # 한글 인코딩(cp949) 오류 방지
+$env:PYTHONUTF8 = "1"               # 한글 인코딩(cp949) 오류 방지
 python manage.py runserver
+
+# ③ 터미널 3
+.\scripts\start_tunnel.ps1          # 출력의 https://xxx.trycloudflare.com URL 복사
 ```
 
-### ③ Cloudflare 터널 (터미널 3)
-```powershell
-.\scripts\start_tunnel.ps1
-# 출력에서 https://xxx-xxx-xxx.trycloudflare.com URL 복사
-```
-
-### ④ Vercel 환경변수 갱신 (터널 URL이 바뀌었을 때만)
+**④ Vercel 환경변수 갱신** (터널 URL이 바뀌었을 때만)
 1. [Vercel 대시보드](https://vercel.com) → ELAW 프로젝트 → **Settings → Environment Variables**
 2. `NEXT_PUBLIC_API_URL` 값을 ③의 새 터널 URL로 수정 (끝에 `/` 없이)
 3. **Deployments 탭 → 최신 배포 → ⋯ → Redeploy** ← 환경변수는 재배포해야 반영됨

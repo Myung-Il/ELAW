@@ -15,6 +15,9 @@ ELAW is a job-linked learning platform (취업 연계 학습 플랫폼) — a ca
 - **After any `migrate` against Supabase, run `python scripts/apply_supabase_rls.py`** — new tables are otherwise exposed to the public anon key via PostgREST.
 - **Never use `manage.py loaddata` against Supabase** (row-by-row over WAN ≈ 90 min). Use `python scripts/fast_loaddata.py backend/backup_sqlite.json` (bulk_create, ~6 s). Dumps for it must be made **without** `--natural-foreign`.
 - Ollama lives at `D:\Ollama\ollama.exe` (not on PATH). The backend calls model `mybot`; if missing: `ollama cp mybot-2b-backup:latest mybot`.
+- **Vercel CLI crashes on this PC** (Korean Windows username breaks its UA header — `vercel login` is unusable). Use `scripts/update_vercel_env.ps1` (REST API + `VERCEL_TOKEN` from `backend/.env`) for env updates/redeploys.
+- "Make it reachable by URL" / 시연 준비 requests → use the `/go-live` skill (`.claude/skills/go-live/`): `scripts/start_all.ps1` (Ollama+Django+tunnel as detached windows) then `scripts/update_vercel_env.ps1`.
+- `.ps1` files with Korean text must be saved as **UTF-8 with BOM** — Windows PowerShell 5.1 reads BOM-less files as cp949 and fails to parse.
 - Seed account for API testing: `minjun.kim@elaw.kr` / `elaw1234!`.
 
 ## Commands
