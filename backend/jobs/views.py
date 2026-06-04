@@ -20,6 +20,7 @@ jobs/views.py
 - PATCH  /api/jobs/portfolios/<id>/       포트폴리오 수정
 """
 
+import threading
 import uuid
 import logging
 from datetime import date, timedelta
@@ -442,19 +443,89 @@ class JobStudyView(APIView):
 # 6. 취업 모드 + AI 포트폴리오 생성 ⭐ 신규
 # ─────────────────────────────────────────
 
+def _run_portfolio_generation(portfolio_id, posting_id, user_id, experience, applicant_name):
+    """
+    백그라운드 스레드에서 Ollama 추론을 수행하고 결과를 Portfolio에 기록.
+
+    CPU 추론이 2~4분 걸리는데 Vercel 프록시(~75초)·Cloudflare 터널(~100초)이
+    동기 응답을 기다리지 못하므로, JobApplyView는 즉시 202를 반환하고
+    프론트엔드가 GET /api/jobs/portfolios/<id>/ 를 폴링해 완성을 확인한다.
+    content_json.status: 'generating' → 'done' | 'error'
+    """
+    from django.db import connection
+    try:
+        posting = JobPosting.objects.select_related('company').get(id=posting_id)
+        jd_text = build_jd_text(posting)
+        ai_result = generate_portfolio(
+            experience=experience,
+            jd=jd_text,
+            applicant_name=applicant_name,
+        )
+
+        portfolio = Portfolio.objects.get(id=portfolio_id)
+        meta_section = {
+            "type": "metadata",
+            "target_posting_id": posting.id,
+            "target_company": posting.company.name,
+            "target_job_role": posting.job_role,
+            "user_input_experience": experience,
+            "ai_model": "mybot (Ollama)",
+        }
+
+        if ai_result['success']:
+            meta_section["prompt_used"] = ai_result['prompt']
+            portfolio.content_json = {
+                "status": "done",
+                "sections": [
+                    {
+                        "type": "ai_generated",
+                        "title": "AI 생성 포트폴리오 본문",
+                        "content": ai_result['content'],
+                    },
+                    meta_section,
+                ],
+            }
+            portfolio.save()
+            Match.objects.update_or_create(
+                user_id=user_id,
+                posting=posting,
+                defaults={'status': 'applied'},
+            )
+            logger.info(f"[Portfolio AI] 비동기 생성 완료 — portfolio={portfolio_id}")
+        else:
+            portfolio.content_json = {
+                "status": "error",
+                "error": ai_result['error'],
+                "sections": [meta_section],
+            }
+            portfolio.save()
+            logger.error(f"[Portfolio AI] 비동기 생성 실패 — portfolio={portfolio_id}: {ai_result['error']}")
+    except Exception as exc:  # 스레드에서 예외가 죽으면 폴링이 영원히 generating에 머무름
+        logger.exception(f"[Portfolio AI] 비동기 생성 예외 — portfolio={portfolio_id}")
+        try:
+            Portfolio.objects.filter(id=portfolio_id).update(content_json={
+                "status": "error",
+                "error": f"서버 내부 오류: {exc}",
+                "sections": [],
+            })
+        except Exception:
+            pass
+    finally:
+        connection.close()  # 스레드 전용 DB 커넥션 정리
+
+
 class JobApplyView(APIView):
     """
     POST /api/jobs/<id>/apply/
 
     취업 모드 진입 — AI(Ollama 'mybot') 가 포트폴리오 본문을 자동 생성.
 
-    동작:
+    동작 (비동기):
       1. 사용자가 입력한 'experience' (경력/역할)을 받음
-      2. 공고의 description + skills 로 JD 텍스트 조립
-      3. Ollama mybot 호출 → 포트폴리오 본문 생성
-      4. Portfolio 모델에 저장 (버전 +1)
-      5. Match 의 status='applied' 로 업데이트
-      6. 응답: 포트폴리오 ID + 생성된 본문
+      2. Portfolio 행을 status='generating' 으로 즉시 생성하고 202 반환
+      3. 백그라운드 스레드가 Ollama mybot 호출 → 완료 시 content_json 갱신
+         + Match status='applied' (실패 시 status='error' + 사유 기록)
+      4. 프론트엔드는 GET /api/jobs/portfolios/<id>/ 를 폴링해 완성 확인
 
     Body (필수):
         {
@@ -462,7 +533,7 @@ class JobApplyView(APIView):
           "title": "내 포트폴리오 제목 (선택)"
         }
 
-    응답 시간: 30초~120초 (Ollama 모델 추론 시간)
+    202 응답 즉시 반환 — 실제 생성은 2~4분 (CPU 추론)
     """
     permission_classes = [IsAuthenticated]
 
@@ -490,33 +561,7 @@ class JobApplyView(APIView):
                 "message": "경력 내용이 너무 짧습니다. 최소 20자 이상 입력해주세요.",
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        # 3. JD 텍스트 조립
-        jd_text = build_jd_text(posting)
-
-        # 4. Ollama 호출 (시간 걸림: 30~120초)
-        ai_result = generate_portfolio(
-            experience=experience,
-            jd=jd_text,
-            applicant_name=(request.user.name or "").strip() or "지원자",
-        )
-
-        if not ai_result['success']:
-            error_type = ai_result.get('error_type', 'error')
-            if error_type == 'timeout':
-                http_status = status.HTTP_504_GATEWAY_TIMEOUT
-            elif error_type == 'unavailable':
-                http_status = status.HTTP_503_SERVICE_UNAVAILABLE
-            else:
-                http_status = status.HTTP_500_INTERNAL_SERVER_ERROR
-            return Response({
-                "message": "포트폴리오 생성에 실패했습니다.",
-                "error": ai_result['error'],
-            }, status=http_status)
-
-        generated_content = ai_result['content']
-        prompt_used = ai_result['prompt']
-
-        # 5. 기존 포트폴리오 조회 (없으면 생성, 있으면 버전 +1)
+        # 3. Portfolio 행을 placeholder 로 즉시 생성 (버전 +1)
         last_portfolio = Portfolio.objects.filter(user=request.user).order_by('-version').first()
         next_version = (last_portfolio.version + 1) if last_portfolio else 1
 
@@ -529,48 +574,33 @@ class JobApplyView(APIView):
             user=request.user,
             title=portfolio_title,
             summary_text=f"{posting.company.name} {posting.job_role} 지원용 포트폴리오",
-            content_json={
-                "sections": [
-                    {
-                        "type": "ai_generated",
-                        "title": "AI 생성 포트폴리오 본문",
-                        "content": generated_content,
-                    },
-                    {
-                        "type": "metadata",
-                        "target_posting_id": posting.id,
-                        "target_company": posting.company.name,
-                        "target_job_role": posting.job_role,
-                        "user_input_experience": experience,
-                        "ai_model": "mybot (Ollama)",
-                        "prompt_used": prompt_used,
-                    },
-                ]
-            },
+            content_json={"status": "generating", "sections": []},
             public_slug=slug,
             language='ko',
             version=next_version,
             is_public=False,
         )
 
-        # 6. Match 의 status='applied' 로 업데이트 (없으면 생성)
-        match, _ = Match.objects.update_or_create(
-            user=request.user,
-            posting=posting,
-            defaults={
-                'status': 'applied',
-            }
-        )
+        # 4. 백그라운드 스레드에서 Ollama 추론 시작 (2~4분)
+        threading.Thread(
+            target=_run_portfolio_generation,
+            args=(
+                portfolio.id,
+                posting.id,
+                request.user.id,
+                experience,
+                (request.user.name or "").strip() or "지원자",
+            ),
+            daemon=True,
+        ).start()
 
+        # 5. 즉시 202 반환 — 프론트가 portfolios/<id>/ 폴링으로 완성 확인
         return Response({
             "message": f"'{posting.company.name} - {posting.title}' 지원용 "
-                       f"포트폴리오가 생성되었습니다!",
+                       f"포트폴리오 생성을 시작했습니다. (약 2~4분 소요)",
+            "status": "generating",
             "portfolio": PortfolioDetailSerializer(portfolio).data,
-            "match": {
-                "id": match.id,
-                "status": match.status,
-            },
-        }, status=status.HTTP_201_CREATED)
+        }, status=status.HTTP_202_ACCEPTED)
 
 
 # ─────────────────────────────────────────
