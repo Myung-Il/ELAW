@@ -74,7 +74,7 @@ if errorlevel 1 (
 python manage.py shell -c "from core.models_dataset import DatasetEntry; exit(0 if DatasetEntry.objects.exists() else 1)" >nul 2>&1
 if errorlevel 1 (
     echo [INFO] Loading HuggingFace dataset...
-    python manage.py load_dataset
+    python manage.py load_dataset --postings
     echo [OK] Dataset loaded
 ) else (
     echo [OK] Dataset already loaded. Skipping.

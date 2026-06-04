@@ -13,6 +13,17 @@ GitHub에서 클론 후 로컬 환경에서 웹 서비스를 실행하는 단계
 | npm | 9 이상 | `npm --version` |
 | Git | 최신 | `git --version` |
 
+**하드웨어 (AI 포트폴리오 기능 사용 시)**
+
+| 항목 | 최소 | 권장 |
+|------|------|------|
+| RAM | 8GB (포트폴리오 기능 제외 시) | **16GB 이상** (`portfolio_merged.gguf` 8.6GB 모델 로드에 필요) |
+| GPU | 없어도 동작 (CPU 추론, 생성 1~3분) | NVIDIA GPU + VRAM 10GB 이상 (생성 수십 초) |
+| 디스크 | 모델 파일 8.6GB + Ollama 빌드 사본 8.6GB ≈ **여유 20GB** | |
+
+> RAM 8GB PC에서는 학습 모델(F16, 8.6GB)이 메모리보다 커서 원본 그대로는 로드가 실패합니다.
+> 이 경우 **양자화 빌드**(약 2.8GB, 8GB RAM에서 동작)나 **원격 Ollama**를 사용하세요 — [선택 — AI 기능 활성화](#선택--ai-기능-활성화) 섹션 8~9번 참고.
+
 ---
 
 ## 1단계 — 저장소 클론
@@ -21,6 +32,22 @@ GitHub에서 클론 후 로컬 환경에서 웹 서비스를 실행하는 단계
 git clone https://github.com/Ohseonghwan538/ELAW.git
 cd ELAW
 ```
+
+---
+
+## 빠른 시작 — 통합 실행 스크립트 (Windows)
+
+2~3단계 전체를 자동으로 수행하는 스크립트가 저장소 루트에 있습니다. **`start_elaw.bat` 더블클릭** (또는 터미널에서 실행) 하면:
+
+1. Python / Node / Ollama 설치 확인 (Ollama 없으면 포트폴리오 기능만 비활성, 나머지 정상)
+2. `backend/.env` 자동 생성 (`DJANGO_SECRET_KEY` 랜덤 발급)
+3. 가상환경(venv) 생성 + `pip install`
+4. DB 마이그레이션 → 문제 데이터(`load_problems`) → 기업공고(`load_dataset --postings`) → 시드(`seed_all`) — **이미 적재된 항목은 자동 건너뜀**
+5. `npm install` (최초 1회)
+6. Ollama가 있으면 `mybot` 모델 자동 등록
+7. 프론트(3000)·백엔드(8000) 서버 동시 실행 + 브라우저 자동 오픈
+
+> 수동으로 단계별 진행하거나 문제를 진단하려면 아래 2단계부터 따라가세요.
 
 ---
 
@@ -232,25 +259,63 @@ ollama create mybot -f Modelfile     # Modelfile이 portfolio_merged.gguf를 사
 ollama list                          # mybot 항목이 보이면 정상
 ```
 
-> `portfolio_merged.gguf`는 베이스 모델이 이미 병합되어 있어 `ollama pull gemma2:2b` 같은 별도 베이스 다운로드가 필요 없습니다.
+> - 8.6GB 파일을 복사·해싱하므로 **수 분이 소요됩니다.**
+> - `portfolio_merged.gguf`는 베이스 모델이 이미 병합되어 있어 `ollama pull gemma2:2b` 같은 별도 베이스 다운로드가 필요 없습니다.
 
-**5) (GGUF 교체·갱신 시) 모델 재빌드**
+**5) 학습 모델이 적용됐는지 확인 (중요)**
+
+`ollama list`의 **SIZE가 GGUF 파일 크기(약 8.6GB)와 비슷해야** 학습 모델이 적용된 것입니다.
+SIZE가 1.6GB라면 베이스 gemma2(2.6B Q4_0)로 빌드된 구버전입니다 — 아래 6)으로 재빌드하세요.
+
+```bash
+ollama show mybot      # parameters / quantization 확인
+```
+
+**6) (GGUF 교체·갱신 시) 모델 재빌드**
 
 기존에 `mybot` 모델이 등록된 상태에서 GGUF 파일을 새 버전으로 바꿨다면, Ollama는 기존 모델을 그대로 쓰므로 반드시 재빌드해야 반영됩니다.
 
 ```bash
 cd models/portfolio
+ollama cp mybot mybot-backup         # (선택) 기존 모델 백업
 ollama rm mybot                      # 기존 모델 제거
 ollama create mybot -f Modelfile     # 새 GGUF로 재빌드
 ```
 
-**6) 동작 확인**
+**7) 동작 확인**
 
 ```bash
 ollama run mybot "백엔드 개발자 JD를 보고 포트폴리오 써줘"
 ```
 
-> Ollama가 없거나 `mybot` 모델이 없으면 포트폴리오 생성 요청 시 해당 엔드포인트만 실패하며, 나머지 기능은 정상 동작합니다.
+> - CPU 추론 환경에서는 포트폴리오 1건 생성에 **1~3분** 걸립니다 (GPU 환경은 수십 초).
+>   웹 화면에서 생성 버튼을 누른 뒤 **여러 번 다시 누르지 말고 기다리세요** — 요청이 큐에 쌓여 더 느려집니다.
+> - Ollama가 없거나 `mybot` 모델이 없으면 포트폴리오 생성 요청 시 해당 엔드포인트만 실패하며, 나머지 기능은 정상 동작합니다.
+
+**8) (RAM이 부족한 PC) 양자화 빌드**
+
+RAM이 16GB 미만이면 8.6GB 모델 로드가 실패합니다 (`model requires more system memory` 오류).
+`portfolio_merged.gguf`는 **F16 정밀도(gemma3 계열 4.6B)** 이므로 빌드 시 양자화해 약 1/3 크기로 줄일 수 있습니다 (학습 내용 유지, 정밀도 소폭 손실):
+
+```bash
+cd models/portfolio
+ollama rm mybot                                    # 기존 등록분이 있으면 제거
+ollama create mybot --quantize q4_K_M -f Modelfile  # F16 → q4_K_M (약 2.8GB)
+```
+
+> 양자화 변환 자체도 수 분 걸립니다. 완료 후 `ollama list`의 SIZE가 3GB 안팎이면 정상입니다.
+
+**9) (선택) 다른 PC의 Ollama 사용 — 원격 서빙**
+
+백엔드는 Ollama를 **HTTP API**(`http://127.0.0.1:11434`)로 호출합니다. RAM이 큰 다른 PC에서 Ollama를 띄우고, 백엔드 PC에서 `OLLAMA_HOST` 환경변수로 그 주소를 가리키면 됩니다:
+
+```bash
+# (모델 서빙 PC) 외부 접속 허용으로 Ollama 실행
+set OLLAMA_HOST=0.0.0.0 && ollama serve
+
+# (백엔드 PC) backend/.env 또는 환경변수에 추가
+OLLAMA_HOST=http://<서빙PC IP>:11434
+```
 
 ---
 
@@ -269,12 +334,17 @@ ollama run mybot "백엔드 개발자 JD를 보고 포트폴리오 써줘"
 | `UnicodeEncodeError: 'cp949' codec...` | 한국어 콘솔에서 이모지 출력 (구버전) | 최신 코드로 갱신 (`load_dataset`이 출력 인코딩을 UTF-8로 자동 설정) |
 | `could not locate ollama app` / `could not connect to ollama app` | Ollama 앱(서버) 미실행 | 시작 메뉴에서 Ollama 앱 실행 또는 `ollama serve` (AI 활성화 섹션 2번 참고) |
 | `model 'mybot' not found` | Ollama 모델 미빌드 | `models/portfolio`에서 `ollama create mybot -f Modelfile` |
-| GGUF를 바꿨는데 결과가 안 바뀜 | 기존 `mybot` 모델이 그대로 사용됨 | `ollama rm mybot && ollama create mybot -f Modelfile` 재빌드 |
-| `no such file ... portfolio_merged.gguf` | 가중치 파일 누락 (Git 미포함, ~9 GB) | `portfolio_merged.gguf`를 `models/portfolio/`에 배치 후 재빌드 |
+| GGUF를 바꿨는데 결과가 안 바뀜 / `ollama list`의 mybot SIZE가 1.6GB | 기존(구버전) `mybot` 모델이 그대로 사용됨 | `ollama rm mybot && ollama create mybot -f Modelfile` 재빌드 (AI 활성화 섹션 5~6번) |
+| `no such file ... portfolio_merged.gguf` | 가중치 파일 누락 (Git 미포함, 8.6 GB) | `portfolio_merged.gguf`를 `models/portfolio/`에 배치 후 재빌드 |
+| `model requires more system memory` / 모델 로드가 끝나지 않음 | RAM 부족 (모델 8.6GB > 가용 메모리) | RAM 16GB+ PC 사용, 양자화 빌드(섹션 8번), 또는 원격 Ollama(섹션 9번) |
+| 포트폴리오 생성이 약 30초 만에 `HTTP 500` (프론트 로그에 `socket hang up`) | Next.js 프록시 타임아웃 (구버전 코드) | 최신 코드로 갱신 — `frontend/next.config.mjs`에 `experimental.proxyTimeout: 300_000` 포함됨 |
+| 생성 "실패" 후 포트폴리오 목록에 결과물이 있음 | 프록시가 먼저 끊겼지만 백엔드 생성은 완료된 것 | 프록시 타임아웃 해결(위 항목) 후 재시도. 저장된 결과물은 그대로 사용 가능 |
 
 ---
 
 ## 요약 — 최초 실행 체크리스트
+
+> Windows에서는 **`start_elaw.bat` 실행 한 번**으로 아래 항목 대부분이 자동 처리됩니다.
 
 ```
 [ ] Python / Node.js / Git 설치 확인
@@ -289,7 +359,9 @@ ollama run mybot "백엔드 개발자 JD를 보고 포트폴리오 써줘"
 [ ] npm install (frontend/ 에서)
 [ ] npm run dev → http://localhost:3000 확인
 [ ] 브라우저에서 로그인 테스트
+[ ] (선택 — AI 포트폴리오) RAM 16GB+ 확인 (부족 시 양자화 빌드 또는 원격 Ollama)
 [ ] (선택 — AI 포트폴리오) Ollama 앱 실행 (ollama list 로 확인)
 [ ] (선택 — AI 포트폴리오) portfolio_merged.gguf 배치 후 models/portfolio 에서 ollama create mybot -f Modelfile
+[ ]   └ 적용 확인: ollama list 의 mybot SIZE ≈ 8.6GB (1.6GB면 구버전 — 재빌드 필요)
 [ ]   └ GGUF 교체 시: ollama rm mybot && ollama create mybot -f Modelfile 로 재빌드
 ```

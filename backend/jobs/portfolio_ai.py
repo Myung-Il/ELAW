@@ -3,40 +3,35 @@ jobs/portfolio_ai.py
 
 본인이 학습시킨 'mybot' 모델 (Ollama)을 사용해 포트폴리오 본문을 생성하는 헬퍼.
 
+호출 방식: Ollama HTTP API (POST /api/generate)
+    - `ollama run` CLI 서브프로세스는 콘솔 인코딩/행 버퍼 문제로 응답이 멈추는
+      경우가 있어 HTTP API로 호출한다 (ANSI 제어문자도 없음).
+
 사용 예시:
     from jobs.portfolio_ai import generate_portfolio
     result = generate_portfolio(experience_text, jd_text)
     # result = {"success": True, "content": "...", "prompt": "..."}
 
 요구사항:
-    - 서버 PC에 ollama 설치 (https://ollama.com)
+    - Ollama 앱(서버)이 실행 중이어야 함 (기본 http://127.0.0.1:11434)
     - mybot 모델이 등록되어 있어야 함
         ollama list  →  mybot:latest 확인
 """
 
 import os
 import re
-import shutil
 import logging
-import subprocess
+
+import requests
 
 logger = logging.getLogger(__name__)
 
-# ollama 실행 파일 경로 — PATH에 없으면 D:\Ollama 등 고정 경로 탐색
-_OLLAMA_FALLBACK_PATHS = [
-    r"D:\Ollama\ollama.exe",
-    r"C:\Users\Public\ollama\ollama.exe",
-    r"C:\Program Files\Ollama\ollama.exe",
-]
-
-def _find_ollama() -> str:
-    found = shutil.which("ollama")
-    if found:
-        return found
-    for path in _OLLAMA_FALLBACK_PATHS:
-        if os.path.isfile(path):
-            return path
-    raise FileNotFoundError("ollama 실행 파일을 찾을 수 없습니다.")
+# Ollama 서버 주소 — OLLAMA_HOST 환경변수로 재정의 가능
+def _ollama_base_url() -> str:
+    host = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434").strip().rstrip("/")
+    if not host.startswith("http"):
+        host = "http://" + host
+    return host
 
 
 # ─────────────────────────────────────────
@@ -122,15 +117,15 @@ def _clean_ansi(text: str) -> str:
 def generate_portfolio(experience: str, jd: str, *,
                        applicant_name: str = "지원자",
                        model_name: str = "mybot",
-                       timeout: int = 120) -> dict:
+                       timeout: int = 300) -> dict:
     """
-    Ollama로 포트폴리오 본문 생성.
+    Ollama HTTP API로 포트폴리오 본문 생성.
 
     매개변수:
         experience: 사용자가 입력한 경력/역할 텍스트
         jd        : 채용공고(JD) 텍스트
         model_name: ollama 모델명 (기본 'mybot')
-        timeout   : 타임아웃 초 (기본 120초)
+        timeout   : 타임아웃 초 (기본 300초 — CPU 추론 환경 고려)
 
     반환:
         {
@@ -163,35 +158,39 @@ def generate_portfolio(experience: str, jd: str, *,
 
     logger.info(f"[Portfolio AI] {model_name} 호출 시작 — 프롬프트 길이: {len(prompt)}")
 
-    # ⭐ ollama 의 컬러/터미널 제어문자 비활성화
-    env = os.environ.copy()
-    env['NO_COLOR'] = '1'
-    env['TERM'] = 'dumb'
-
     try:
-        ollama_cmd = _find_ollama()
-        result = subprocess.run(
-            [ollama_cmd, 'run', model_name, prompt],
-            capture_output=True,
-            text=True,
-            encoding='utf-8',
+        resp = requests.post(
+            f"{_ollama_base_url()}/api/generate",
+            json={
+                "model": model_name,
+                "prompt": prompt,
+                "stream": False,
+            },
             timeout=timeout,
-            env=env,                     # ⭐ NO_COLOR 환경 전달
         )
 
-        if result.returncode != 0:
-            logger.error(f"[Portfolio AI] ollama 종료 코드 {result.returncode}")
-            logger.error(f"[Portfolio AI] stderr: {result.stderr[:500]}")
+        if resp.status_code == 404:
+            logger.error(f"[Portfolio AI] 모델 없음: {model_name}")
             return {
                 "success": False,
                 "content": "",
                 "prompt": prompt,
-                "error": f"ollama 실행 실패 (returncode={result.returncode}): "
-                         f"{result.stderr[:300]}",
+                "error": f"'{model_name}' 모델이 등록되어 있지 않습니다. "
+                         f"models/portfolio 에서 'ollama create {model_name} -f Modelfile' 을 실행해주세요.",
+                "error_type": "unavailable",
             }
 
-        # ⭐ ANSI 제어문자 제거 + 정리
-        content = _clean_ansi(result.stdout or "")
+        if resp.status_code != 200:
+            logger.error(f"[Portfolio AI] HTTP {resp.status_code}: {resp.text[:500]}")
+            return {
+                "success": False,
+                "content": "",
+                "prompt": prompt,
+                "error": f"Ollama 호출 실패 (HTTP {resp.status_code}): {resp.text[:300]}",
+            }
+
+        # ANSI 제어문자 제거 + 정리 (HTTP API 응답에는 보통 없지만 안전망)
+        content = _clean_ansi(resp.json().get("response") or "")
 
         if not content:
             return {
@@ -209,7 +208,7 @@ def generate_portfolio(experience: str, jd: str, *,
             "error": None,
         }
 
-    except subprocess.TimeoutExpired:
+    except requests.exceptions.Timeout:
         logger.error(f"[Portfolio AI] {timeout}초 타임아웃")
         return {
             "success": False,
@@ -219,13 +218,14 @@ def generate_portfolio(experience: str, jd: str, *,
             "error_type": "timeout",
         }
 
-    except FileNotFoundError:
-        logger.error("[Portfolio AI] ollama 명령어를 찾을 수 없음")
+    except requests.exceptions.ConnectionError:
+        logger.error("[Portfolio AI] Ollama 서버에 연결할 수 없음 (%s)", _ollama_base_url())
         return {
             "success": False,
             "content": "",
             "prompt": prompt,
-            "error": "서버에 Ollama가 설치되어 있지 않습니다. 관리자에게 문의해주세요.",
+            "error": "Ollama 서버에 연결할 수 없습니다. Ollama 앱을 실행한 후 다시 시도해주세요. "
+                     "(실행 확인: ollama list)",
             "error_type": "unavailable",
         }
 

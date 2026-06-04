@@ -10,6 +10,11 @@ const nextConfig = {
     unoptimized: true,
   },
   skipTrailingSlashRedirect: true,
+  experimental: {
+    // AI 포트폴리오 생성(/api/jobs/<id>/apply/)은 CPU 추론으로 수 분 걸릴 수 있음.
+    // rewrites 프록시 기본 타임아웃(30초)이 백엔드 응답 전에 끊지 않도록 300초로 확대.
+    proxyTimeout: 300_000,
+  },
   async rewrites() {
     const backend = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
     return [
