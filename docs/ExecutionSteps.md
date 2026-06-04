@@ -164,34 +164,93 @@ npm run dev
 
 ## 테스트 계정 (seed_all 실행 후 사용 가능)
 
+모든 시드 계정의 비밀번호는 **`elaw1234!`** 로 동일합니다.
+
 | 이메일 | 비밀번호 | 역할 |
 |--------|----------|------|
 | `seonghwan.oh@elaw.kr` | `elaw1234!` | 학생 (실제 사용자) |
-| `test@elaw.kr` | `test1234` | 학생 |
+| `minjun.kim@elaw.kr` | `elaw1234!` | 학생 |
 | `admin1@elaw.kr` | `elaw1234!` | 관리자 |
+
+> 그 외 학생 계정: `seoyeon.lee` / `jiho.park` / `sua.choi` / `doyun.jung` / `haeun.kang` / `jaewon.yoon` / `soyul.lim` / `junseo.han` (@elaw.kr, 비밀번호 동일)
 
 ---
 
 ## 선택 — AI 기능 활성화
 
-### Gemini (커리큘럼 자동 생성)
+### 커리큘럼 자동 생성 (기본 — API 키 불필요)
+
+온보딩(목표 설정)에서 분야·직무를 선택하면, **해당 직무의 기업공고(JobPosting)에서 필수/우대 기술을 집계**해
+주차별 커리큘럼을 자동 생성합니다. 외부 AI 호출 없이 동작하므로 별도 설정이 필요 없습니다.
+(2-6단계 `load_dataset --postings`를 실행해 두면 실제 공고 기반으로 더 풍부하게 생성됩니다.)
+
+### Gemini (선택 — AI 커리큘럼 생성)
+
+`POST /api/core/goals/` 요청에 `"use_ai": true`를 포함하면 Gemini로 커리큘럼을 생성합니다 (실패 시 공고 기반으로 폴백).
 
 1. Google AI Studio에서 API 키 발급
 2. `backend/.env`의 `GEMINI_API_KEY=` 뒤에 키 입력
 3. 백엔드 서버 재시작
 
-> 키가 없으면 8주 기본 커리큘럼으로 폴백됩니다.
-
 ### Ollama (AI 포트폴리오 생성)
 
-포트폴리오 생성(`/jobs/[id]/apply`) 기능은 로컬 Ollama가 필요합니다.
+포트폴리오 생성(`/jobs/[id]/apply`) 기능은 로컬 Ollama와 `mybot` 모델이 필요합니다.
+
+**1) Ollama 설치** — [https://ollama.com](https://ollama.com) 에서 설치 후 `ollama --version` 으로 확인합니다.
+
+**2) Ollama 앱(서버) 실행** — CLI만 설치되어 있어도 **Ollama 앱이 실행 중이어야** 모델 빌드·실행이 가능합니다.
+
+- **Windows**: 시작 메뉴에서 **Ollama** 앱을 실행합니다 (트레이에 라마 아이콘이 표시되면 정상). 또는 터미널에서 직접 서버를 띄울 수 있습니다.
+  ```bash
+  ollama serve        # 포그라운드로 서버 실행 (터미널을 열어 둔 채 유지)
+  ```
+- **macOS**: 응용 프로그램에서 Ollama.app 실행 (메뉴바 아이콘 확인).
+- 실행 확인:
+  ```bash
+  ollama list         # 모델 목록이 출력되면 서버 정상 동작
+  ```
+
+> `Error: could not locate ollama app` 또는 `could not connect to ollama app` 오류가 나오면 앱(서버)이 실행되지 않은 상태입니다. 위 방법으로 앱을 먼저 실행하세요.
+> Windows에서 Ollama 앱은 기본적으로 로그인 시 자동 시작됩니다 (설정에서 변경 가능).
+
+**3) 모델 가중치 파일 준비**
+
+`mybot` 모델은 `models/portfolio/portfolio_merged.gguf`(베이스 모델 + LoRA 병합 완료된 단독 GGUF, 약 9 GB)로 빌드됩니다.
+이 파일은 용량이 커서 Git 저장소에 포함되지 않으므로(`.gitignore`), 별도로 받아 `models/portfolio/` 폴더에 두어야 합니다.
 
 ```bash
-# Ollama 설치 후 (https://ollama.com)
-ollama run mybot   # 첫 실행 시 모델 다운로드 (수 분 소요)
+# 파일이 제자리에 있는지 확인
+dir models\portfolio\portfolio_merged.gguf     # Windows
+# ls models/portfolio/portfolio_merged.gguf    # macOS/Linux
 ```
 
-> Ollama가 없으면 포트폴리오 생성 요청 시 해당 엔드포인트만 실패합니다.
+**4) mybot 모델 빌드**
+
+```bash
+cd models/portfolio
+ollama create mybot -f Modelfile     # Modelfile이 portfolio_merged.gguf를 사용
+ollama list                          # mybot 항목이 보이면 정상
+```
+
+> `portfolio_merged.gguf`는 베이스 모델이 이미 병합되어 있어 `ollama pull gemma2:2b` 같은 별도 베이스 다운로드가 필요 없습니다.
+
+**5) (GGUF 교체·갱신 시) 모델 재빌드**
+
+기존에 `mybot` 모델이 등록된 상태에서 GGUF 파일을 새 버전으로 바꿨다면, Ollama는 기존 모델을 그대로 쓰므로 반드시 재빌드해야 반영됩니다.
+
+```bash
+cd models/portfolio
+ollama rm mybot                      # 기존 모델 제거
+ollama create mybot -f Modelfile     # 새 GGUF로 재빌드
+```
+
+**6) 동작 확인**
+
+```bash
+ollama run mybot "백엔드 개발자 JD를 보고 포트폴리오 써줘"
+```
+
+> Ollama가 없거나 `mybot` 모델이 없으면 포트폴리오 생성 요청 시 해당 엔드포인트만 실패하며, 나머지 기능은 정상 동작합니다.
 
 ---
 
@@ -208,6 +267,10 @@ ollama run mybot   # 첫 실행 시 모델 다운로드 (수 분 소요)
 | 문제 목록·진단 퀴즈가 비어 있음 | 문제 데이터 미적재 | 2단계 2-5 `load_problems` 실행 |
 | 기업공고가 샘플(카카오/네이버/라인)만 보임 | 데이터셋 미적재 | 2단계 2-6 `load_dataset --postings` 실행 |
 | `UnicodeEncodeError: 'cp949' codec...` | 한국어 콘솔에서 이모지 출력 (구버전) | 최신 코드로 갱신 (`load_dataset`이 출력 인코딩을 UTF-8로 자동 설정) |
+| `could not locate ollama app` / `could not connect to ollama app` | Ollama 앱(서버) 미실행 | 시작 메뉴에서 Ollama 앱 실행 또는 `ollama serve` (AI 활성화 섹션 2번 참고) |
+| `model 'mybot' not found` | Ollama 모델 미빌드 | `models/portfolio`에서 `ollama create mybot -f Modelfile` |
+| GGUF를 바꿨는데 결과가 안 바뀜 | 기존 `mybot` 모델이 그대로 사용됨 | `ollama rm mybot && ollama create mybot -f Modelfile` 재빌드 |
+| `no such file ... portfolio_merged.gguf` | 가중치 파일 누락 (Git 미포함, ~9 GB) | `portfolio_merged.gguf`를 `models/portfolio/`에 배치 후 재빌드 |
 
 ---
 
@@ -226,4 +289,7 @@ ollama run mybot   # 첫 실행 시 모델 다운로드 (수 분 소요)
 [ ] npm install (frontend/ 에서)
 [ ] npm run dev → http://localhost:3000 확인
 [ ] 브라우저에서 로그인 테스트
+[ ] (선택 — AI 포트폴리오) Ollama 앱 실행 (ollama list 로 확인)
+[ ] (선택 — AI 포트폴리오) portfolio_merged.gguf 배치 후 models/portfolio 에서 ollama create mybot -f Modelfile
+[ ]   └ GGUF 교체 시: ollama rm mybot && ollama create mybot -f Modelfile 로 재빌드
 ```

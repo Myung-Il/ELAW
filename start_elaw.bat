@@ -27,7 +27,6 @@ if errorlevel 1 (
     ollama list 2>nul | findstr /i "mybot" >nul
     if errorlevel 1 (
         echo [INFO] Registering mybot model with Ollama...
-        ollama pull gemma2:2b
         ollama create mybot -f models\portfolio\Modelfile
         echo [OK] mybot model registered
     ) else (

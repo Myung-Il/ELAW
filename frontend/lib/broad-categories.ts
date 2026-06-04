@@ -1,6 +1,7 @@
 export const BROAD_CATEGORY_RULES: [string, string[]][] = [
   ["테스팅 & QA", [
     "Testing", "QA", "Quality Assurance", "Test Automation", "Defect",
+    "Selenium", "JMeter", "Appium", "TestRail", "Cypress",
   ]],
   ["데이터 & AI/ML", [
     "Machine Learning", "Deep Learning", "NLP", "Natural Language", "Computer Vision",
@@ -10,16 +11,23 @@ export const BROAD_CATEGORY_RULES: [string, string[]][] = [
     "RAG", "Reinforcement Learning", "Distributed Training", "Model Training",
     "Model Serving", "Active Learning", "Evaluation Metric", "Tokenization",
     "Information Retrieval",
+    // 기업공고 기술 스택 (주차 테마 매칭용)
+    "PyTorch", "TensorFlow", "Keras", "Scikit", "Pandas", "NumPy",
+    "Spark", "Hadoop", "Airflow", "Flink", "HBase", "BigQuery", "Elasticsearch",
+    "OpenCV", "YOLO", "CUDA", "TensorRT", "Hugging Face", "Transformer",
+    "LangChain", "Tableau", "Statistics",
   ]],
   ["네트워크", [
     "Network", "Networking", "TCP", "HTTP", "DNS", "Routing", "VLAN", "VPN",
     "Wireless", "CDN", "NAT", "Ethernet", "Switching", "IPv6", "ARP", "ICMP",
     "Layer 2", "Layer 3", "Transport Layer", "QoS", "Multicast", "Subnetting",
-    "Connectivity", "Communication",
+    "Connectivity", "Communication", "Wireshark", "SDN",
   ]],
   ["데이터베이스", [
     "Database", "SQL", "NoSQL", "RDBMS", "Data Modeling", "Data Warehouse",
     "Replication", "Transaction", "Data Storage", "Databases",
+    // 기업공고 기술 스택
+    "MongoDB", "Redis", "Oracle", "MariaDB", "DynamoDB", "Cassandra", "DBMS",
   ]],
   ["클라우드 & 인프라", [
     "Cloud", "Infrastructure", "DevOps", "Kubernetes", "Docker", "Container",
@@ -30,24 +38,34 @@ export const BROAD_CATEGORY_RULES: [string, string[]][] = [
     "Disaster Recovery", "Auto Scaling", "Chaos Engineering", "Messaging",
     "Message Queue", "Message Broker", "Load Balancing", "Microservices",
     "Operation & Monitoring", "Performance", "Storage",
+    // 기업공고 기술 스택
+    "AWS", "GCP", "Azure", "Terraform", "Jenkins", "Ansible",
+    "Kafka", "RabbitMQ", "Prometheus", "Grafana", "Nginx", "Helm",
   ]],
   ["보안", [
     "Security", "Cryptography", "Privacy", "Compliance", "Vulnerability",
     "Incident Response", "Identity and Access", "IAM", "DDoS", "Intrusion",
-    "Audit", "Governance",
+    "Audit", "Governance", "Penetration", "OWASP", "Firewall", "SIEM",
   ]],
   ["웹 개발", [
     "Frontend", "CSS", "HTML", "JavaScript", "TypeScript", "React", "DOM",
     "Browser", "UI", "UX", "Web", "Responsive", "Animation",
     "State Management", "Micro Frontend", "Mobile", "iOS", "Android",
+    // 기업공고 기술 스택
+    "Vue", "Angular", "Next.js", "Nuxt", "Svelte", "Tailwind", "Redux",
+    "Flutter", "React Native", "Swift", "Jetpack Compose", "Xcode", "Figma",
   ]],
   ["백엔드 & API", [
     "Backend", "API", "Server", "Spring Boot", "REST API",
+    // 기업공고 기술 스택
+    "Django", "DRF", "Flask", "FastAPI", "Spring", "Node.js", "GraphQL", "gRPC",
+    "express ", "MSA",
   ]],
   ["운영체제 & 시스템", [
     "OS", "Operating System", "Linux", "Memory", "Hardware", "Embedded",
     "Firmware", "Kernel", "Virtualization", "Sensor", "Electronics",
     "Power", "Battery", "IoT", "ROS", "Physics", "Kinematics", "Navigation",
+    "RTOS", "ARM", "Raspberry", "MQTT",
   ]],
   ["프로그래밍 & 알고리즘", [
     "Algorithm", "Data Structure", "Logic", "OOP", "Clean Code",
@@ -55,6 +73,11 @@ export const BROAD_CATEGORY_RULES: [string, string[]][] = [
     "Software", "Math", "Mathematics", "Design Pattern", "CS Foundation",
     "Basic Theory", "Programming", "Scripting", "Git", "Version Control",
     "Architecture", "System", "Language", "General",
+    // 기업공고 기술 스택 (프로그래밍 언어)
+    "Python", "Java", "C++", "C#", "Kotlin", "Ruby", " rust", " scala", " go ",
+    // 알고리즘 주차 테마 키워드
+    "Graph", "Sorting", "Dynamic Programming", "Greedy", "Backtracking",
+    "Recursion", "Binary Search", "Shortest Path", "Coding Test", " dp ",
   ]],
 ]
 
@@ -114,6 +137,15 @@ const KO_EN_TECH: [string, string][] = [
   ["모니터링", "monitoring"], ["임베디드", "embedded"], ["모바일", "mobile"],
   ["알고리즘", "algorithm"], ["동시성", "concurrency"],
   ["시스템 설계", "system design"], ["분산", "distributed system"],
+  // 기본 커리큘럼 주차 테마 (default_curriculum / 학습 주제)
+  ["그래프", "graph"], ["정렬", "sorting"], ["이분탐색", "binary search"],
+  ["이분 탐색", "binary search"], ["동적 프로그래밍", "dynamic programming"],
+  ["그리디", "greedy"], ["백트래킹", "backtracking"], ["최단경로", "shortest path"],
+  ["최단 경로", "shortest path"], ["코딩테스트", "coding test"], ["코딩 테스트", "coding test"],
+  ["코드 리뷰", "code quality"], ["객체지향", "oop"],
+  ["트리", "tree data structure"], ["배열", "array data structure"],
+  ["스택", "stack data structure"], ["해시", "hash data structure"],
+  ["힙", "heap data structure"],
 ]
 
 function translateTheme(theme: string): string {

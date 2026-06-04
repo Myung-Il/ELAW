@@ -11,13 +11,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 파일 | 역할 |
 |------|------|
 | `portfolio_maker.py` | CLI 인터페이스 + Ollama subprocess 호출 |
-| `Modelfile` | Ollama 모델 정의 (gemma2:2b 기반, LoRA 어댑터 적용) |
-| `my_portfolio_adapter.gguf` | LoRA 파인튜닝 가중치 — 직접 수정 금지 |
+| `Modelfile` | Ollama 모델 정의 (`portfolio_merged.gguf` 기반) |
+| `portfolio_merged.gguf` | 베이스 모델 + LoRA 병합 완료된 단독 가중치 — 직접 수정 금지 |
 
 ## 모델 명세 (`Modelfile`)
 
 ```
-FROM gemma2:2b
+FROM ./portfolio_merged.gguf
 PARAMETER temperature 0.2
 PARAMETER top_p 0.9
 SYSTEM "당신은 주어진 데이터만 100% 신뢰하여 이력서를 재작성하는 깐깐한 취업 컨설턴트입니다.
@@ -40,7 +40,8 @@ python portfolio_maker.py
 
 ### Ollama 환경 설정 (최초 1회)
 ```bash
-ollama pull gemma2:2b
+# portfolio_merged.gguf는 베이스 모델이 이미 병합된 단독 모델이라
+# 별도 베이스 모델(ollama pull gemma2:2b) 다운로드가 필요 없다.
 cd models/portfolio
 ollama create mybot -f Modelfile
 ollama list | grep mybot    # 확인
@@ -85,7 +86,7 @@ portfolio_text = result.stdout  # ANSI 제어문자 제거 후 저장
 
 ## 주의사항
 
-- `my_portfolio_adapter.gguf`: 파인튜닝된 가중치 파일 — 임의 수정·삭제 금지
+- `portfolio_merged.gguf`: 베이스+LoRA 병합 완료된 가중치 파일 — 임의 수정·삭제 금지
 - `Modelfile` 수정 후에는 `ollama rm mybot && ollama create mybot -f Modelfile` 재빌드 필요
 - Ollama는 백엔드 서버와 동일 머신에서 실행되어야 함 (subprocess 호출)
 - 출력이 영어로 나오면 Modelfile의 SYSTEM 프롬프트가 적용되지 않은 것 → 모델 재빌드

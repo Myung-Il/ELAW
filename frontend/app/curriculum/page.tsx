@@ -308,9 +308,8 @@ export default function CurriculumPage() {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* ── 좌측: 주간 커리큘럼 목록 ────────────────────── */}
           <div className="lg:col-span-2 space-y-3">
-            {weeks
-              .filter((week) => elawProblems.length === 0 || getWeekBroadCategories(week.theme, elawProblems).length > 0)
-              .map((week, displayIdx) => {
+            {/* 생성된 커리큘럼 주차는 전부 표시 — 문제 연동 배지·카운트는 대분류 매칭된 주차에만 노출 */}
+            {weeks.map((week, displayIdx) => {
               const displayNum = displayIdx + 1
               const isSelected = selectedWeeks.has(week.week)
               const weekCats = getWeekBroadCategories(week.theme, elawProblems)

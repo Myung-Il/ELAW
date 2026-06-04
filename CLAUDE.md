@@ -125,7 +125,7 @@ Curriculum zone/weight mapping (controls ensemble behavior):
 
 - **Portfolio generation requires Ollama**: `jobs/portfolio_ai.py` calls a local `mybot` Ollama model via subprocess. If Ollama isn't running, portfolio endpoints will fail/hang.
 - **Study mode conflict**: Creating a study goal when one is already active returns 409. Pass `?force=true` to recreate.
-- **Gemini fallback**: If `GEMINI_API_KEY` is absent or the API fails, curriculum generation falls back to a hardcoded 8-week default path.
+- **Curriculum generation is posting-based by default**: `POST /api/core/goals/` aggregates required/preferred skills from `JobPosting` rows matching the user's selected job role (Korean role names resolved via `_POSTING_ROLE_MAP` in `core/views_user.py`); `POST /api/jobs/<id>/study/` uses that posting's own skills — neither makes an AI call. Pass `"use_ai": true` to attempt Gemini instead; on failure both fall back to the skill-based path.
 - **Match status is immutable**: Job match status transitions are one-way (`scrapped → applied`).
 - **ML test data dependency**: `models/curriculum/test.py` requires `DB/JobProblems/*.json` and `DB/LearningPaths/*.json` to be populated first (via `python manage.py load_dataset`).
 
