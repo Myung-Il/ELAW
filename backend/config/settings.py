@@ -142,7 +142,7 @@ if _cors_origins:
 else:
     CORS_ALLOW_ALL_ORIGINS = True  # 개발 환경 기본값
 
-# SQLite (개발) / MySQL (운영) — .env에 DB_ENGINE=mysql 설정 시 MySQL로 전환
+# SQLite (개발) / MySQL·PostgreSQL (운영) — .env의 DB_ENGINE 값으로 전환
 if os.getenv("DB_ENGINE") == "mysql":
     DATABASES = {
         "default": {
@@ -153,6 +153,20 @@ if os.getenv("DB_ENGINE") == "mysql":
             "HOST":     os.getenv("DB_HOST", "localhost"),
             "PORT":     os.getenv("DB_PORT", "3306"),
             "OPTIONS":  {"charset": "utf8mb4"},
+        }
+    }
+elif os.getenv("DB_ENGINE") == "postgresql":
+    # Supabase Postgres — Session pooler(5432) 권장: IPv4 호환 + Django 세션 기능 유지
+    # 접속 정보는 Supabase 대시보드 → Connect → Session pooler 탭 참고
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME":     os.getenv("DB_NAME", "postgres"),
+            "USER":     os.getenv("DB_USER", "postgres"),
+            "PASSWORD": os.getenv("DB_PASSWORD", ""),
+            "HOST":     os.getenv("DB_HOST", "localhost"),
+            "PORT":     os.getenv("DB_PORT", "5432"),
+            "OPTIONS":  {"sslmode": "require"},
         }
     }
 

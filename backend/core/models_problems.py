@@ -59,7 +59,9 @@ class JobProblem(models.Model):
 
     # 분류
     difficulty    = models.CharField(max_length=20, choices=Difficulty.choices)
-    question_type = models.CharField(max_length=20, choices=QuestionType.choices,
+    # 실데이터에는 choices 외 유형(architecture_decision 등, 최대 29자)이 존재하므로
+    # 길이를 여유 있게 두고 choices는 대표 유형 문서화 용도로만 유지한다.
+    question_type = models.CharField(max_length=50, choices=QuestionType.choices,
                                      null=True, blank=True)
     category      = models.CharField(max_length=100,
                                      help_text='예) Machine Learning, Deep Learning')

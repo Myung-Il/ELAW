@@ -74,6 +74,8 @@ backend/logs/
 
 # 백업 폴더 (작업 중 생성)
 backup_*/
+# SQLite → Supabase 이전용 전체 덤프 (28MB, scripts/fast_loaddata.py 로 재생성 가능)
+backend/backup_sqlite.json
 
 # 임시 스크래치 파일
 *.tmp

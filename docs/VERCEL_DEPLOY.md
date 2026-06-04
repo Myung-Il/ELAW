@@ -56,13 +56,34 @@ Vercel이 빌드 시 각 `page.tsx`를 해당 경로의 HTML로 변환해 서빙
 - `NEXT_PUBLIC_API_URL`만 공개 백엔드 주소로 바꾸면 모든 API가 동작
 - 백엔드(Django)는 별도 배포 필요 — Vercel은 프론트엔드만 호스팅
 
-## Supabase 연동 (예정)
+## Supabase 연동 (적용됨)
 
-데이터베이스를 Supabase로 연동할 경우:
+Supabase Postgres가 **운영 데이터 저장소**다. 두 경로로 접근한다:
 
-1. Supabase 프로젝트 생성 → Settings → API에서 URL/anon key 확인
-2. `frontend/.env.example`의 Supabase 변수 주석 해제 후 `.env.local`에 값 입력
-3. Vercel 환경변수에도 동일하게 등록
-4. `npm install @supabase/supabase-js` 후 클라이언트 초기화 코드 추가
+```
+Django ORM ──(psycopg, Session pooler 5432)──→ Supabase Postgres  ← 모든 읽기/쓰기
+랜딩 페이지 ──(supabase-js, anon key)────────→ 〃 (RLS 공개 읽기 정책으로 제한)
+```
 
-메인 화면의 하드코딩 데이터(`departments`, `companies`, `events`, 통계 카드 — `app/page.tsx` 상단 `[BE 매뉴얼]`/`[DB 매뉴얼]` 주석 참고)를 Supabase 테이블 조회로 교체하면 된다.
+- **Django 연결**: `backend/.env`의 `DB_ENGINE=postgresql` + `DB_*` 변수 (Session pooler 사용 — IPv4 호환). `DB_ENGINE`을 주석 처리하면 로컬 SQLite로 복귀.
+- **스키마 관리**: Django 마이그레이션이 유일한 스키마 소스. 수작업 SQL(`DB/sql/1~04_*.sql`)은 참고용 문서로만 남음.
+- **RLS 보안**: `DB/sql/05_rls_policies.sql` — 모든 테이블 RLS 활성 + anon 쓰기 회수, 랜딩이 읽는 7개 테이블(job_problems, learning_path_meta 등)만 anon SELECT 허용. 새 마이그레이션으로 테이블 추가 시 `python scripts/apply_supabase_rls.py` 재실행 필수.
+- **초기 데이터**: `backend/backup_sqlite.json` (SQLite 전체 덤프) → `python manage.py loaddata backup_sqlite.json`. 초기화가 필요하면 `python scripts/supabase_reset.py --yes` 후 migrate → loaddata.
+
+## 백엔드 공개 — Cloudflare Tunnel (시연용)
+
+Django는 Ollama(AI 포트폴리오) 의존성 때문에 로컬에서 실행하고, 터널로 공개한다:
+
+```powershell
+# 터미널 1 — 백엔드
+cd backend; python manage.py runserver
+
+# 터미널 2 — 터널
+.\scripts\start_tunnel.ps1     # https://xxx.trycloudflare.com URL 출력
+```
+
+1. 출력된 터널 URL을 Vercel → Settings → Environment Variables → `NEXT_PUBLIC_API_URL`에 입력
+2. Deployments 탭 → 최신 배포 → **Redeploy** (환경변수는 재배포해야 반영)
+
+> ⚠️ 무료 quick tunnel은 실행할 때마다 URL이 바뀐다 — 시연 전마다 1~2번 반복.
+> ⚠️ AI 포트폴리오 생성(30~120초)은 Vercel 프록시 타임아웃에 걸릴 수 있음 — 끊기면 로컬 환경에서 시연.
