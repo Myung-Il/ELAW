@@ -122,7 +122,10 @@
       "PowerShell(Set-Location frontend; npx tsc --noEmit 2>$null | Select-String -Pattern \"curriculum|broad-categories\"; \"tsc exit: $LASTEXITCODE\"; Set-Location ..)",
       "PowerShell(git *)",
       "PowerShell(Set-Location frontend; npx tsc lib\\\\broad-categories.ts --outDir ..\\\\_tmp_bc --module commonjs --target es2020 --skipLibCheck; Set-Location ..; \"compiled: $\\(Test-Path _tmp_bc\\\\broad-categories.js\\)\")",
-      "PowerShell(Remove-Item *)"
+      "PowerShell(Remove-Item *)",
+      "PowerShell(python -c \"import ast; ast.parse\\(open\\(r'backend\\\\jobs\\\\views.py', encoding='utf-8'\\).read\\(\\)\\); print\\('syntax OK'\\)\"; python backend\\\\manage.py check 2>$null)",
+      "PowerShell(python backend\\\\manage.py shell -c \"from core.models import AiLog, JobPosting; print\\('ailog_before:', AiLog.objects.count\\(\\)\\); p = JobPosting.objects.filter\\(job_role='Frontend Developer', is_active=True\\).first\\(\\); print\\('posting:', p.id\\)\")",
+      "PowerShell($login = Invoke-RestMethod -Uri \"http://localhost:8000/api/accounts/login/\" -Method POST -ContentType \"application/json\" -Body '{\"email\":\"jiho.park@elaw.kr\",\"password\":\"elaw1234!\"}'; $h = @{ Authorization = \"Bearer $\\($login.access\\)\" }; $r = Invoke-RestMethod -Uri \"http://localhost:8000/api/jobs/3/study/?force=true\" -Method POST -Headers $h -ContentType \"application/json\" -Body '{}'; \"ai_generated: $\\($r.ai_generated\\)\"; python backend\\\\manage.py shell -c \"from core.models import AiLog, Curriculum; print\\('ailog_after:', AiLog.objects.count\\(\\)\\); c = Curriculum.objects.filter\\(is_active=True\\).order_by\\('-id'\\).first\\(\\); print\\('weeks:', len\\(c.content_json['weeks']\\)\\)\")"
     ]
   }
 }

@@ -96,12 +96,13 @@ subprocess.run(['ollama', 'run', 'mybot', prompt])
 # 응답: 30~120초, ANSI 제어문자 제거 후 content_json에 저장
 ```
 
-### 커리큘럼 생성 (`core/views_user.py`)
+### 커리큘럼 생성 (`core/views_user.py`, `jobs/views.py`)
 ```python
 # POST /api/core/goals/ — 기본은 기업공고 기반 (AI 호출 없음)
 # posting_based_curriculum(): 직무 매칭 공고들의 required/preferred_skills를
 #   빈도순 집계 → default_curriculum()으로 주차 구성
-# "use_ai": true 전달 시에만 Gemini 2.0 Flash 시도 (실패 시 공고 기반 폴백)
+# POST /api/jobs/<id>/study/ — 해당 공고의 기술 기반 (AI 호출 없음)
+# 두 엔드포인트 모두 "use_ai": true 전달 시에만 Gemini 2.0 Flash 시도 (실패 시 폴백)
 # Gemini 호출 시 AiLog에 토큰·지연 시간 기록
 ```
 

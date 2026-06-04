@@ -340,20 +340,71 @@ class JobStudyView(APIView):
             }
         )
 
-        # ── 공고 맞춤 Gemini 커리큘럼 생성 ──────────
-        from core.models import LearningStats, SolveHistory, Curriculum
+        # ── 공고 맞춤 커리큘럼 생성 ──────────────
+        # 기본: 공고의 필수/우대 기술 기반 생성 — Gemini 미사용.
+        # 요청에 use_ai=true 를 명시한 경우에만 Gemini를 시도하고,
+        # 실패하면 동일하게 공고 기술 기반으로 폴백한다.
+        from core.models import Curriculum
 
-        solve_count = SolveHistory.objects.filter(user=request.user).count()
-        langs = list(
-            LearningStats.objects.filter(user=request.user, stat_type="language")
-            .values_list("stat_key", flat=True)
-        )
+        use_ai = str(request.data.get('use_ai', '')).lower() in ('1', 'true', 'yes')
 
         req_skills  = posting.required_skills  or []
         pref_skills = posting.preferred_skills or []
-        req_str     = ', '.join(req_skills)  if req_skills  else '미정'
-        pref_str    = ', '.join(pref_skills) if pref_skills else '없음'
-        langs_str   = ', '.join(langs)       if langs       else '미정'
+
+        raw, parsed = None, None
+        if use_ai:
+            raw, parsed = self._generate_with_gemini(
+                request.user, posting, req_skills, pref_skills, duration_weeks
+            )
+            if not parsed:
+                logger.warning(
+                    "Gemini 스터디 커리큘럼 생성 실패 — 기본 커리큘럼으로 대체 (user_id=%s, posting_id=%s)",
+                    request.user.id, posting_id,
+                )
+
+        content = parsed or default_curriculum(
+            new_goal,
+            required_skills=req_skills + pref_skills,
+            duration_weeks=duration_weeks,
+        )
+
+        Curriculum.objects.create(
+            user         = request.user,
+            goal         = new_goal,
+            is_active    = True,
+            version      = 1,
+            content_json = content,
+        )
+
+        ai_generated = parsed is not None
+        return Response({
+            "message": f"'{posting.job_role}' 직무로 {duration_weeks}주 공부를 시작합니다! "
+                       f"{'AI가 공고 맞춤 커리큘럼을 생성했습니다.' if ai_generated else '공고 기술 기반 커리큘럼으로 시작합니다.'}",
+            "goal": UserGoalSerializer(new_goal).data,
+            "ai_generated": ai_generated,
+            "target_posting": {
+                "id": posting.id,
+                "title": posting.title,
+                "job_role": posting.job_role,
+                "company_name": posting.company.name,
+                "required_skills": posting.required_skills,
+                "preferred_skills": posting.preferred_skills,
+            },
+        }, status=status.HTTP_201_CREATED)
+
+    def _generate_with_gemini(self, user, posting, req_skills, pref_skills, duration_weeks):
+        """use_ai=true 요청 시에만 호출되는 Gemini 공고 맞춤 커리큘럼 생성 (선택 기능)"""
+        from core.models import LearningStats, SolveHistory
+
+        solve_count = SolveHistory.objects.filter(user=user).count()
+        langs = list(
+            LearningStats.objects.filter(user=user, stat_type="language")
+            .values_list("stat_key", flat=True)
+        )
+
+        req_str   = ', '.join(req_skills)  if req_skills  else '미정'
+        pref_str  = ', '.join(pref_skills) if pref_skills else '없음'
+        langs_str = ', '.join(langs)       if langs       else '미정'
 
         job_prompt = f"""당신은 취업 준비 학습 플랫폼 ELAW의 AI 커리큘럼 생성기입니다.
 아래 채용공고를 목표로 {duration_weeks}주 집중 학습 커리큘럼을 JSON으로 생성해주세요.
@@ -382,42 +433,9 @@ class JobStudyView(APIView):
 [JSON만 출력 — 코드블록·설명 텍스트 없이 순수 JSON]
 {{"total_weeks":{duration_weeks},"field":"{posting.job_role}","job_role":"{posting.job_role}","required_skills":{req_skills},"preferred_skills":{pref_skills},"weeks":[{{"week":1,"theme":"구체적 주제명","tasks":["과제1","과제2","과제3"],"recommended_problems":["문제번호"],"estimated_hours":10}}]}}"""
 
-        raw    = call_gemini(request.user, job_prompt, "curriculum_study")
+        raw    = call_gemini(user, job_prompt, "curriculum_study")
         parsed = parse_json_from_gemini(raw)
-        if not parsed:
-            logger.warning(
-                "Gemini 스터디 커리큘럼 생성 실패 — 기본 커리큘럼으로 대체 (user_id=%s, posting_id=%s)",
-                request.user.id, posting_id,
-            )
-        content = parsed or default_curriculum(
-            new_goal,
-            required_skills=req_skills + pref_skills,
-            duration_weeks=duration_weeks,
-        )
-
-        Curriculum.objects.create(
-            user         = request.user,
-            goal         = new_goal,
-            is_active    = True,
-            version      = 1,
-            content_json = content,
-        )
-
-        ai_generated = raw is not None
-        return Response({
-            "message": f"'{posting.job_role}' 직무로 {duration_weeks}주 공부를 시작합니다! "
-                       f"{'AI가 공고 맞춤 커리큘럼을 생성했습니다.' if ai_generated else '기본 커리큘럼으로 시작합니다.'}",
-            "goal": UserGoalSerializer(new_goal).data,
-            "ai_generated": ai_generated,
-            "target_posting": {
-                "id": posting.id,
-                "title": posting.title,
-                "job_role": posting.job_role,
-                "company_name": posting.company.name,
-                "required_skills": posting.required_skills,
-                "preferred_skills": posting.preferred_skills,
-            },
-        }, status=status.HTTP_201_CREATED)
+        return raw, parsed
 
 
 # ─────────────────────────────────────────
