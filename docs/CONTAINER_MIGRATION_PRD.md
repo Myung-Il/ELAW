@@ -141,16 +141,23 @@
 - 후속(Phase 6): `deploy.sh`를 새 스택(`elaw_backend` 등 + 프론트 빌드) 기준으로 개정 후 runner 재개
 
 ### Phase 5 — 외부 노출 및 전환
-- [ ] (관리자 승인 시) 매핑 포트로 외부 접속 검증 / (미승인 시) cloudflared를 `http://127.0.0.1:80`으로 변경해 named tunnel 운영
-- [ ] 최종 데이터 동기화 (전환 시점 Supabase 차분 재적재)
+- [ ] 접속 경로 확정: **SSH 터널 기본**(`scripts/elaw_connect.bat`, 매핑 불필요·즉시 가능) + (관리자 매핑 승인 시) 직접 노출 — allowlist 동작·SNAT 여부 외부에서 검증
+- [ ] 팀원 SSH 공개키 등록(= 접속 승인) 및 접속 테스트
+- [ ] 최종 데이터 동기화 (전환 시점 Supabase 차분 재덤프+적재, media 파일 동기화)
 - [ ] 팀(실사용자 4명) 접속 주소 전환 안내
 - [ ] 모니터링 1주 후: Vercel 배포 중지, Supabase 프로젝트 일시정지(즉시 삭제 금지 — 롤백 대비 2주 보관), 로컬 PC 주 서버·`/volume/elaw` 풀백 스택 정지
 - **완료 기준**: 외부에서 단일 주소로 전 기능 동작, 클라우드 의존 0
 
-### Phase 6 — 운영 체계
-- [ ] `pg_dump` 일일 백업 cron (`/volume/ELAW/backups`, 14일 보관) + 복원 리허설 1회
-- [ ] 로그 로테이션, 디스크/메모리 점검 스크립트
-- [ ] `docs/OPERATIONS.md` 개정 (새 단일 컨테이너 운영 절차)
+### ✅ Phase 6 — 운영 체계 (완료, 2026-06-06 — Phase 5보다 먼저 수행)
+- [x] 일일 백업: `scripts/backup_db.sh` — 03:30 KST `pg_dump -Fc` → `backups/` 14일 보관 + 무결성 확인. 첫 백업(5.4MB) 생성
+- [x] **복원 리허설 통과**: 임시 DB 복원 → 41 테이블/34 사용자/6,000 문제 검증 (`scripts/restore_rehearsal.sh`)
+- [x] 로그 로테이션: logrotate 매일 04:00 KST, 7일 보관 (copytruncate)
+- [x] cron 데몬을 supervisord에 추가 (`elaw_cron`) — 총 6개 프로그램 RUNNING
+- [x] `scripts/provision_container.sh` — 컨테이너 재생성 시 일괄 복구 (PG/nginx/cron/supervisord/부팅훅)
+- [x] `scripts/deploy_container.sh` — 전환 후 CI(`/volume/deploy.sh`) 교체본 (runner 재개 시 적용)
+- [x] `scripts/elaw_connect.bat` — 팀원용 SSH 터널 원클릭 접속 (포트 매핑 없이도 운영 가능)
+- [x] 운영 문서 `docs/CONTAINER_OPERATIONS.md` (아키텍처/일상 명령/백업·복원/재생성/배포/트러블슈팅)
+- 전부 `container-migration` 브랜치 커밋(`f62e3c4`)
 
 ## 5. 리스크
 
