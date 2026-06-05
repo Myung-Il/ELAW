@@ -61,3 +61,5 @@ curl.exe -s -o NUL -w "%{http_code}" "https://elaw-rho.vercel.app/api/jobs/"   #
 - 모든 Python 명령에 `PYTHONUTF8=1` (start_all.ps1은 자동 처리).
 - 포트폴리오 생성을 동기 방식으로 되돌리지 말 것 (프록시 타임아웃 — CLAUDE.md 참고).
 - `backend/.env`는 절대 커밋 금지.
+- 현재 프로덕션이 **풀백 서버**를 바라보는 상태에서 주 서버로 복귀하려면, 1단계(start_all) 후
+  2단계 대신 `.\scripts\switch_backend.ps1 -To primary` 실행 (풀백 전환은 `/go-fallback` 스킬 참고).

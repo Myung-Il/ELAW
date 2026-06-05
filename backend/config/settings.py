@@ -158,6 +158,7 @@ if os.getenv("DB_ENGINE") == "mysql":
 elif os.getenv("DB_ENGINE") == "postgresql":
     # Supabase Postgres — Session pooler(5432) 권장: IPv4 호환 + Django 세션 기능 유지
     # 접속 정보는 Supabase 대시보드 → Connect → Session pooler 탭 참고
+    _pg_options = {"sslmode": "require"}
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -166,9 +167,15 @@ elif os.getenv("DB_ENGINE") == "postgresql":
             "PASSWORD": os.getenv("DB_PASSWORD", ""),
             "HOST":     os.getenv("DB_HOST", "localhost"),
             "PORT":     os.getenv("DB_PORT", "5432"),
-            "OPTIONS":  {"sslmode": "require"},
+            "OPTIONS":  _pg_options,
         }
     }
+    # 풀백 서버 등 5432가 막힌 망에서는 Transaction pooler(6543) 사용 —
+    # .env에 DB_POOL_MODE=transaction 설정 시 풀러 호환 옵션 적용 (주 서버는 영향 없음)
+    if os.getenv("DB_POOL_MODE") == "transaction":
+        _pg_options["prepare_threshold"] = None        # psycopg3 prepared stmt 비활성화
+        DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
+        DATABASES["default"]["CONN_MAX_AGE"] = 0       # 커넥션 재사용 금지 (풀러가 관리)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GITHUB_TOKEN   = os.getenv("GITHUB_TOKEN", "")

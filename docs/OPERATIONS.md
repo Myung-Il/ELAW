@@ -217,6 +217,7 @@ GET  /api/jobs/<id>/apply/   → 이 공고에 작성한 내 최신 포트폴리
 | Python 한글 출력/덤프 깨짐 (`cp949`) | Windows 기본 인코딩 | 명령 전 `$env:PYTHONUTF8 = "1"` |
 | 랜딩 페이지가 폴백(가짜) 데이터 표시 | Supabase RLS로 막혔거나 테이블 비어있음 | `python scripts/apply_supabase_rls.py` 재실행 / 6-3 재적재 |
 | anon key로 사용자 테이블이 읽힘 | RLS 미적용 (마이그레이션 후 누락) | `python scripts/apply_supabase_rls.py` |
+| 주 서버를 쓸 수 없음 (PC 꺼짐·점검) | 단일 PC 의존 | 풀백 전환: `.\scripts\switch_backend.ps1 -To fallback` (10절) |
 
 ### 진단용 로그 위치
 - Django: 실행 중인 터미널 + `backend/logs/django.log`
@@ -238,15 +239,69 @@ GET  /api/jobs/<id>/apply/   → 이 공고에 작성한 내 최신 포트폴리
 | `docs/VERCEL_DEPLOY.md` | Vercel 초기 설정 상세 |
 | `backend/jobs/portfolio_ai.py` | Ollama 호출 헬퍼 |
 | `backend/jobs/views.py` → `JobApplyView`, `_run_portfolio_generation` | 비동기 생성 로직 |
+| `scripts/switch_backend.ps1` | 주↔풀백 백엔드 전환 (10절) |
+| `scripts/fallback/` | 풀백 서버 배포 산출물 (supervisord.conf, url_publisher 등) |
 
 ### 테스트 계정 (seed 데이터)
 - `minjun.kim@elaw.kr` / `elaw1234!` (seed_all 생성 계정 공통 비밀번호)
 
 ---
 
-## 10. 향후 개선 후보 (현재 제약)
+## 10. 풀백 서버 (학교 데이터센터, hot standby)
+
+주 서버(로컬 PC)가 꺼져도 서비스를 잇기 위한 예비 백엔드. **상시 가동** 중이며
+GPU(V100×2) 추론이라 AI 포트폴리오 생성이 ~10초(주 서버 2~4분)로 오히려 빠르다.
+구축 상세: `docs/planning/PRD_풀백서버_도커구축.md`
+
+### 10-1. 구조
+
+```
+학교 데이터센터 컨테이너 (Ubuntu 20.04, ssh elaw-nas = root@220.67.89.246:12278, 키 인증)
+  /volume/elaw/               ← 모든 자산 (NFS — 컨테이너 재시작에도 보존)
+    app/        repo clone (backend 코드, .env: DB_PORT=6543 + DB_POOL_MODE=transaction)
+    venv/       Python 3.14 + 의존성 + supervisord
+    runtime/    ollama(+mybot GGUF 원본), cloudflared, uv
+    scripts/    supervisord.conf, start_fallback.sh, url_publisher.py, smoke_test.py
+    logs/       backend.log, ollama.log, cloudflared.log, url_publisher.log
+  supervisord가 4개 프로세스 관리(autorestart): ollama → backend(gunicorn:9000) → cloudflared → url_publisher
+  url_publisher가 quick tunnel URL을 Supabase infra_endpoint 테이블에 상시 게시 (RLS anon 차단)
+```
+- DB는 주 서버와 **동일한 Supabase** — 단, 학교망이 5432를 막아 **6543 Transaction pooler** 사용
+  (`settings.py`의 `DB_POOL_MODE=transaction` 분기가 호환 옵션 적용)
+
+### 10-2. 전환 / 복귀
+
+```powershell
+.\scripts\switch_backend.ps1 -To fallback   # 풀백으로 전환 (~1분) — 또는 "풀백 서버로 실행해 줘" (/go-fallback 스킬)
+.\scripts\switch_backend.ps1 -To primary    # 주 서버 복귀 (먼저 .\scripts\start_all.ps1 로 주 서버 기동)
+```
+URL 조회 → 헬스체크 → Vercel env 교체+재배포 → E2E 검증까지 자동.
+
+### 10-3. 상태 확인 / 재기동
+
+```powershell
+ssh elaw-nas "/volume/elaw/venv/bin/supervisorctl -c /volume/elaw/scripts/supervisord.conf status"
+ssh elaw-nas "/volume/elaw/scripts/start_fallback.sh"    # 컨테이너 재시작 후엔 이것만 실행 (멱등)
+```
+- 개별 프로세스 크래시는 supervisord가 자동 복구. **데이터센터 관리자가 컨테이너를 재시작한 경우만** 위 재기동 필요.
+- 터널 URL이 바뀌어도 30초 내 Supabase에 재게시되므로 별도 조치 불필요 (전환 시 자동 반영).
+
+### 10-4. 풀백 코드 업데이트
+
+```powershell
+ssh elaw-nas "git -C /volume/elaw/app pull && /volume/elaw/runtime/uv/uv pip install --python /volume/elaw/venv/bin/python -r /volume/elaw/app/requirements.txt && /volume/elaw/venv/bin/supervisorctl -c /volume/elaw/scripts/supervisord.conf restart backend"
+ssh elaw-nas "PYTHONUTF8=1 /volume/elaw/venv/bin/python /volume/elaw/scripts/smoke_test.py"   # 검증
+```
+
+### 10-5. 알려진 한계
+- 게시판 첨부파일은 서버별 로컬 `media/` — 주 서버에서 올린 첨부는 풀백에서 안 보임 (글 자체는 DB 공유라 정상)
+- quick tunnel URL은 풀백 터널 재시작 시 변경 — 프로덕션이 풀백을 바라보던 중이라면 전환 스크립트 재실행 필요
+
+---
+
+## 11. 향후 개선 후보 (현재 제약)
 
 - **터널 URL 고정**: Cloudflare 계정+도메인 기반 named tunnel로 전환하면 매번 Vercel env 갱신이 불필요해짐
-- **백엔드 클라우드화**: Render/Railway에 Django 배포 가능하나 Ollama 포트폴리오는 Gemini 대체 또는 비활성화 필요
+- ~~**백엔드 클라우드화**~~: → **풀백 서버로 해소** (10절) — 주 서버 다운 시 전환으로 무중단 운영 가능
 - **첨부파일 클라우드화**: 게시판 첨부는 아직 로컬 `backend/media/` — Supabase Storage 전환 검토
 - **테스트 코드**: 백엔드 테스트 스텁 비어있음

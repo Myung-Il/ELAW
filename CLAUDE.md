@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ELAW is a job-linked learning platform (취업 연계 학습 플랫폼) — a capstone project for Mokpo National University's Convergence Software Department. It matches job postings to personalized learning paths and generates AI-powered portfolios.
 
-**Deployment topology**: frontend auto-deploys to Vercel on `main` push; Django runs on the local PC (Ollama dependency) exposed via Cloudflare quick tunnel; **Supabase Postgres is the production DB**. Full runbook: `docs/OPERATIONS.md`.
+**Deployment topology**: frontend auto-deploys to Vercel on `main` push; Django runs on the local PC (Ollama dependency) exposed via Cloudflare quick tunnel; **Supabase Postgres is the production DB**. A **fallback backend** (school datacenter container, GPU, hot standby) can take over via `scripts/switch_backend.ps1` / the `/go-fallback` skill. Full runbook: `docs/OPERATIONS.md`.
 
 ## Environment Gotchas (read first)
 
@@ -17,6 +17,7 @@ ELAW is a job-linked learning platform (취업 연계 학습 플랫폼) — a ca
 - Ollama lives at `D:\Ollama\ollama.exe` (not on PATH). The backend calls model `mybot`; if missing: `ollama cp mybot-2b-backup:latest mybot`.
 - **Vercel CLI crashes on this PC** (Korean Windows username breaks its UA header — `vercel login` is unusable). Use `scripts/update_vercel_env.ps1` (REST API + `VERCEL_TOKEN` from `backend/.env`) for env updates/redeploys.
 - "Make it reachable by URL" / 시연 준비 requests → use the `/go-live` skill (`.claude/skills/go-live/`): `scripts/start_all.ps1` (Ollama+Django+tunnel as detached windows) then `scripts/update_vercel_env.ps1`.
+- "풀백 서버로 실행해 줘" / fallback requests → use the `/go-fallback` skill (`.claude/skills/go-fallback/`): `scripts/switch_backend.ps1 -To fallback`. The fallback (ssh alias `elaw-nas`, supervisord stack under `/volume/elaw/`) runs hot standby with GPU inference (~10 s portfolio generation) and uses Supabase port **6543** + `DB_POOL_MODE=transaction` (school network blocks 5432). Ops: `docs/OPERATIONS.md` §10.
 - `.ps1` files with Korean text must be saved as **UTF-8 with BOM** — Windows PowerShell 5.1 reads BOM-less files as cp949 and fails to parse.
 - Seed account for API testing: `minjun.kim@elaw.kr` / `elaw1234!`.
 
@@ -178,5 +179,6 @@ Many frontend pages currently use hardcoded mock data pending full API integrati
 - AI features: implemented (Ollama portfolio — async + polling, ML recommendation)
 - Production DB: **migrated to Supabase Postgres** (all data loaded; RLS applied — public read on 7 landing tables only)
 - Deployment: Vercel auto-deploy (frontend) + Cloudflare tunnel (backend) — see `docs/OPERATIONS.md`
+- Fallback backend: school datacenter container (V100 GPU), hot standby, switch via `scripts/switch_backend.ps1` or `/go-fallback` — see `docs/planning/PRD_풀백서버_도커구축.md`
 - Backend test suites: empty stubs (no tests written yet)
 - Known constraints: tunnel URL changes per run (update Vercel env + Redeploy); board attachments still on local `backend/media/`

@@ -14,5 +14,8 @@ requests>=2.31          # Gemini API, ETL HTTP 호출에 사용
 # ── PostgreSQL (Supabase 운영 DB) ─────────────
 psycopg[binary]>=3.2     # DB_ENGINE=postgresql 시 사용
 
+# ── WSGI 서버 (풀백/운영 배포용 — 주 서버는 runserver 사용) ──
+gunicorn>=23.0
+
 # ── MySQL (운영 환경 선택) ────────────────────
 # mysqlclient>=2.2        # MySQL 사용 시 주석 해제 후 설치
