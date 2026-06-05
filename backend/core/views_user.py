@@ -483,14 +483,18 @@ def generate_matches_for_user(user):
     # Match 저장은 bulk_create/bulk_update로 일괄 처리한다.
     # (공고당 update_or_create는 원격 Supabase 기준 왕복 2~3회 × 공고 수 ≈ 50초+
     #  → Vercel 프록시 ~75초 한도를 넘겨 502를 유발했던 원인)
-    postings = JobPosting.objects.filter(is_active=True).select_related("company")
+    # ⚠️ 필요한 컬럼만 values()로 조회할 것 — 전체 컬럼 조회(description 포함)는
+    #   응답이 수 MB라 원격 DB 구간에서 간헐적 ~60초 전송 스톨을 유발했다 (실측, 2026-06-05).
+    postings = JobPosting.objects.filter(is_active=True).values(
+        "id", "title", "required_skills", "preferred_skills", "company__name"
+    )
     existing = {m.posting_id: m for m in Match.objects.filter(user=user)}
     results, to_create, to_update = [], [], []
     now = timezone.now()
 
     for posting in postings:
-        req  = [s.lower() for s in (posting.required_skills  or [])]
-        pref = [s.lower() for s in (posting.preferred_skills or [])]
+        req  = [s.lower() for s in (posting["required_skills"]  or [])]
+        pref = [s.lower() for s in (posting["preferred_skills"] or [])]
 
         req_score  = (sum(1 for s in req  if s in my_skills) / len(req)  * 60) if req  else 0
         pref_score = (sum(1 for s in pref if s in my_skills) / len(pref) * 25) if pref else 0
@@ -502,19 +506,19 @@ def generate_matches_for_user(user):
         elif total >= 50: st = "viewed"
         else:             st = "recommended"
 
-        match = existing.get(posting.id)
+        match = existing.get(posting["id"])
         created = match is None
         if created:
-            to_create.append(Match(user=user, posting=posting, match_score=total, status=st))
+            to_create.append(Match(user=user, posting_id=posting["id"], match_score=total, status=st))
         elif match.match_score != total or match.status != st:
             match.match_score = total
             match.status      = st
             match.updated_at  = now  # bulk_update는 auto_now를 적용하지 않음
             to_update.append(match)
         results.append({
-            "posting_id":    posting.id,
-            "posting_title": posting.title,
-            "company":       posting.company.name,
+            "posting_id":    posting["id"],
+            "posting_title": posting["title"],
+            "company":       posting["company__name"],
             "match_score":   total,
             "status":        st,
             "created":       created,
