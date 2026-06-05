@@ -21,6 +21,11 @@ class GKT:
         """
         self._responses        = responses
         self._dependency_graph = dependency_graph
+        # question_id → node dict 인덱스 (순방향 전파에서 category 조회용, O(1))
+        self._node_index       = {
+            n["question_id"]: n
+            for n in dependency_graph.get("nodes", [])
+        }
         self._category_stats   = self._build_category_stats()
         self._node_mastery     = self._build_node_mastery()
         self._weak_nodes       = self._build_weak_nodes()
@@ -86,16 +91,32 @@ class GKT:
             / self._category_stats[cat]["total"]
         )
 
-        # 오답이면 취약 노드 + 선행 노드 추가
+        # 오답이면 취약 노드 + 선행 노드 추가 (역방향 전파)
         if not response["is_correct"]:
             self._weak_nodes.add(qid)
             for edge in self._dependency_graph.get("edges", []):
                 if edge["Target_ID"] == qid:
                     self._weak_nodes.add(edge["Preceding_ID"])
 
+        # 정답이면 후행 노드 카테고리 숙련도 소폭 상향 (순방향 전파)
+        else:
+            current_mastery = self._node_mastery[cat]
+            for edge in self._dependency_graph.get("edges", []):
+                if edge["Preceding_ID"] == qid:
+                    target_node = self._node_index.get(edge["Target_ID"])
+                    if target_node is None:
+                        continue
+                    target_cat = target_node["category"]
+                    if target_cat not in self._node_mastery:
+                        self._node_mastery[target_cat] = 0.5  # 미경험 카테고리 기본값
+                    # 가중 혼합: 후행 노드 숙련도를 현재 정답 카테고리 숙련도 방향으로 소폭 이동
+                    self._node_mastery[target_cat] = (
+                        0.9 * self._node_mastery[target_cat] + 0.1 * current_mastery
+                    )
+
     # ─────────────────────────────────────────
     # 공개: 문제별 미래 취약 가능성 점수 반환 (0~1)
-    #       취약 노드 여부 + 카테고리 숙련도 반전
+    #       취약 노드 여부(alpha) + 카테고리 숙련도 반전(1-alpha)
     # ─────────────────────────────────────────
     def predict(self, problem: dict) -> float:
         """
@@ -117,4 +138,6 @@ class GKT:
         mastery = self._node_mastery.get(cat, 0.5)
         mastery_score = 1.0 - mastery
 
-        return round((weak_score + mastery_score) / 2, 3)
+        # 가중 혼합 (단순 평균 대비 weak_score에 더 강한 가중치)
+        alpha = 0.6
+        return round(alpha * weak_score + (1 - alpha) * mastery_score, 3)

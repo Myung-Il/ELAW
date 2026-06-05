@@ -34,10 +34,18 @@ class SAKT:
         category_weights = {}
         for i, r in enumerate(recent):
             cat = r["category"]
-            weight = (i + 1) / n  # 최근일수록 높은 가중치
+            position_weight    = (i + 1) / n          # 최근일수록 높은 가중치
+            correctness_weight = 1.0 if r["is_correct"] else -0.5  # 정답 양의 기여, 오답 음의 기여
+            weight = position_weight * correctness_weight
             if cat not in category_weights:
                 category_weights[cat] = 0.0
             category_weights[cat] += weight
+
+        # 음수 클리핑 — 오답이 지배적인 카테고리는 0으로
+        category_weights = {
+            cat: max(0.0, w)
+            for cat, w in category_weights.items()
+        }
 
         # 정규화
         total = sum(category_weights.values())

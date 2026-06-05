@@ -16,8 +16,8 @@ class Voting:
     """
 
     # 구간 경계값
-    ZONE_LOW    = 60.0   # 60% 미만 → 낮음
-    ZONE_MID    = 77.0   # 60~77% → 괜찮음, 77% 이상 → 높음
+    ZONE_LOW    = 40.0   # 40% 미만 → 낮음
+    ZONE_MID    = 77.0   # 40~77% → 괜찮음, 77% 이상 → 높음
 
     # 구간별 보팅 비율 (DKT, SAKT, GKT)
     WEIGHTS = {

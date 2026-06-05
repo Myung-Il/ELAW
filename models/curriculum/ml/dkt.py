@@ -23,7 +23,7 @@ class DKT:
 
     # ─────────────────────────────────────────
     # 내부: 카테고리별 가중 정답률 계산
-    #       최근 응답일수록 높은 가중치 (선형 증가)
+    #       최근 응답일수록 높은 가중치 (지수 감쇠 — 망각 곡선 근사)
     # ─────────────────────────────────────────
     def _build_weighted_stats(self) -> dict:
         recent = self._responses[-self._window:]
@@ -31,10 +31,11 @@ class DKT:
         if n == 0:
             return {}
 
+        decay = 0.9  # 망각 곡선 근사 — 오래된 응답일수록 기하급수적으로 감쇠
         stats = {}
         for i, r in enumerate(recent):
             cat = r["category"]
-            weight = (i + 1) / n  # 최근일수록 높은 가중치
+            weight = decay ** (n - 1 - i)  # 최근일수록 높은 가중치 (지수 감쇠)
             if cat not in stats:
                 stats[cat] = {"weight_sum": 0.0, "correct_sum": 0.0}
             stats[cat]["weight_sum"]  += weight
