@@ -102,3 +102,4 @@ runtime/
 backend/staticfiles/
 backend/supabase_dump*.json
 nohup.out
+backups/
