@@ -1,0 +1,62 @@
+---
+title: ELAW 전체 ERD — 32 테이블 (2026-06-05 기준)
+config:
+  theme: neutral
+  er:
+    layoutDirection: TB
+---
+erDiagram
+    %% ───────── 레이어 1 — 기본 도메인 (16) ─────────
+    users ||--o| companies : "1:1 기업회원"
+    users ||--o{ platform_links : "외부 계정 연동"
+    users ||--o{ user_goals : "학습 목표"
+    user_goals ||--o{ curricula : "커리큘럼 버전"
+    users ||--o{ solve_history : "풀이 이력(ETL)"
+    users ||--o{ learning_stats : "언어·태그 통계"
+    users ||--o{ portfolios : "포트폴리오"
+    users ||--o{ matches : "매칭"
+    job_postings ||--o{ matches : ""
+    companies ||--o{ job_postings : "채용공고"
+    users ||--o{ posts : "작성(RESTRICT)"
+    posts ||--o{ post_attachments : "첨부"
+    posts ||--o{ post_views : "조회(계정당1회)"
+    posts ||--o{ post_likes : "좋아요(계정당1회)"
+    posts ||--o{ comments : "댓글"
+    users ||--o{ ai_logs : "AI 호출 로그"
+
+    %% ───────── 레이어 2 — 데이터셋 (5) ─────────
+    dataset_entries ||--o| dataset_resumes : "1:1 구조화"
+    dataset_entries ||--o| dataset_job_descriptions : "1:1 구조화"
+    dataset_resumes ||--o{ dataset_match_scores : ""
+    dataset_job_descriptions ||--o{ dataset_match_scores : "학습 레이블"
+    job_postings ||--o{ dataset_job_descriptions : "연결(옵션)"
+    dataset_load_history {
+        string dataset_name
+        string status
+    }
+
+    %% ───────── 레이어 3 — 문제·퀴즈 (7) ─────────
+    job_problems ||--o{ problem_edges : "선수과목(source)"
+    job_problems ||--o{ problem_edges : "후속(target)"
+    job_problems ||--o{ job_problem_solve_history : "자체 풀이"
+    users ||--o{ job_problem_solve_history : ""
+    job_problem_clusters {
+        string cluster_id
+        json question_ids "JSON 참조(FK 아님)"
+    }
+    users ||--o| quiz_sessions : "1:1 진단 퀴즈"
+    users ||--o| recommend_sessions : "1:1 추천 세션"
+    learning_path_meta {
+        string job_role UK
+        int cluster_count
+    }
+
+    %% ───────── 레이어 4 — 추천·갭·포트폴리오 (4) ─────────
+    users ||--o{ skill_gaps : "스킬 갭"
+    job_postings ||--o{ skill_gaps : ""
+    skill_gaps ||--o{ problem_recommendations : "갭 보완 추천"
+    users ||--o{ problem_recommendations : ""
+    problem_recommendations ||--o{ job_problem_solve_history : "추천→풀이 추적"
+    portfolios ||--o{ portfolio_snapshots : "버전"
+    portfolio_snapshots ||--o{ portfolio_feedback : "RLHF 피드백"
+    users ||--o{ portfolio_feedback : ""

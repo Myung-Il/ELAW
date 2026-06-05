@@ -1,0 +1,145 @@
+---
+title: ELAW 레이어 1 상세 ERD — 기본 도메인 16 테이블
+config:
+  theme: neutral
+---
+erDiagram
+    users {
+        bigint id PK
+        string email UK "로그인 ID"
+        string name
+        string role "student/company/admin"
+        bool is_active
+        bool ai_consent
+    }
+    companies {
+        bigint id PK
+        bigint user_id FK "1:1"
+        string name
+        string industry
+        bool is_approved
+    }
+    platform_links {
+        bigint id PK
+        bigint user_id FK
+        string platform "baekjoon/github/programmers"
+        string external_id "핸들·username"
+        datetime last_synced
+        bool is_active
+    }
+    user_goals {
+        bigint id PK
+        bigint user_id FK
+        string goal_type "study/job"
+        string job_role
+        smallint duration_weeks
+        bool is_active
+    }
+    curricula {
+        bigint id PK
+        bigint goal_id FK
+        bigint user_id FK
+        json content_json "weeks[]"
+        smallint version
+        bool is_active
+    }
+    solve_history {
+        bigint id PK
+        bigint user_id FK
+        string platform "baekjoon/programmers/w3schools/custom"
+        string problem_id "UK(user+platform+problem)"
+        string status "solved/failed/partial"
+        json algo_tags
+        string difficulty "Bronze5~Ruby1"
+        string source "api/crawl/manual"
+    }
+    learning_stats {
+        bigint id PK
+        bigint user_id FK
+        string stat_type "language/algo_tag"
+        string stat_key "Python·DP 등"
+        int total_count
+        int solved_count
+        float correct_rate
+    }
+    portfolios {
+        bigint id PK
+        bigint user_id FK
+        string title
+        json content_json "sections[]+status"
+        string public_slug UK
+        smallint version
+        bool is_public
+    }
+    job_postings {
+        bigint id PK
+        bigint company_id FK
+        string title
+        json required_skills
+        json preferred_skills
+        string career_level
+        date deadline
+        bool is_active
+    }
+    matches {
+        bigint id PK
+        bigint user_id FK
+        bigint posting_id FK
+        float match_score "0~100"
+        string status "recommended→applied"
+    }
+    posts {
+        bigint id PK
+        bigint author_id FK "RESTRICT"
+        string category "notice/contest/event/qna"
+        string title
+        bool is_pinned
+        int view_count
+        int like_count
+    }
+    post_attachments {
+        bigint id PK
+        bigint post_id FK
+        string original_name
+        int file_size
+    }
+    post_views {
+        bigint id PK
+        bigint post_id FK
+        bigint user_id FK "UK(post+user)"
+    }
+    post_likes {
+        bigint id PK
+        bigint post_id FK
+        bigint user_id FK "UK(post+user)"
+    }
+    comments {
+        bigint id PK
+        bigint post_id FK
+        bigint author_id FK
+        text content
+    }
+    ai_logs {
+        bigint id PK
+        bigint user_id FK "nullable=SYSTEM"
+        string feature "curriculum/portfolio 등"
+        int latency_ms
+        string status "success/error/timeout/cached"
+    }
+
+    users ||--o| companies : ""
+    users ||--o{ platform_links : ""
+    users ||--o{ user_goals : ""
+    user_goals ||--o{ curricula : ""
+    users ||--o{ solve_history : ""
+    users ||--o{ learning_stats : ""
+    users ||--o{ portfolios : ""
+    users ||--o{ matches : ""
+    companies ||--o{ job_postings : ""
+    job_postings ||--o{ matches : ""
+    users ||--o{ posts : ""
+    posts ||--o{ post_attachments : ""
+    posts ||--o{ post_views : ""
+    posts ||--o{ post_likes : ""
+    posts ||--o{ comments : ""
+    users ||--o{ ai_logs : ""

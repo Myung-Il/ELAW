@@ -26,6 +26,9 @@ import {
 interface DashboardData {
   user: { name: string; email: string; role: string }
   goal: { field: string; job_role: string; duration_weeks: number; has_curriculum: boolean } | null
+  solve_stats?: { total: number; solved: number; correct_rate: number }
+  top_languages?: { stat_key: string; correct_rate: number | null }[]
+  weak_tags?: { stat_key: string; correct_rate: number | null; total_count: number }[]
   top_matches: { posting_title: string; company: string; match_score: number; status: string }[]
 }
 
@@ -231,6 +234,13 @@ export default function HomePage() {
   const user = dashboard?.user
   const goal = dashboard?.goal
   const topMatches = dashboard?.top_matches ?? []
+
+  // 플랫폼 연동(백준 등) 기반 학습 통계 — /api/core/dashboard/
+  const solveStats = dashboard?.solve_stats
+  const topLanguages = dashboard?.top_languages ?? []
+  const weakTags = dashboard?.weak_tags ?? []
+  const hasPlatformStats =
+    (solveStats?.total ?? 0) > 0 || topLanguages.length > 0 || weakTags.length > 0
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -576,6 +586,90 @@ export default function HomePage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* 플랫폼 학습 통계 — 백준·GitHub 연동 데이터 (/api/core/dashboard/) */}
+            {hasPlatformStats && (
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                    플랫폼 학습 통계
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  {/* 풀이 통계 */}
+                  {solveStats && solveStats.total > 0 && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { label: "총 시도", value: solveStats.total.toLocaleString("ko-KR") },
+                        { label: "해결",    value: solveStats.solved.toLocaleString("ko-KR") },
+                        { label: "정답률",  value: `${Math.round(solveStats.correct_rate)}%` },
+                      ].map((s) => (
+                        <div key={s.label} className="rounded-lg border bg-muted/30 p-2.5 text-center">
+                          <p className="text-base font-bold text-primary">{s.value}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* 주력 언어 Top3 */}
+                  {topLanguages.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                        주력 언어
+                      </p>
+                      <div className="space-y-2">
+                        {topLanguages.map((lang) => (
+                          <div key={lang.stat_key} className="space-y-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-medium">{lang.stat_key}</span>
+                              <span className="text-muted-foreground">
+                                정답률 {Math.round(lang.correct_rate ?? 0)}%
+                              </span>
+                            </div>
+                            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                              <div
+                                className="h-full rounded-full bg-primary transition-all"
+                                style={{ width: `${Math.min(lang.correct_rate ?? 0, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 취약 알고리즘 태그 Top3 */}
+                  {weakTags.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                        취약 알고리즘 태그
+                      </p>
+                      <div className="space-y-2">
+                        {weakTags.map((tag) => (
+                          <div
+                            key={tag.stat_key}
+                            className="flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2"
+                          >
+                            <span className="flex items-center gap-2 text-sm font-medium">
+                              <AlertTriangle className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
+                              {tag.stat_key}
+                            </span>
+                            <span className="text-xs text-muted-foreground flex-shrink-0">
+                              <span className="font-semibold text-rose-500">
+                                {Math.round(tag.correct_rate ?? 0)}%
+                              </span>
+                              {" · "}{tag.total_count}회 시도
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* 게시판 — 자동 슬라이드 */}
             <Card className="shadow-sm">
