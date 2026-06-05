@@ -55,11 +55,11 @@
 
 외부에서 포트 도달성 테스트 결과 — **12278(SSH) 외 전부 차단** (9000, 9001, 3000, 8888, 80, 443 모두 불통).
 
-> **결정 (2026-06-06, 사용자)**: 외부 인터넷 노출은 하지 않고 **학교 내부망 전용**으로 운영한다 (named tunnel은 도메인 비용 문제로 철회). 컨테이너는 브리지 NAT(172.17.0.5) 모드이므로 내부망 접속도 호스트 포트 매핑에 의존한다.
+> **결정 (2026-06-06 최종, 사용자)**: **외부망 포트 직접 노출 + 승인된 IP만 허용** (nginx allowlist — `scripts/nginx_allowlist.conf`, 노트북 110.13.213.214·학교 내부망 등록, 팀원 IP는 한 줄씩 추가).
 >
-> - 1순위: 기존 매핑 포트 확인 — 내부망 PC에서 `http://172.26.21.246:9001` 테스트 (사용자 액션)
-> - 2순위: NAS 관리자에게 내부용 포트 매핑 요청
-> - 3순위: 팀원 4명 SSH 로컬 포워딩 (`ssh -L 8080:127.0.0.1:80 -p 12278 root@…`) — 12278은 이미 개방되어 있어 추가 설정 불필요
+> - 외부에서 현재 12278(SSH)만 개방 → **NAS 관리자에게 컨테이너 80 포트 매핑 요청 필요** (사용자 액션, 태스크 #7)
+> - 매핑 전 임시 접속: SSH 터널 `ssh -L 8080:127.0.0.1:80 -p 12278 root@220.67.89.246` 후 `http://localhost:8080`
+> - 주의: 호스트/공유기 NAT가 출발지 IP를 SNAT하면 allowlist가 무력화될 수 있음 — 매핑 후 외부 접속 테스트에서 확인 (Phase 5)
 
 ## 2. 목표 아키텍처
 
@@ -127,12 +127,18 @@
 - [x] `next start` 127.0.0.1:3000 — 랜딩 실데이터 렌더링, `/api` 프록시 경유 로그인 성공, 주요 페이지 200/리다이렉트 정상
 - 메모: standalone 불필요 판단(node_modules 보유, next start 운영). 빌드/기동 시 `API_URL`·`NEXT_PUBLIC_API_URL`을 백엔드 주소로 지정 (Phase 4에서 supervisord 환경변수로 고정)
 
-### Phase 4 — Ollama + nginx + supervisord 통합
-- [ ] Ollama 구성: `/volume/elaw/runtime/ollama` 바이너리·모델 재사용(복사), `OLLAMA_HOST=127.0.0.1:11434`, GPU 동작 확인
-- [ ] nginx 설치, :80 → `/` 프론트, `/api` `/admin` `/media` 백엔드 라우팅
-- [ ] 신규 supervisord 구성 `/volume/ELAW/scripts/supervisord.conf`: postgres → ollama → backend(gunicorn, gthread+keep-alive 75 — 풀백에서 검증된 설정) → frontend → nginx
-- [ ] 컨테이너 재시작 시 자동 기동 경로 확인 (시스템 supervisord 또는 기동 스크립트)
-- **완료 기준**: `supervisorctl restart all` 후 전 서비스 자동 복구
+### ✅ Phase 4 — Ollama + nginx + supervisord 통합 (완료, 2026-06-06)
+- [x] Ollama 별도 인스턴스 `:11435` — 풀백 런타임 전체(bin+lib, 2.1GB)와 모델(4.6GB) 복사, **100% GPU(V100) 추론 확인** (바이너리만 복사 시 llama-server 누락으로 실패 → lib 포함 전체 복사로 해결)
+- [x] nginx `:80` 단일 진입점 — `/admin`→gunicorn, `/static`·`/media`→정적 서빙, 나머지→Next(:3000, `/api`는 Next rewrites 경유). **IP allowlist** `scripts/nginx_allowlist.conf` 적용
+- [x] supervisord 5개 프로그램 (`/etc/supervisor/conf.d/elaw.conf`): postgres→ollama→backend(gunicorn :9002, gthread+keep-alive 75, timeout 300)→frontend→nginx
+- [x] `DJANGO_DEBUG=False` 전환 + `STATIC_ROOT`/collectstatic (admin 정적 파일 nginx 서빙)
+- [x] 부팅 자동 기동: `/run_jupyter.sh`에 ssh+supervisor 기동 훅 추가 (백업 `.bak`)
+- [x] 완료 기준 충족: 전체 restart 후 자동 복구 + nginx 경유 랜딩/로그인/admin 정상
+
+#### ⚠️ 사건 기록: self-hosted runner의 작업 디렉토리 초기화 (2026-06-06)
+- 컨테이너에 GitHub Actions self-hosted runner가 있어 팀원이 `main` 푸시 시 `/volume/deploy.sh`가 `git reset --hard origin/main` 실행 → 커밋 전 변경분 소실. 로컬 백업으로 전량 복구.
+- 조치: ① runner **일시정지** (재개: `cd /volume/actions-runner/actions-runner && RUNNER_ALLOW_RUNASROOT=1 nohup ./run.sh > /volume/actions-runner/runner.log 2>&1 &`) ② 이전 작업 전부를 **`container-migration` 브랜치로 커밋·푸시**(`66e496d`) — main(Vercel 자동배포)에는 무영향
+- 후속(Phase 6): `deploy.sh`를 새 스택(`elaw_backend` 등 + 프론트 빌드) 기준으로 개정 후 runner 재개
 
 ### Phase 5 — 외부 노출 및 전환
 - [ ] (관리자 승인 시) 매핑 포트로 외부 접속 검증 / (미승인 시) cloudflared를 `http://127.0.0.1:80`으로 변경해 named tunnel 운영
