@@ -97,3 +97,8 @@ models/portfolio/portfolio_merged.gguf
 models/portfolio/*.gguf
 *.safetensors
 merge_model.py
+data/
+runtime/
+backend/staticfiles/
+backend/supabase_dump*.json
+nohup.out

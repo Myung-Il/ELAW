@@ -110,6 +110,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'   # collectstatic 산출물 — nginx가 /static/ 서빙
 
 MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -158,7 +159,7 @@ if os.getenv("DB_ENGINE") == "mysql":
 elif os.getenv("DB_ENGINE") == "postgresql":
     # Supabase Postgres — Session pooler(5432) 권장: IPv4 호환 + Django 세션 기능 유지
     # 접속 정보는 Supabase 대시보드 → Connect → Session pooler 탭 참고
-    _pg_options = {"sslmode": "require"}
+    _pg_options = {"sslmode": os.getenv("DB_SSLMODE", "require")}  # 로컬 PG는 DB_SSLMODE=disable
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",

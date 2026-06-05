@@ -1,7 +1,6 @@
 // 루트 레이아웃 - 모든 페이지에 공통 적용되는 최상위 레이아웃
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -22,8 +21,6 @@ export default function RootLayout({
     <html lang="ko">
       <body className="font-sans antialiased" suppressHydrationWarning>
         {children}
-        {/* Vercel 웹 분석 - 배포 환경에서 페이지뷰 추적 */}
-        <Analytics />
       </body>
     </html>
   )

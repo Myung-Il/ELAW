@@ -1,12 +1,11 @@
 // 메인 랜딩 페이지 - 비로그인 사용자가 처음 보는 페이지
 // 로그인 클릭 → /login, 회원가입 클릭 → /register 으로 이동
-// [FE 수정 매뉴얼] Supabase 연동 완료 — 직군/기업/이벤트/통계가 DB 실데이터로 렌더링됨 (5분 ISR)
+// [FE 수정 매뉴얼] 백엔드 랜딩 API 연동 — 직군/기업/이벤트/통계가 DB 실데이터로 렌더링됨 (5분 ISR)
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import PublicHeader from "@/components/layout/public-header"
-import { supabase } from "@/lib/supabase"
 import {
   GraduationCap,
   Building2,
@@ -50,7 +49,7 @@ type CompanyItem = { name: string; field: string; positions: number; logo: strin
 type EventItem = { id: number; title: string; type: string; views: number; snippet: string }
 type StatItem = { value: string; label: string }
 
-// ─── 폴백 데이터 (Supabase 조회 실패 시 표시) ─────────────
+// ─── 폴백 데이터 (랜딩 API 조회 실패 시 표시) ─────────────
 const FALLBACK_ROLES: JobRoleItem[] = [
   { name: "AI Engineer", problems: 200, clusters: 192, icon: "🤖" },
   { name: "Backend Engineer", problems: 200, clusters: 180, icon: "⚙️" },
@@ -76,72 +75,61 @@ const FALLBACK_STATS: StatItem[] = [
   { value: "3+", label: "파트너 기업" },
 ]
 
-// ─── Supabase 실데이터 조회 ──────────────────────────────
-// [DB 매뉴얼] learning_path_meta(직군별 학습경로), core_company+core_jobposting(기업/공고),
-//             core_post(대회/이벤트), job_problems(문제) — DB/sql 스키마 참조
+// ─── 백엔드 랜딩 API 조회 ────────────────────────────────
+// GET /api/core/landing/ — 직군/기업/이벤트/통계 일괄 반환 (구 supabase-js 직접 조회 대체)
+// 서버 컴포넌트(ISR)에서 실행되므로 컨테이너 내부 주소(API_URL) 우선 사용
+const API_URL =
+  process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
+
+type LandingResponse = {
+  roles: { job_role: string; total_problems: number; cluster_count: number }[]
+  companies: { name: string; industry: string | null; posting_count: number }[]
+  posts: { id: number; title: string; category: string; content: string; view_count: number }[]
+  stats: { problems: number; roles: number; postings: number; companies: number }
+}
+
 async function getLandingData() {
   try {
-    const [rolesRes, companiesRes, postsRes, problemCnt, roleCnt, postingCnt, companyCnt] =
-      await Promise.all([
-        supabase
-          .from("learning_path_meta")
-          .select("job_role,total_problems,cluster_count")
-          .in("job_role", Object.keys(ROLE_ICONS)),
-        supabase
-          .from("core_company")
-          .select("name,industry,core_jobposting(count)")
-          .eq("is_approved", true)
-          .limit(4),
-        supabase
-          .from("core_post")
-          .select("id,title,category,content,view_count")
-          .in("category", ["contest", "event"])
-          .order("view_count", { ascending: false })
-          .limit(3),
-        supabase.from("job_problems").select("*", { count: "exact", head: true }),
-        supabase.from("learning_path_meta").select("*", { count: "exact", head: true }),
-        supabase.from("core_jobposting").select("*", { count: "exact", head: true }),
-        supabase.from("core_company").select("*", { count: "exact", head: true }),
-      ])
+    const res = await fetch(`${API_URL}/api/core/landing/`, { next: { revalidate: 300 } })
+    if (!res.ok) throw new Error(`landing API ${res.status}`)
+    const data: LandingResponse = await res.json()
 
-    const jobRoles: JobRoleItem[] =
-      rolesRes.data?.length
-        ? rolesRes.data.map((r) => ({
-            name: r.job_role,
-            problems: r.total_problems,
-            clusters: r.cluster_count,
-            icon: ROLE_ICONS[r.job_role] ?? "💼",
-          }))
-        : FALLBACK_ROLES
+    const roleRows = data.roles.filter((r) => r.job_role in ROLE_ICONS)
+    const jobRoles: JobRoleItem[] = roleRows.length
+      ? roleRows.map((r) => ({
+          name: r.job_role,
+          problems: r.total_problems,
+          clusters: r.cluster_count,
+          icon: ROLE_ICONS[r.job_role] ?? "💼",
+        }))
+      : FALLBACK_ROLES
 
-    const companies: CompanyItem[] =
-      companiesRes.data?.length
-        ? companiesRes.data.map((c, i) => ({
-            name: c.name,
-            field: c.industry ?? "",
-            positions: (c.core_jobposting as { count: number }[])?.[0]?.count ?? 0,
-            logo: c.name.charAt(0),
-            color: COMPANY_COLORS[i % COMPANY_COLORS.length],
-          }))
-        : FALLBACK_COMPANIES
+    const companies: CompanyItem[] = data.companies.length
+      ? data.companies.map((c, i) => ({
+          name: c.name,
+          field: c.industry ?? "",
+          positions: c.posting_count,
+          logo: c.name.charAt(0),
+          color: COMPANY_COLORS[i % COMPANY_COLORS.length],
+        }))
+      : FALLBACK_COMPANIES
 
-    const events: EventItem[] =
-      postsRes.data?.length
-        ? postsRes.data.map((p) => ({
-            id: p.id,
-            title: p.title,
-            type: POST_CATEGORY_LABEL[p.category] ?? p.category,
-            views: p.view_count,
-            snippet: p.content.length > 40 ? `${p.content.slice(0, 40)}…` : p.content,
-          }))
-        : FALLBACK_EVENTS
+    const events: EventItem[] = data.posts.length
+      ? data.posts.map((p) => ({
+          id: p.id,
+          title: p.title,
+          type: POST_CATEGORY_LABEL[p.category] ?? p.category,
+          views: p.view_count,
+          snippet: p.content.length > 40 ? `${p.content.slice(0, 40)}…` : p.content,
+        }))
+      : FALLBACK_EVENTS
 
-    const stats: StatItem[] = problemCnt.count
+    const stats: StatItem[] = data.stats.problems
       ? [
-          { value: problemCnt.count.toLocaleString(), label: "제공 문제" },
-          { value: String(roleCnt.count ?? 0), label: "지원 직군" },
-          { value: String(postingCnt.count ?? 0), label: "채용 공고" },
-          { value: String(companyCnt.count ?? 0), label: "파트너 기업" },
+          { value: data.stats.problems.toLocaleString(), label: "제공 문제" },
+          { value: String(data.stats.roles), label: "지원 직군" },
+          { value: String(data.stats.postings), label: "채용 공고" },
+          { value: String(data.stats.companies), label: "파트너 기업" },
         ]
       : FALLBACK_STATS
 
@@ -216,7 +204,7 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* 통계 카드 — Supabase 실데이터 (문제/직군/공고/기업 카운트) */}
+            {/* 통계 카드 — 랜딩 API 실데이터 (문제/직군/공고/기업 카운트) */}
             <div className="mx-auto mt-20 grid max-w-4xl grid-cols-2 gap-6 md:grid-cols-4">
               {stats.map((stat) => (
                 <div

@@ -13,6 +13,7 @@ from core.views_db import (
     DBPortfolioView, DBJobPostingView, DBMatchView, DBPostView,
     DBAiLogView, DBSummaryView,
 )
+from core.views_landing import LandingView
 from core.views_user import GoalView, MatchGenerateView, DashboardView, CurriculumUpdateView
 from core.views_quiz import (
     QuizStartView, QuizSubmitView, QuizProgressView,
@@ -40,6 +41,8 @@ db_urls = [
 
 # 사용자 기능 API
 core_urls = [
+    # 랜딩 페이지 공개 데이터 (비로그인 — 구 supabase-js 직접 조회 대체)
+    path('landing/',                      LandingView.as_view()),
     path('goals/',                        GoalView.as_view()),
     path('curriculum/<int:curriculum_id>/', CurriculumUpdateView.as_view()),
     path('matches/generate/',             MatchGenerateView.as_view()),
