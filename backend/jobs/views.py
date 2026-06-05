@@ -118,8 +118,21 @@ class JobListView(APIView):
         except (ValueError, TypeError):
             limit, offset = 20, 0
 
-        page_qs = qs[offset: offset + limit]
-        serializer = JobPostingListSerializer(page_qs, many=True, context={'request': request})
+        page_list = list(qs[offset: offset + limit])
+
+        # 페이지에 실린 공고들의 내 Match를 한 번에 조회해 serializer에 전달
+        # (공고당 is_scrapped/my_match_score 개별 쿼리 → 원격 DB에서 수십 초 소요 방지)
+        context = {'request': request}
+        if request.user.is_authenticated:
+            context['match_map'] = {
+                m.posting_id: m
+                for m in Match.objects.filter(
+                    user=request.user,
+                    posting_id__in=[p.id for p in page_list],
+                )
+            }
+
+        serializer = JobPostingListSerializer(page_list, many=True, context=context)
         return Response({
             "message": "공고 목록 조회 성공",
             "count": total,

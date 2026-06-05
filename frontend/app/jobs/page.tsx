@@ -14,7 +14,7 @@ import {
 import AppHeader from "@/components/layout/app-header"
 import {
   Search, Briefcase, ChevronRight, SlidersHorizontal,
-  Loader2, LayoutGrid, X, Star,
+  Loader2, LayoutGrid, X, Star, Eye,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
@@ -39,6 +39,7 @@ interface JobPosting {
   preferred_skills?: string[]
   my_match_score?: number
   is_scrapped?: boolean
+  view_count?: number
 }
 
 interface JobsResponse {
@@ -348,13 +349,21 @@ export default function JobsPage() {
                       <Badge variant="outline" className="text-xs">{job.career_level}</Badge>
                     </div>
                     <div className="mt-3 flex items-center justify-between">
-                      {job.deadline ? (
-                        <span className="text-xs font-medium text-destructive">
-                          {new Date(job.deadline).toLocaleDateString("ko-KR")} 마감
-                        </span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">상시 모집</span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {job.deadline ? (
+                          <span className="text-xs font-medium text-destructive">
+                            {new Date(job.deadline).toLocaleDateString("ko-KR")} 마감
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">상시 모집</span>
+                        )}
+                        {job.view_count !== undefined && (
+                          <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                            <Eye className="h-3 w-3" />
+                            {job.view_count.toLocaleString("ko-KR")}
+                          </span>
+                        )}
+                      </div>
                       <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
                   </CardContent>

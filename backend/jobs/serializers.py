@@ -42,6 +42,12 @@ class JobPostingListSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request or not request.user.is_authenticated:
             return False
+        # 목록 뷰가 일괄 조회해 넘긴 match_map이 있으면 사용 — 공고당 개별 쿼리 방지
+        # (원격 Supabase 기준 limit=100 목록에 왕복 200회 ≈ 50초가 걸리던 원인)
+        match_map = self.context.get('match_map')
+        if match_map is not None:
+            m = match_map.get(obj.id)
+            return bool(m and m.status in ('scrapped', 'applied'))
         return Match.objects.filter(
             user=request.user, posting=obj,
             status__in=['scrapped', 'applied']
@@ -51,6 +57,10 @@ class JobPostingListSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request or not request.user.is_authenticated:
             return None
+        match_map = self.context.get('match_map')
+        if match_map is not None:
+            m = match_map.get(obj.id)
+            return m.match_score if m else None
         match = Match.objects.filter(user=request.user, posting=obj).first()
         return match.match_score if match else None
 

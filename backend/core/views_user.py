@@ -376,6 +376,14 @@ class GoalView(APIView):
             content_json = content,
         )
 
+        # ── 매칭 점수 자동 계산 ──────────────────
+        # 신규 사용자도 목표 설정 직후 공고 목록에서 매칭 점수를 바로 볼 수 있게 한다.
+        # 매칭 실패가 목표 생성 자체를 막아서는 안 되므로 예외는 로그만 남긴다.
+        try:
+            generate_matches_for_user(request.user)
+        except Exception:
+            logger.exception("목표 생성 후 매칭 점수 자동 계산 실패 (user_id=%s)", request.user.id)
+
         return Response(
             {
                 "message":       "목표가 등록되고 커리큘럼이 생성되었습니다.",
@@ -441,6 +449,87 @@ class GoalView(APIView):
 # ────────────────────────────────────────
 # 매칭 점수 계산 및 저장
 # ────────────────────────────────────────
+def generate_matches_for_user(user):
+    """활성 공고 전체와 매칭 점수를 계산해 Match 테이블에 저장.
+
+    MatchGenerateView(수동 재계산)와 GoalView(목표 생성 직후 자동 계산)에서 공용.
+    반환: (my_skills 리스트, 점수 내림차순 results 리스트)
+    """
+    from core.models import JobPosting, Match, LearningStats, PlatformLink
+
+    # 사용자 스킬 수집 — 언어·알고리즘 태그를 단일 쿼리로 가져오기
+    my_skills = set()
+    _all_stats = list(
+        LearningStats.objects.filter(
+            user=user, stat_type__in=["language", "algo_tag"]
+        ).values_list("stat_type", "stat_key")
+    )
+    for stat_type, stat_key in _all_stats:
+        if stat_type == "language":
+            my_skills.add(stat_key.lower())
+    algo_count = sum(1 for t, _ in _all_stats if t == "algo_tag")
+
+    # 플랫폼 연동 정보에서 스킬 추가
+    platform_skills = {"python", "git"}  # 기본값
+    links = PlatformLink.objects.filter(user=user, is_active=True)
+    for link in links:
+        if link.platform == "github":
+            platform_skills.add("github")
+        if link.platform == "baekjoon":
+            platform_skills.update({"알고리즘", "자료구조"})
+    my_skills.update(platform_skills)
+
+    # 활성 공고 전체와 매칭 — company N+1 방지
+    # Match 저장은 bulk_create/bulk_update로 일괄 처리한다.
+    # (공고당 update_or_create는 원격 Supabase 기준 왕복 2~3회 × 공고 수 ≈ 50초+
+    #  → Vercel 프록시 ~75초 한도를 넘겨 502를 유발했던 원인)
+    postings = JobPosting.objects.filter(is_active=True).select_related("company")
+    existing = {m.posting_id: m for m in Match.objects.filter(user=user)}
+    results, to_create, to_update = [], [], []
+    now = timezone.now()
+
+    for posting in postings:
+        req  = [s.lower() for s in (posting.required_skills  or [])]
+        pref = [s.lower() for s in (posting.preferred_skills or [])]
+
+        req_score  = (sum(1 for s in req  if s in my_skills) / len(req)  * 60) if req  else 0
+        pref_score = (sum(1 for s in pref if s in my_skills) / len(pref) * 25) if pref else 0
+        algo_bonus = min(algo_count * 1.5, 15)
+        total      = round(min(req_score + pref_score + algo_bonus, 100), 1)
+
+        if total >= 80:   st = "applied"
+        elif total >= 65: st = "scrapped"
+        elif total >= 50: st = "viewed"
+        else:             st = "recommended"
+
+        match = existing.get(posting.id)
+        created = match is None
+        if created:
+            to_create.append(Match(user=user, posting=posting, match_score=total, status=st))
+        elif match.match_score != total or match.status != st:
+            match.match_score = total
+            match.status      = st
+            match.updated_at  = now  # bulk_update는 auto_now를 적용하지 않음
+            to_update.append(match)
+        results.append({
+            "posting_id":    posting.id,
+            "posting_title": posting.title,
+            "company":       posting.company.name,
+            "match_score":   total,
+            "status":        st,
+            "created":       created,
+        })
+
+    if to_create:
+        Match.objects.bulk_create(to_create)
+    if to_update:
+        Match.objects.bulk_update(to_update, ["match_score", "status", "updated_at"])
+
+    # 점수 높은 순 정렬
+    results.sort(key=lambda x: -x["match_score"])
+    return list(my_skills), results
+
+
 class MatchGenerateView(APIView):
     """
     POST /api/core/matches/generate/
@@ -451,67 +540,11 @@ class MatchGenerateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        from core.models import JobPosting, Match, LearningStats, PlatformLink
-
-        # 사용자 스킬 수집 — 언어·알고리즘 태그를 단일 쿼리로 가져오기
-        my_skills = set()
-        _all_stats = list(
-            LearningStats.objects.filter(
-                user=request.user, stat_type__in=["language", "algo_tag"]
-            ).values_list("stat_type", "stat_key")
-        )
-        for stat_type, stat_key in _all_stats:
-            if stat_type == "language":
-                my_skills.add(stat_key.lower())
-        algo_count = sum(1 for t, _ in _all_stats if t == "algo_tag")
-
-        # 플랫폼 연동 정보에서 스킬 추가
-        platform_skills = {"python", "git"}  # 기본값
-        links = PlatformLink.objects.filter(user=request.user, is_active=True)
-        for link in links:
-            if link.platform == "github":
-                platform_skills.add("github")
-            if link.platform == "baekjoon":
-                platform_skills.update({"알고리즘", "자료구조"})
-        my_skills.update(platform_skills)
-
-        # 활성 공고 전체와 매칭 — company N+1 방지
-        postings = JobPosting.objects.filter(is_active=True).select_related("company")
-        results  = []
-
-        for posting in postings:
-            req  = [s.lower() for s in (posting.required_skills  or [])]
-            pref = [s.lower() for s in (posting.preferred_skills or [])]
-
-            req_score  = (sum(1 for s in req  if s in my_skills) / len(req)  * 60) if req  else 0
-            pref_score = (sum(1 for s in pref if s in my_skills) / len(pref) * 25) if pref else 0
-            algo_bonus = min(algo_count * 1.5, 15)
-            total      = round(min(req_score + pref_score + algo_bonus, 100), 1)
-
-            if total >= 80:   st = "applied"
-            elif total >= 65: st = "scrapped"
-            elif total >= 50: st = "viewed"
-            else:             st = "recommended"
-
-            match, created = Match.objects.update_or_create(
-                user=request.user, posting=posting,
-                defaults=dict(match_score=total, status=st),
-            )
-            results.append({
-                "posting_id":    posting.id,
-                "posting_title": posting.title,
-                "company":       posting.company.name,
-                "match_score":   total,
-                "status":        st,
-                "created":       created,
-            })
-
-        # 점수 높은 순 정렬
-        results.sort(key=lambda x: -x["match_score"])
+        my_skills, results = generate_matches_for_user(request.user)
 
         return Response({
             "message":       f"{len(results)}개 공고와 매칭 완료",
-            "my_skills":     list(my_skills),
+            "my_skills":     my_skills,
             "matches":       results,
         })
 

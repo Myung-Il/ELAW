@@ -10,7 +10,7 @@ import AppHeader from "@/components/layout/app-header"
 import {
   Building2, Briefcase, Calendar,
   ArrowLeft, FileText, GraduationCap, CheckCircle, Clock, TrendingUp,
-  Loader2, Bookmark, BookmarkCheck,
+  Loader2, Bookmark, BookmarkCheck, Eye,
 } from "lucide-react"
 import { api } from "@/lib/api-client"
 
@@ -249,6 +249,10 @@ export default function JobDetailPage() {
                       {new Date(job.deadline).toLocaleDateString("ko-KR")} 마감
                     </span>
                   )}
+                  <span className="flex items-center gap-1">
+                    <Eye className="h-3.5 w-3.5" />
+                    조회 {job.view_count.toLocaleString("ko-KR")}
+                  </span>
                 </div>
               </div>
               <Button
